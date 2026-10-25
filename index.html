@@ -101,7 +101,9 @@ input[type=range]{width:100%;accent-color:var(--rust);height:32px}
 .shop{display:flex;flex-direction:column;gap:2px}
 .shop .line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px dashed var(--line)}
 .shop .line:first-of-type{border-top:0}
-.shop .line span:last-child{font-weight:700;white-space:nowrap}
+.shop .line > span:first-child{flex:1;min-width:0;overflow-wrap:anywhere}
+.shop .line > span:last-child{flex:none;font-weight:700;white-space:nowrap;text-align:right}
+.shop .line .small{display:block;margin-top:2px;line-height:1.35}
 .done{color:var(--ok);font-weight:700}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{font-weight:700;font-size:.9rem}
@@ -234,7 +236,7 @@ const DOCS = {
     ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
-const APP_VERSION = '1.8';
+const APP_VERSION = '1.9';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {

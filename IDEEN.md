@@ -13,6 +13,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Vorratscheck-Erinnerung**: regelmäßige Erinnerung, den Vorrat zu prüfen, wöchentlich, monatlich oder alle 3 Monate *(Version 1.7)*
 - [x] **Automatische Erinnerung im Kalender**: Serientermin „Vorratscheck“ per Google Kalender oder Termindatei, Abfrage beim Anlegen des eigenen Vorrats, auch in den Einstellungen *(Version 1.7)*
 - [x] **Hinweis auf Neuerungen**: Text auf der Startseite verweist auf „Was ist neu?“, Markierung „Neu: Version …“ nach Updates *(Version 1.8)*
+- [x] **Einkaufsliste aufgeräumt**: Zeilenumbruch bei langen Texten unter „Noch kaufen“ *(Version 1.9)*
 
 ## Priorität hoch
 

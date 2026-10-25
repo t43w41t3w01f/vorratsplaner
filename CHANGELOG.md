@@ -2,6 +2,9 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.9 – 25. Oktober 2026
+- **Einkaufsliste aufgeräumt:** Lange Zeilen unter „Noch kaufen“ brechen sauber um und laufen nicht mehr über den Kasten hinaus, Mengen rechtsbündig.
+
 ## 1.8 – 25. Oktober 2026
 - **Hinweis auf der Startseite:** Ein kurzer Text unter den beiden großen Knöpfen verweist auf „Was ist neu?“ mit allen Funktionen und Versionen.
 - Nach einem Update zeigt die Startseite „Neu: Version …“, bis die Versionsseite einmal geöffnet wurde.
