@@ -1,5 +1,5 @@
 // Offline-Cache. Bei jeder Änderung an den Dateien VERSION erhöhen.
-const VERSION = 'vorratsplaner-v3';
+const VERSION = 'vorratsplaner-v4';
 const FILES = ['./', 'index.html', 'datenschutz.html', 'versionen.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 
@@ -14,7 +14,6 @@ self.addEventListener('activate', e => {
 // Erst Netz (für Updates), bei Ausfall aus dem Cache
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  if (new URL(e.request.url).origin !== self.location.origin) return; // Warnungen nicht cachen
   e.respondWith(
     fetch(e.request)
       .then(r => { const copy = r.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); return r; })
