@@ -9,6 +9,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Vorrat drucken**: kompletter Bestand als Ausdruck oder PDF, mit Haltbarkeit und Kästchen zum Abhaken *(Version 1.5)*
 - [x] **Nur lange Haltbares**: Beispiele je Gruppe, Hinweis bei MHD unter 3 Monaten, Trockenware und Pulver mit Umrechnungsfaktor *(Version 1.6)*
 - [x] **Vorratscheck-Erinnerung**: Serientermin im Kalender (Google oder Termindatei), wöchentlich, monatlich oder alle 3 Monate, Abfrage beim Anlegen des eigenen Vorrats *(Version 1.7)*
+- [x] **Hinweis auf Neuerungen**: Text auf der Startseite verweist auf „Was ist neu?“, Markierung „Neu: Version …“ nach Updates *(Version 1.8)*
 
 ## Priorität hoch
 

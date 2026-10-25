@@ -2,6 +2,10 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.8 – 25. Oktober 2026
+- **Hinweis auf der Startseite:** Ein kurzer Text unter den beiden großen Knöpfen verweist auf „Was ist neu?“ mit allen Funktionen und Versionen.
+- Nach einem Update zeigt die Startseite „Neu: Version …“, bis die Versionsseite einmal geöffnet wurde.
+
 ## 1.7 – 25. Oktober 2026
 - **Erinnerung im Kalender:** Beim Anlegen des eigenen Vorrats fragt die App, ob ein Serientermin „Vorratscheck“ angelegt werden soll (wöchentlich, monatlich oder alle 3 Monate).
 - Ein Tipp öffnet den fertigen Termin im Google Kalender, alternativ eine Termindatei für andere Kalender.
