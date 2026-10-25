@@ -37,7 +37,7 @@ button{cursor:pointer}
 :focus-visible{outline:3px solid var(--rust);outline-offset:2px}
 .app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 h1,h2,.display{font-family:var(--f-display);font-weight:800;letter-spacing:.01em;line-height:1;margin:0;text-wrap:balance}
-h1{font-size:2.1rem;text-transform:uppercase}
+h1{font-size:clamp(1.55rem,7.5vw,2.1rem);text-transform:uppercase;min-width:0}
 h2{font-size:1.45rem;text-transform:uppercase}
 .muted{color:var(--muted)}
 .small{font-size:.875rem}
@@ -141,6 +141,14 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.8r
 .na{color:var(--muted)}
 .na[aria-pressed=true]{background:var(--track);color:var(--ink);border-style:dashed}
 @media (max-width:420px){.item{grid-template-columns:1fr}.item .actions{justify-content:flex-start}}
+.rot-entry{padding:14px}
+.rot-entry .choice-ico{width:52px;height:52px}
+.rotlist{display:flex;flex-direction:column}
+.rot .meta{display:flex;gap:8px;flex-wrap:wrap;font-size:.875rem;color:var(--muted);align-items:center}
+.rot{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.rotlist .rot:first-child{border-top:0;padding-top:0}
+.rot-form{display:flex;flex-direction:column;gap:8px;background:var(--track);border-radius:12px;padding:12px}
+.rot-form select{border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--paper)}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -181,7 +189,7 @@ const DOCS = {
     ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
-const APP_VERSION = '1.2';
+const APP_VERSION = '1.3';
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
   wasser:'<path d="M12 3c-3 4.2-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.8-6-11z"/>',
@@ -194,6 +202,7 @@ const ICONS = {
   doku:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
   back:'<path d="M15 5l-7 7 7 7"/>',
+  rotate:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>',
   calc:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5v2M4 13h2M18 13h2"/>',
   shelf:'<path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16"/><rect x="7" y="7" width="4" height="5"/><rect x="13" y="9" width="4" height="3"/><rect x="8" y="15" width="7" height="5"/>',
   print:'<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
@@ -309,6 +318,7 @@ function render(){
   else if(UI.view==='calc') root.innerHTML=viewCalc(c);
   else if(UI.view==='wasser'||UI.view==='nahrung') root.innerHTML=viewStock(c);
   else if(UI.view==='settings') root.innerHTML=viewSettings();
+  else if(UI.view==='rotation') root.innerHTML=viewRotation(c);
   else if(UI.view==='docs-orig') root.innerHTML=viewDocs('orig');
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
@@ -341,6 +351,10 @@ function viewVorrat(c){
   const t=(k,name,val,extra)=>`<button class="tile" data-act="go" data-v="${k}"><div class="head">${icon(k)}<span class="name">${name}</span></div><span class="val num">${val}</span>${extra}</button>`;
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Mein Vorrat</h1></div>
   ${expiryBand(c)}
+  <button class="choice rot-entry" data-act="go" data-v="rotation"><span class="choice-ico">${icon('rotate')}</span>
+    <span class="choice-txt"><span class="ct" style="font-size:1.35rem">Verbrauchsliste</span>
+    <span class="small muted">Was bald abläuft: jetzt essen, neu kaufen, Datum aktualisieren</span>
+    <span class="small num choice-fact ${rotItems().length?'t-warn':'t-ok'}">${rotItems().length?`${rotItems().length} ${rotItems().length===1?'Artikel':'Artikel'} in den nächsten 2 Monaten oder abgelaufen`:'Nichts läuft in den nächsten 2 Monaten ab'}</span></span></button>
   <p class="small muted" style="margin:0">Tippe auf eine Kategorie, um Artikel einzutragen oder Mengen zu ändern.</p>
   <div class="grid">
     ${t('wasser','Wasser',`${fmt(c.water)} l in ${nW} ${nW===1?'Eintrag':'Einträgen'}`,warn('wasser'))}
@@ -392,12 +406,42 @@ function tile(k,name,val,r,sub){
     <span class="val num">${val}</span>${bar(r)}<span class="small t-${status(r)}" style="font-weight:700">${sub}</span></button>`;
 }
 
+function rotItems(){
+  return S.items.filter(i=>{ const st=mhdState(i.mhd); return st==='expired'||st==='soon'; })
+    .sort((a,b)=>mhdIdx(a.mhd)-mhdIdx(b.mhd));
+}
+function viewRotation(c){
+  const items=rotItems();
+  const years=[]; for(let y=NOW.getFullYear();y<=NOW.getFullYear()+10;y++) years.push(y);
+  const back=UI.back||'vorrat';
+  const row=it=>{ const st=mhdState(it.mhd), left=mhdIdx(it.mhd)-CUR;
+    const when = st==='expired' ? `<span class="pill expired">abgelaufen ${mhdText(it.mhd)}</span>` : `<span class="pill soon">${left===0?'läuft diesen Monat ab':`noch ${left} ${left===1?'Monat':'Monate'}`} · ${mhdText(it.mhd)}</span>`;
+    const cat = it.cat==='wasser'?'Wasser':(FOOD.find(g=>g.k===it.group)||{}).n||'';
+    const editing = UI.rotEdit===it.id;
+    return `<div class="rot">
+      <div><div style="font-weight:700">${esc(it.name)}</div><div class="meta" style="margin-top:3px">${when}<span class="num">${it.count} × ${sizeText(it)}</span>${it.demo?'<span class="pill demo">Beispiel</span>':''}</div>
+        <div class="small muted" style="margin-top:2px">${esc(cat)}</div></div>
+      ${editing?`<div class="rot-form"><span class="small" style="font-weight:700">Neues Haltbarkeitsdatum</span>
+          <div class="two"><select id="rot-m" aria-label="Monat">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i===NOW.getMonth()?'selected':''}>${m}</option>`).join('')}</select>
+          <select id="rot-y" aria-label="Jahr">${years.map(y=>`<option ${y===NOW.getFullYear()+1?'selected':''}>${y}</option>`).join('')}</select></div>
+          <div class="row"><button class="primary small" data-act="rotSave" data-id="${it.id}">Speichern</button><button class="secondary small" data-act="rotCancel">Abbrechen</button></div></div>`
+      :`<div class="row"><button class="primary small" data-act="rotEdit" data-id="${it.id}">Ersetzt – neues Datum</button><button class="secondary small" data-act="rotUsed" data-id="${it.id}">Aufgebraucht</button></div>`}
+    </div>`; };
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="${back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Verbrauchsliste</h1></div>
+  <section class="panel"><p style="margin:0">So bleibt dein Vorrat frisch: Iss diese Artikel im Alltag auf und kauf sie neu. Trag danach das neue Haltbarkeitsdatum ein.</p>
+    <p class="small muted" style="margin:0">„Aufgebraucht“ entfernt den Artikel. Er erscheint dann in der Einkaufsliste.</p></section>
+  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+  <section class="panel">${items.length?`<div class="rotlist">${items.map(row).join('')}</div>`
+    :`<p class="done" style="margin:0">Nichts zu tun. In den nächsten 2 Monaten läuft nichts ab.</p>`}</section>`;
+}
+
 function expiryBand(c){
   if(!c.expired.length && !c.soon.length) return '';
   const parts=[];
   if(c.expired.length) parts.push(`<b>${c.expired.length} ${c.expired.length===1?'Artikel ist':'Artikel sind'} abgelaufen</b> und ${c.expired.length===1?'zählt':'zählen'} nicht mehr zum Vorrat: ${c.expired.map(i=>esc(i.name)).join(', ')}.`);
   if(c.soon.length) parts.push(`<b>${c.soon.length} ${c.soon.length===1?'Artikel läuft':'Artikel laufen'} bald ab.</b> Jetzt verbrauchen und neu kaufen: ${c.soon.map(i=>esc(i.name)).join(', ')}.`);
-  return `<div class="band warn"><div>${parts.map(p=>`<div class="small">${p}</div>`).join('')}</div></div>`;
+  return `<div class="band warn"><div style="display:flex;flex-direction:column;gap:6px">${parts.map(p=>`<div class="small">${p}</div>`).join('')}
+    ${UI.view!=='rotation'?`<button class="secondary small" style="align-self:flex-start" data-act="go" data-v="rotation">Zur Verbrauchsliste</button>`:''}</div></div>`;
 }
 
 function buyLines(c){
@@ -569,7 +613,7 @@ root.addEventListener('click', async e=>{
   if(a!=='copyList'&&a!=='copyExport') UI.msg='';
   switch(a){
     case 'print': window.print(); return;
-    case 'go': if(UI.view==='vorrat'||UI.view==='calc') UI.back=UI.view; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
+    case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
     case 'persons': S.persons=Math.max(1,Math.min(20,S.persons+ +b.dataset.d)); save(); break;
@@ -586,6 +630,13 @@ root.addEventListener('click', async e=>{
     case 'reset': UI.confirmReset=true; break;
     case 'resetNo': UI.confirmReset=false; break;
     case 'resetYes': S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; break;
+    case 'rotEdit': UI.rotEdit=b.dataset.id; break;
+    case 'rotCancel': UI.rotEdit=null; break;
+    case 'rotSave': { const it=S.items.find(i=>i.id===b.dataset.id); const m=document.getElementById('rot-m').value, y=document.getElementById('rot-y').value;
+      if(it){ it.mhd=`${y}-${String(m).padStart(2,'0')}`; UI.msg=`${it.name}: neues Datum ${mhdText(it.mhd)} gespeichert.`; }
+      UI.rotEdit=null; save(); break; }
+    case 'rotUsed': { const it=S.items.find(i=>i.id===b.dataset.id); S.items=S.items.filter(i=>i.id!==b.dataset.id);
+      if(it) UI.msg=`${it.name} entfernt. Steht jetzt in der Einkaufsliste, falls etwas fehlt.`; UI.rotEdit=null; save(); break; }
     case 'loadDemo': S=demoState(); save(); UI.view='home'; break;
   }
   render();

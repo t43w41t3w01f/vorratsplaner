@@ -1,0 +1,34 @@
+# Ideen für den Vorratsplaner
+
+Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version, in der sie umgesetzt wurden.
+
+## Umgesetzt
+
+- [x] **Rotations-Liste „Verbrauchsliste“**: Was in den nächsten 2 Monaten abläuft, mit „Ersetzt – neues Datum“ und „Aufgebraucht“ *(Version 1.3)*
+
+## Priorität hoch
+
+- [ ] **Notfall-Modus „Es ist so weit“**: Umschalten auf Tageszähler, Wasserverbrauch pro Tag und Ess-Reihenfolge (erst Kühlschrank, dann Frisches, dann Konserven)
+- [ ] **Notfall-Wissen offline**: Wasser abkochen, Verhalten bei Stromausfall, Kochen ohne Strom, Notfall-Radiosender, Notrufnummern
+- [ ] **Sicherung als Datei und Erinnerung**: Hinweis „Letzte Sicherung vor 60 Tagen, jetzt sichern?“, Sicherung als Datei statt nur Text
+- [ ] **Haushaltsprofil**: Kinder, Babys, Haustiere, Senioren mit eigenen Mengen (Kind ca. halbe Portion, Hund Futter und Wasser extra, Babynahrung, Windeln)
+
+## Weitere Ideen
+
+- [ ] **Notfallplan der Familie**: Treffpunkt, wichtige Telefonnummern, wer holt die Kinder
+- [ ] **Notgepäck-Checkliste** (Fluchtrucksack nach BBK), unabhängig von den Tagen
+- [ ] **Lagerort pro Artikel** (z. B. „Keller, Regal 2“)
+- [ ] **Vorratscheck-Erinnerung** alle 3 Monate (Hinweis beim Öffnen, keine Push-Benachrichtigung)
+- [ ] **Wasser-Rechner Kochen**: Nudeln und Reis brauchen zusätzliches Wasser
+- [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
+
+## Offen
+
+- [ ] **Soll-Mengen der Checklisten festlegen** (Kerzen, Toilettenpapier, Batterien usw.), bisher Schätzwerte
+
+## Bewusst verworfen
+
+- Kalorienzählung und Nährwerte: viel Pflegeaufwand, kaum Mehrwert gegenüber den BBK-Gruppen
+- Online-Funktionen (Sync, Konto): brechen das Offline-Prinzip, brauchen einen Server
+- Amtliche Warnungen (NINA-Daten): getestet, der Warndienst blockiert den Abruf aus der App. Für Warnungen die Warn-App NINA nutzen
+- Barcode-Scanner: braucht Kamera und Online-Datenbank, Eintippen ist fast genauso schnell
