@@ -132,7 +132,30 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.8r
   .print-only{display:block}
   .shop .line{border-color:#999;break-inside:avoid}
   .done,.muted,.label{color:#000!important}
+  body.pinv .app{display:none!important}
+  body.pinv #printout{display:block!important;visibility:visible}
+  body.pinv #printout *{visibility:visible}
 }
+#printout{display:none;font:11pt/1.35 system-ui,Roboto,Arial,sans-serif;color:#000;background:#fff}
+#printout h1{font-size:18pt;margin:0 0 2pt;text-transform:none}
+#printout h2{font-size:12.5pt;margin:14pt 0 4pt;text-transform:uppercase;letter-spacing:.04em;border-bottom:1.5pt solid #000;padding-bottom:2pt}
+#printout h3{font-size:11pt;margin:8pt 0 3pt}
+#printout table{width:100%;border-collapse:collapse;margin:0 0 4pt;table-layout:fixed}
+#printout th:first-child{width:16pt}
+#printout .t6 th.n{width:12%} #printout .t6 th.n:last-child{width:22%} #printout .t6 td:last-child{white-space:normal}
+#printout h2,#printout h3{break-after:avoid}
+#printout .t4 th.n:nth-child(3){width:12%} #printout .t4 th.n:nth-child(4){width:30%}
+#printout th,#printout td{border-bottom:.5pt solid #999;padding:3pt 4pt;text-align:left;vertical-align:top}
+#printout th{font-size:9pt;text-transform:uppercase;letter-spacing:.03em}
+#printout td.n,#printout th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#printout .box{display:inline-block;width:9pt;height:9pt;border:1pt solid #000;vertical-align:-1pt}
+#printout .meta{font-size:9.5pt;color:#333}
+#printout .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;margin:8pt 0}
+#printout .sum div{border:1pt solid #000;padding:4pt 6pt}
+#printout .sum b{display:block;font-size:13pt}
+#printout section,#printout tr{break-inside:avoid}
+#printout .exp{font-weight:700}
+@page{margin:14mm}
 .subitem{width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0}
 .list .subitem:first-child{border-top:0}
 .open{font-weight:700;color:var(--rust);white-space:nowrap}
@@ -152,6 +175,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.8r
 .filebtn{display:inline-block;text-align:center;cursor:pointer}
 details summary{cursor:pointer;color:var(--muted);font-weight:700}
 .band.backup{border-color:var(--olive)}
+.primary svg{width:18px;height:18px;vertical-align:-3px;margin-right:4px}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -159,6 +183,7 @@ footer{font-size:.8rem;color:var(--muted);text-align:center}
 <body>
 
 <div class="app" id="app"></div>
+<div id="printout" aria-hidden="true"></div>
 
 <script>
 /* ---------- BBK-Grundlagen (pro Person, pro Tag) ---------- */
@@ -192,7 +217,7 @@ const DOCS = {
     ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
-const APP_VERSION = '1.4';
+const APP_VERSION = '1.5';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -412,7 +437,8 @@ function viewVorrat(c){
     ${t('nahrung','Nahrung',`${fmt(c.foodTotal)} kg in ${nF} ${nF===1?'Eintrag':'Einträgen'}`,warn('nahrung'))}
     ${Object.entries(CHECK).map(([k,v])=>t(k,v.n,`${c.checks[k].have} von ${c.checks[k].need} Teilen`,bar(c.checks[k].ratio))).join('')}
   </div>
-  <button class="secondary" data-act="go" data-v="calc">Zur Berechnung</button>`;
+  <div class="row">${CAN_PRINT?`<button class="primary" data-act="printInv">${icon('print')} Vorrat drucken</button>`:''}<button class="secondary" data-act="go" data-v="calc">Zur Berechnung</button></div>
+  ${CAN_PRINT?`<p class="hint" style="margin:0">Druckt den kompletten Vorrat mit Mengen, Haltbarkeit und Checklisten, auch als PDF. Tipp: ausgedruckt zum Vorrat legen, das funktioniert auch ohne Strom.</p>`:''}`;
 }
 
 function viewCalc(c){
@@ -455,6 +481,40 @@ function viewCalc(c){
 function tile(k,name,val,r,sub){
   return `<button class="tile" data-act="go" data-v="${k}"><div class="head">${icon(k)}<span class="name">${name}</span></div>
     <span class="val num">${val}</span>${bar(r)}<span class="small t-${status(r)}" style="font-weight:700">${sub}</span></button>`;
+}
+
+function printInventory(){
+  const c=calc(), d=new Date();
+  const mhdCell=it=>{ const st=mhdState(it.mhd); return `<td class="n${st==='expired'||st==='soon'?' exp':''}">${it.mhd?mhdText(it.mhd):'–'}${st==='expired'?' (abgelaufen)':st==='soon'?' (bald)':''}</td>`; };
+  const tot=it=>{ const b=base(it)*it.count; return fmt(b, b<10?2:1)+' '+(it.unit==='g'||it.unit==='kg'?'kg':'l'); };
+  const table=items=>items.length?`<table class="t6"><thead><tr><th></th><th>Artikel</th><th class="n">Je Stück</th><th class="n">Anzahl</th><th class="n">Gesamt</th><th class="n">MHD</th></tr></thead><tbody>
+    ${items.map(it=>`<tr><td><span class="box"></span></td><td>${esc(it.name)}</td><td class="n">${sizeText(it)}</td><td class="n">${it.count}</td><td class="n">${tot(it)}</td>${mhdCell(it)}</tr>`).join('')}</tbody></table>`
+    :'<p class="meta">Keine Einträge.</p>';
+  const water=S.items.filter(i=>i.cat==='wasser');
+  const food=FOOD.map(g=>{ const items=S.items.filter(i=>i.cat==='nahrung'&&i.group===g.k); const need=g.d*c.p*c.T;
+    return `<h3>${g.n} <span class="meta">– vorhanden ${fmt(c.food[g.k],2)} kg von ${fmt(need,2)} kg</span></h3>${table(items)}`; }).join('');
+  const checks=Object.entries(CHECK).map(([k,v])=>`<section><h3>${v.n} <span class="meta">– ${c.checks[k].have} von ${c.checks[k].need}</span></h3>
+    <table class="t4"><thead><tr><th></th><th>Gegenstand</th><th class="n">Soll</th><th class="n">Vorhanden</th></tr></thead><tbody>
+    ${v.items.map(([key,name,q,pp])=>{ const need=q*(pp?c.p:1);
+      let hv; if(DERIVED[key]){ const st=docStatus(DERIVED[key]); hv=`${st.done} von ${st.total} Dokumenten`; }
+      else if(key==='bargeld') hv=`${fmt(S.cash?.have||0,0)} € von ${fmt(cashTarget(),0)} €`; else hv=String(S.checks[key]||0);
+      return `<tr><td><span class="box"></span></td><td>${name}</td><td class="n">${DERIVED[key]||key==='bargeld'?'':need}</td><td class="n">${hv}</td></tr>`; }).join('')}</tbody></table></section>`).join('');
+  const docs=['orig','copy'].map(kind=>{ const st=docStatus(kind); return st.open.length?`<p class="meta"><b>${DOCS[kind].n} – noch offen:</b> ${esc(st.open.join(', '))}</p>`:''; }).join('');
+  const L=buyLines(c); const buyN=L.water.length+L.food.length+L.checks.reduce((a,[,r])=>a+r.length,0);
+  document.getElementById('printout').innerHTML=`
+    <h1>Notvorrat – Bestandsliste</h1>
+    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'} · Ziel ${c.T} Tage · Vorratsplaner ${APP_VERSION}</div>
+    <div class="sum"><div>Reicht für<b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b></div><div>Wasser<b>${fmt(c.water)} / ${fmt(c.waterNeed)} l</b></div>
+      <div>Nahrung<b>${fmt(c.foodTotal)} / ${fmt(c.foodNeed)} kg</b></div><div>Noch kaufen<b>${buyN} Posten</b></div></div>
+    ${c.expired.length||c.soon.length?`<p class="exp">Abgelaufen: ${c.expired.map(i=>esc(i.name)).join(', ')||'–'} · Läuft bald ab: ${c.soon.map(i=>esc(i.name)).join(', ')||'–'}</p>`:''}
+    <section><h2>Wasser</h2>${table(water)}</section>
+    <h2>Nahrung</h2>${food}
+    <h2>Ausrüstung und Dokumente</h2>${checks}${docs}
+    <p class="meta" style="margin-top:12pt">Richtwerte nach BBK: 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Abgelaufene Artikel sind in den Summen nicht enthalten. Kästchen zum Abhaken bei der Kontrolle.</p>`;
+  document.body.classList.add('pinv');
+  const done=()=>{ document.body.classList.remove('pinv'); window.removeEventListener('afterprint',done); };
+  window.addEventListener('afterprint',done);
+  setTimeout(()=>window.print(),50);
 }
 
 function rotItems(){
@@ -686,6 +746,7 @@ root.addEventListener('click', async e=>{
   if(a!=='copyList'&&a!=='copyExport') UI.msg='';
   switch(a){
     case 'print': window.print(); return;
+    case 'printInv': printInventory(); return;
     case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.pending=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
