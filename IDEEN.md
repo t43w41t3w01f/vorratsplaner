@@ -26,12 +26,16 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 ## Offen
 
+- [ ] **Feedback per E-Mail**: Textfeld in der App öffnet die Mail-App mit fertigem Text und App-Version. *Wartet auf eine eigene E-Mail-Adresse.*
+- [ ] **Besucherzähler** (z. B. GoatCounter, ohne Cookies und IP-Speicherung, nur für Sascha sichtbar). *Entscheidung offen*, bräuchte einen externen Dienst und einen Datenschutz-Hinweis
 - [ ] **Umrechnungsfaktoren prüfen** (getrocknet ×2,5, Trockenobst ×3, Milchpulver ×8, Volleipulver ×4), bisher Richtwerte
 - [ ] **Konserven: Gesamt- oder Abtropfgewicht?** BBK-Angabe unklar, derzeit Gesamtgewicht
 
 - [ ] **Soll-Mengen der Checklisten festlegen** (Kerzen, Toilettenpapier, Batterien usw.), bisher Schätzwerte
 
 ## Bewusst verworfen
+
+- Like-Knopf mit IP-Sperre: Die App kennt die IP nicht, ein Server müsste sie speichern. Außerdem unzuverlässig (gemeinsames WLAN, wechselnde Handy-IPs)
 
 - Kalorienzählung und Nährwerte: viel Pflegeaufwand, kaum Mehrwert gegenüber den BBK-Gruppen
 - Online-Funktionen (Sync, Konto): brechen das Offline-Prinzip, brauchen einen Server
