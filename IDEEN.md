@@ -7,6 +7,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Rotations-Liste „Verbrauchsliste“**: Was in den nächsten 2 Monaten abläuft, mit „Ersetzt – neues Datum“ und „Aufgebraucht“ *(Version 1.3)*
 - [x] **Sicherung als Datei und Erinnerung**: Datei speichern oder teilen (Drive, Mail), Erinnerung nach 7 Tagen oder 10 Änderungen, Wiederherstellen aus Datei, automatische Zwischenstände der letzten 7 Tage *(Version 1.4)*
 - [x] **Vorrat drucken**: kompletter Bestand als Ausdruck oder PDF, mit Haltbarkeit und Kästchen zum Abhaken *(Version 1.5)*
+- [x] **Nur lange Haltbares**: Beispiele je Gruppe, Hinweis bei MHD unter 3 Monaten, Trockenware und Pulver mit Umrechnungsfaktor *(Version 1.6)*
 
 ## Priorität hoch
 
@@ -24,6 +25,9 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
 
 ## Offen
+
+- [ ] **Umrechnungsfaktoren prüfen** (getrocknet ×2,5, Trockenobst ×3, Milchpulver ×8, Volleipulver ×4), bisher Richtwerte
+- [ ] **Konserven: Gesamt- oder Abtropfgewicht?** BBK-Angabe unklar, derzeit Gesamtgewicht
 
 - [ ] **Soll-Mengen der Checklisten festlegen** (Kerzen, Toilettenpapier, Batterien usw.), bisher Schätzwerte
 
