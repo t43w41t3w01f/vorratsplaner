@@ -14,12 +14,13 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Automatische Erinnerung im Kalender**: Serientermin „Vorratscheck“ per Google Kalender oder Termindatei, Abfrage beim Anlegen des eigenen Vorrats, auch in den Einstellungen *(Version 1.7)*
 - [x] **Hinweis auf Neuerungen**: Text auf der Startseite verweist auf „Was ist neu?“, Markierung „Neu: Version …“ nach Updates *(Version 1.8)*
 - [x] **Einkaufsliste aufgeräumt**: Zeilenumbruch bei langen Texten unter „Noch kaufen“ *(Version 1.9)*
+- [x] **Haushaltsprofil Kinder**: Zähler für Kinder 4–9 (Nahrung ×0,7) und Kleinkinder 1–3 (×0,5) nach DGE, Kleinkind-Kachel mit Windeln und Kleinkindnahrung *(Version 1.10)*
 
 ## Priorität hoch
 
 - [ ] **Notfall-Modus „Es ist so weit“**: Umschalten auf Tageszähler, Wasserverbrauch pro Tag und Ess-Reihenfolge (erst Kühlschrank, dann Frisches, dann Konserven)
 - [ ] **Notfall-Wissen offline**: Wasser abkochen, Verhalten bei Stromausfall, Kochen ohne Strom, Notfall-Radiosender, Notrufnummern
-- [ ] **Haushaltsprofil**: Kinder, Babys, Haustiere, Senioren mit eigenen Mengen (Kind ca. halbe Portion, Hund Futter und Wasser extra, Babynahrung, Windeln)
+- [ ] **Haushaltsprofil Teil 2**: Haustiere (Futter und Wasser extra), Senioren, Säuglinge unter 1 Jahr
 
 ## Weitere Ideen
 
@@ -32,6 +33,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 ## Offen
 
+- [ ] **Kleinkind-Mengen prüfen** (6 Windeln, 1 Gläschen pro Tag usw.), bisher eigene Richtwerte
 - [ ] **Feedback per E-Mail**: Textfeld in der App öffnet die Mail-App mit fertigem Text und App-Version. *Wartet auf eine eigene E-Mail-Adresse.*
 - [ ] **Besucherzähler** (z. B. GoatCounter, ohne Cookies und IP-Speicherung, nur für Sascha sichtbar). *Entscheidung offen*, bräuchte einen externen Dienst und einen Datenschutz-Hinweis
 - [ ] **Umrechnungsfaktoren prüfen** (getrocknet ×2,5, Trockenobst ×3, Milchpulver ×8, Volleipulver ×4), bisher Richtwerte

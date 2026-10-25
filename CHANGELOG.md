@@ -2,6 +2,12 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.10 – 25. Oktober 2026
+- **Haushalt mit Kindern:** Zähler für Erwachsene und Kinder ab 10, Kinder 4–9 Jahre und Kleinkinder 1–3 Jahre.
+- Nahrung nach DGE-Richtwerten: Kinder 4–9 Jahre ca. 70 %, Kleinkinder ca. 50 %. Wasser, Hygiene, Dokumente und Bargeld zählen für alle voll.
+- **Neue Kachel „Kleinkind“** (nur mit Kleinkindern): Windeln, Feuchttücher, Gläschen oder Brei nach Tagen, dazu Milchpulver, Trinkbecher, Kinder-Fiebermittel, Wundschutzcreme, Beschäftigung.
+- Hinweis auf gesonderte Planung von Säuglingsnahrung (unter 1 Jahr).
+
 ## 1.9 – 25. Oktober 2026
 - **Einkaufsliste aufgeräumt:** Lange Zeilen unter „Noch kaufen“ brechen sauber um und laufen nicht mehr über den Kasten hinaus, Mengen rechtsbündig.
 

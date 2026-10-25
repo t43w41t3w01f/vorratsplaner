@@ -4,7 +4,7 @@
 
 👉 **App öffnen:** https://t43w41t3w01f.github.io/vorratsplaner/
 
-Aktuelle Version: **1.9** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.10** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -12,6 +12,7 @@ Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reich
 
 ### Berechnung
 - Personen im Haushalt und Ziel-Tage (1–90) einstellen, Standard sind 10 Tage nach BBK.
+- **Haushalt mit Kindern:** Erwachsene und Kinder ab 10, Kinder 4–9 Jahre (Nahrung ca. 70 %) und Kleinkinder 1–3 Jahre (ca. 50 %) nach DGE-Richtwerten. Wasser und Checklisten zählen für alle voll.
 - **Reicht für:** Reichweite in Tagen und der Engpass, z. B. „Engpass: Wasser“.
 - **Noch kaufen:** Einkaufsliste mit allen Fehlmengen. Wasser wird in Kisten umgerechnet, zu jeder Lebensmittelgruppe gibt es lange haltbare Beispiele. Drucken, als PDF speichern oder kopieren.
 
@@ -21,6 +22,7 @@ Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reich
 - **Trockenware und Pulver** werden umgerechnet, z. B. getrocknete Linsen ×2,5, Milchpulver ×8.
 - **Hinweis bei kurzem Haltbarkeitsdatum** (unter 3 Monaten) beim Eintragen.
 - **Checklisten** für Erste Hilfe, Medikamente, Hygiene, Licht & Strom, Wärme & Kochen.
+- **Kleinkind-Kachel** mit Windeln, Feuchttüchern, Kleinkindnahrung und Zubehör, erscheint nur mit Kleinkindern im Haushalt.
 - **Dokumentenmappe** und Kopien als Checkliste pro Person, **Bargeld-Richtwert** 100 € pro Person.
 - **Vorrat drucken:** kompletter Bestand als Ausdruck oder PDF, mit Kästchen zum Abhaken.
 

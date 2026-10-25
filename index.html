@@ -223,6 +223,10 @@ const CHECK = {
   hygiene: {n:'Hygiene', items:[['seife','Seife',1,true],['zahnb','Zahnbürste',1,true],['paste','Zahnpasta',1],['klo','Toilettenpapier (Rollen)',4,true],['muell','Müllbeutel (Rolle)',1],['handdes','Handdesinfektion',1]]},
   licht:   {n:'Licht & Strom', items:[['lampe','Taschenlampe',1],['batt','Ersatzbatterien (Pack)',2],['radio','Radio mit Kurbel oder Batterie',1],['kerzen','Kerzen',6],['feuer','Feuerzeug oder Streichhölzer',2],['powerbank','Powerbank',1]]},
   waerme:  {n:'Wärme & Kochen', items:[['decke','Warme Decke oder Schlafsack',1,true],['kocher','Campingkocher',1],['kartusche','Gaskartuschen',3]]},
+  // pp:'k' = pro Kleinkind, 5. Feld true = pro Tag. Mengen sind eigene Richtwerte
+  klein:   {n:'Kleinkind', only:'kids1', items:[['windeln','Windeln (Stück)',6,'k',true],['feucht','Feuchttücher (Packung, je 5 Tage)',0.2,'k',true],
+    ['brei','Kleinkindnahrung: Gläschen oder Brei',1,'k',true],['mpulver','Milchpulver oder H-Milch für Kleinkinder (Packung)',1,'k'],
+    ['becher','Trinkbecher oder Flasche',1,'k'],['kfieber','Fieber- und Schmerzmittel für Kinder',1],['wund','Wundschutzcreme',1],['spiel','Beschäftigung (Buch, Kuscheltier, Spiel)',1,'k']]},
   doku:    {n:'Dokumente & Geld', items:[['mappe','Dokumentenmappe (Originale)',1],['kopien','Kopien wichtiger Dokumente',1],['bargeld','Bargeld in kleinen Scheinen',1]]},
 };
 // Dokumente nach BBK-Ratgeber. p = pro Person, h = einmal für den Haushalt
@@ -236,7 +240,15 @@ const DOCS = {
     ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
-const APP_VERSION = '1.9';
+// Nahrung nach DGE-Richtwerten: Kinder 4–9 Jahre ca. 70 %, Kleinkinder 1–3 Jahre ca. 50 % eines Erwachsenen. Wasser und Checklisten zählen voll.
+const EAT_KIDS4 = 0.7, EAT_KIDS1 = 0.5;
+const kids4 = () => S.kids4||0, kids1 = () => S.kids1||0;
+const adults = () => S.persons - kids4() - kids1();
+const eatUnits = () => adults() + kids4()*EAT_KIDS4 + kids1()*EAT_KIDS1;
+function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0)); }
+function needOf(item, p, T){ const [,, q, pp, perDay]=item; const mult = pp==='k' ? kids1() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
+function needText(item){ const [,, q, pp, perDay]=item; return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
+const APP_VERSION = '1.10';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -250,6 +262,7 @@ const ICONS = {
   doku:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
   back:'<path d="M15 5l-7 7 7 7"/>',
+  klein:'<path d="M9 3h6M10 3v3M14 3v3"/><rect x="7" y="6" width="10" height="15" rx="3"/><path d="M7 11h10M10 15h4"/>',
   rotate:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>',
   calc:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5v2M4 13h2M18 13h2"/>',
   shelf:'<path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16"/><rect x="7" y="7" width="4" height="5"/><rect x="13" y="9" width="4" height="3"/><rect x="8" y="15" width="7" height="5"/>',
@@ -281,7 +294,7 @@ function demoState(){
       it('nahrung','fett','Rapsöl',500,'ml',1,'2027-09'),
     ]};
 }
-function emptyState(){ return {persons:S?S.persons:2, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
+function emptyState(){ return {persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
 
 /* ---------- Helfer ---------- */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -402,7 +415,7 @@ async function doBackup(mode){
 function parseBackup(text){
   const d=JSON.parse(text);
   if(!d || !Array.isArray(d.items) || typeof d.persons!=='number') throw new Error('ungültig');
-  return {persons:d.persons, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
+  return {persons:d.persons, kids4:d.kids4||0, kids1:d.kids1||0, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
 }
 function restore(data, msg){
   if(!S.demo){ const d=today(); SNAPS=SNAPS.filter(x=>x.day!==d+'-vorher'); SNAPS.unshift({day:d+'-vorher', at:Date.now(), data:JSON.parse(JSON.stringify(S))}); SNAPS=SNAPS.slice(0,8); DB.put(SNAPS,'snaps'); }
@@ -429,17 +442,18 @@ function calc(){
     if(it.cat==='wasser') water+=a; else if(food[it.group]!==undefined) food[it.group]+=a;
   });
   const foodTotal=Object.values(food).reduce((a,b)=>a+b,0);
-  const waterReach=water/(p*WATER_DAY), foodReach=foodTotal/(p*FOOD_DAY);
+  const eat=eatUnits();
+  const waterReach=water/(p*WATER_DAY), foodReach=foodTotal/(eat*FOOD_DAY);
   const reach=Math.floor(Math.min(waterReach,foodReach)+1e-9);
   const checks={};
-  for(const [k,c] of Object.entries(CHECK)){
+  for(const [k,c] of activeChecks()){
     let need=0, got=0;
-    c.items.forEach(([key,,q,pp])=>{ const n=q*(pp?p:1); need+=n; got+=Math.min(have(key),n); });
+    c.items.forEach(it=>{ const key=it[0], n=needOf(it,p,T); need+=n; got+=Math.min(have(key),n); });
     checks[k]={need,have:got,ratio:need?got/need:1};
   }
   return {p,T,water,food,foodTotal,waterReach,foodReach,reach,
     bottleneck: waterReach<=foodReach?'Wasser':'Nahrung', expired, soon, checks,
-    waterNeed:p*WATER_DAY*T, foodNeed:p*FOOD_DAY*T};
+    waterNeed:p*WATER_DAY*T, foodNeed:eat*FOOD_DAY*T, eat};
 }
 
 /* ---------- Ansichten ---------- */
@@ -495,7 +509,7 @@ function viewVorrat(c){
   <div class="grid">
     ${t('wasser','Wasser',`${fmt(c.water)} l in ${nW} ${nW===1?'Eintrag':'Einträgen'}`,warn('wasser'))}
     ${t('nahrung','Nahrung',`${fmt(c.foodTotal)} kg in ${nF} ${nF===1?'Eintrag':'Einträgen'}`,warn('nahrung'))}
-    ${Object.entries(CHECK).map(([k,v])=>t(k,v.n,`${c.checks[k].have} von ${c.checks[k].need} Teilen`,bar(c.checks[k].ratio))).join('')}
+    ${activeChecks().map(([k,v])=>t(k,v.n,`${c.checks[k].have} von ${c.checks[k].need} Teilen`,bar(c.checks[k].ratio))).join('')}
   </div>
   <div class="row">${CAN_PRINT?`<button class="primary" data-act="printInv">${icon('print')} Vorrat drucken</button>`:''}<button class="secondary" data-act="go" data-v="calc">Zur Berechnung</button></div>
   ${CAN_PRINT?`<p class="hint" style="margin:0">Druckt den kompletten Vorrat mit Mengen, Haltbarkeit und Checklisten, auch als PDF. Tipp: ausgedruckt zum Vorrat legen, das funktioniert auch ohne Strom.</p>`:''}`;
@@ -509,15 +523,18 @@ function viewCalc(c){
   const tiles = [
     tile('wasser','Wasser', `${fmt(c.water)} von ${fmt(c.waterNeed)} l`, c.water/c.waterNeed, `reicht ${Math.floor(c.waterReach)} Tage`),
     tile('nahrung','Nahrung', `${fmt(c.foodTotal)} von ${fmt(c.foodNeed)} kg`, c.foodTotal/c.foodNeed, `reicht ${Math.floor(c.foodReach)} Tage`),
-    ...Object.entries(CHECK).map(([k,v])=>tile(k,v.n, `${c.checks[k].have} von ${c.checks[k].need} Teilen`, c.checks[k].ratio, c.checks[k].ratio>=1?'vollständig':'unvollständig')),
+    ...activeChecks().map(([k,v])=>tile(k,v.n, `${c.checks[k].have} von ${c.checks[k].need} Teilen`, c.checks[k].ratio, c.checks[k].ratio>=1?'vollständig':'unvollständig')),
   ].join('');
   return `
   <div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Berechnung</h1></div>
   ${expiryBand(c)}
   <section class="panel" aria-label="Haushalt und Ziel">
-    <div class="spread"><span class="label">Personen im Haushalt</span>
-      <div class="stepper"><button data-act="persons" data-d="-1" aria-label="Eine Person weniger">−</button><span class="num" id="pc">${c.p}</span><button data-act="persons" data-d="1" aria-label="Eine Person mehr">+</button></div></div>
-    <div class="spread"><label class="label" for="days">Ziel: so lange ohne Einkaufen</label><span class="display num" style="font-size:1.6rem" id="dl">${T} Tage</span></div>
+    <div class="label">Personen im Haushalt <span class="num" style="letter-spacing:0">(${c.p})</span></div>
+    ${[['adults','Erwachsene und Kinder ab 10 Jahren',adults()],['kids4','Kinder 4–9 Jahre',kids4()],['kids1','Kleinkinder 1–3 Jahre',kids1()]].map(([k,n,v])=>`
+    <div class="spread"><span>${n}</span>
+      <div class="stepper"><button data-act="pers" data-k="${k}" data-d="-1" aria-label="${n}: eins weniger">−</button><span class="num">${v}</span><button data-act="pers" data-k="${k}" data-d="1" aria-label="${n}: eins mehr">+</button></div></div>`).join('')}
+    <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll. Richtwerte nach DGE.${kids1()?' Für Kleinkinder gibt es eine eigene Kachel „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>
+    <div class="spread"><label class="label" for="days">Ziel: so lange ohne Einkaufen</label><span class="display num" style="font-size:1.6rem;white-space:nowrap" id="dl">${T} Tage</span></div>
     <input type="range" id="days" min="1" max="90" value="${T}" aria-describedby="dl">
     <div class="chips">${[3,10,30,90].map(d=>`<button class="chip" data-act="days" data-d="${d}" aria-pressed="${d===T}">${d} Tage${d===10?' (BBK)':''}</button>`).join('')}</div>
   </section>
@@ -551,11 +568,11 @@ function printInventory(){
     ${items.map(it=>`<tr><td><span class="box"></span></td><td>${esc(it.name)}</td><td class="n">${sizeText(it)}</td><td class="n">${it.count}</td><td class="n">${tot(it)}</td>${mhdCell(it)}</tr>`).join('')}</tbody></table>`
     :'<p class="meta">Keine Einträge.</p>';
   const water=S.items.filter(i=>i.cat==='wasser');
-  const food=FOOD.map(g=>{ const items=S.items.filter(i=>i.cat==='nahrung'&&i.group===g.k); const need=g.d*c.p*c.T;
+  const food=FOOD.map(g=>{ const items=S.items.filter(i=>i.cat==='nahrung'&&i.group===g.k); const need=g.d*c.eat*c.T;
     return `<h3>${g.n} <span class="meta">– vorhanden ${fmt(c.food[g.k],2)} kg von ${fmt(need,2)} kg</span></h3>${table(items)}`; }).join('');
-  const checks=Object.entries(CHECK).map(([k,v])=>`<section><h3>${v.n} <span class="meta">– ${c.checks[k].have} von ${c.checks[k].need}</span></h3>
+  const checks=activeChecks().map(([k,v])=>`<section><h3>${v.n} <span class="meta">– ${c.checks[k].have} von ${c.checks[k].need}</span></h3>
     <table class="t4"><thead><tr><th></th><th>Gegenstand</th><th class="n">Soll</th><th class="n">Vorhanden</th></tr></thead><tbody>
-    ${v.items.map(([key,name,q,pp])=>{ const need=q*(pp?c.p:1);
+    ${v.items.map(it=>{ const [key,name]=it, need=needOf(it,c.p,c.T);
       let hv; if(DERIVED[key]){ const st=docStatus(DERIVED[key]); hv=`${st.done} von ${st.total} Dokumenten`; }
       else if(key==='bargeld') hv=`${fmt(S.cash?.have||0,0)} € von ${fmt(cashTarget(),0)} €`; else hv=String(S.checks[key]||0);
       return `<tr><td><span class="box"></span></td><td>${name}</td><td class="n">${DERIVED[key]||key==='bargeld'?'':need}</td><td class="n">${hv}</td></tr>`; }).join('')}</tbody></table></section>`).join('');
@@ -563,7 +580,7 @@ function printInventory(){
   const L=buyLines(c); const buyN=L.water.length+L.food.length+L.checks.reduce((a,[,r])=>a+r.length,0);
   document.getElementById('printout').innerHTML=`
     <h1>Notvorrat – Bestandsliste</h1>
-    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'} · Ziel ${c.T} Tage · Vorratsplaner ${APP_VERSION}</div>
+    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):''].filter(Boolean).join(', ')})`:''} · Ziel ${c.T} Tage · Vorratsplaner ${APP_VERSION}</div>
     <div class="sum"><div>Reicht für<b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b></div><div>Wasser<b>${fmt(c.water)} / ${fmt(c.waterNeed)} l</b></div>
       <div>Nahrung<b>${fmt(c.foodTotal)} / ${fmt(c.foodNeed)} kg</b></div><div>Noch kaufen<b>${buyN} Posten</b></div></div>
     ${c.expired.length||c.soon.length?`<p class="exp">Abgelaufen: ${c.expired.map(i=>esc(i.name)).join(', ')||'–'} · Läuft bald ab: ${c.soon.map(i=>esc(i.name)).join(', ')||'–'}</p>`:''}
@@ -619,13 +636,13 @@ function buyLines(c){
   const out=[]; const T=c.T;
   const wMiss=c.waterNeed-c.water;
   const water = wMiss>0.05 ? [[`Wasser`, `${fmt(Math.ceil(wMiss*2)/2)} l`, `ca. ${Math.ceil(wMiss/9)} ${Math.ceil(wMiss/9)===1?'Kiste':'Kisten'} mit 6 × 1,5 l`]] : [];
-  const food = FOOD.map(g=>{ const miss=g.d*c.p*T-c.food[g.k]; return miss>0.01?[g.n, `${fmt(miss, miss<1?2:1)} kg`, `z. B. ${g.ex}`]:null; }).filter(Boolean);
+  const food = FOOD.map(g=>{ const miss=g.d*c.eat*T-c.food[g.k]; return miss>0.01?[g.n, `${fmt(miss, miss<1?2:1)} kg`, `z. B. ${g.ex}`]:null; }).filter(Boolean);
   const checks = [];
-  for(const [k,v] of Object.entries(CHECK)){
-    const rows=v.items.map(([key,name,q,pp])=>{
+  for(const [k,v] of activeChecks()){
+    const rows=v.items.map(it=>{ const [key,name]=it;
       if(DERIVED[key]){ const st=docStatus(DERIVED[key]); return st.open.length?[name,`${st.open.length} offen`,st.open.join(', ')]:null; }
       if(key==='bargeld'){ const m=cashTarget()-(S.cash?.have||0); return m>0?[name,`${fmt(m,0)} €`,'kleine Scheine und Münzen']:null; }
-      const miss=q*(pp?c.p:1)-(S.checks[key]||0); return miss>0?[name,`${miss} ×`]:null; }).filter(Boolean);
+      const miss=needOf(it,c.p,T)-(S.checks[key]||0); return miss>0?[name,`${miss} ×`]:null; }).filter(Boolean);
     if(rows.length) checks.push([v.n,rows]);
   }
   return {water,food,checks};
@@ -673,7 +690,7 @@ function viewStock(c){
   }
   const groups=FOOD.map(g=>{
     const items=S.items.filter(i=>i.cat==='nahrung'&&i.group===g.k);
-    const need=g.d*c.p*c.T, have=c.food[g.k];
+    const need=g.d*c.eat*c.T, have=c.food[g.k];
     return `<section class="panel"><div class="spread"><div style="min-width:0"><h2 style="font-size:1.15rem">${g.n}</h2>${g.how?`<div class="small" style="font-weight:700;color:var(--olive)">${g.how}</div>`:''}</div><span class="num small"><b>${fmt(have,2)}</b> / ${fmt(need,2)} kg</span></div>${bar(need?have/need:1)}
       <div class="hint">Gut geeignet: ${g.ex}</div>
       <div class="list">${items.map(itemRow).join('')||'<p class="small muted" style="margin:0">Noch nichts eingetragen.</p>'}</div>
@@ -724,15 +741,15 @@ function viewCash(){
 
 function viewCheck(c){
   const k=UI.view, v=CHECK[k];
-  const rows=v.items.map(([key,name,q,pp])=>{
+  const rows=v.items.map(it=>{ const [key,name]=it;
     if(DERIVED[key]||key==='bargeld') return subRow(key,name);
-    const need=q*(pp?c.p:1), have=S.checks[key]||0;
+    const need=needOf(it,c.p,c.T), have=S.checks[key]||0, nt=needText(it);
     return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${name}</div>
-      <div class="meta"><span class="num">Soll: ${need}${pp?` (${q} pro Person)`:''}</span>${have>=need?'<span class="pill" style="border-color:var(--ok);color:var(--ok)">vorhanden</span>':''}</div></div>
+      <div class="meta"><span class="num">Soll: ${need}${nt?` (${nt})`:''}</span>${have>=need?'<span class="pill" style="border-color:var(--ok);color:var(--ok)">vorhanden</span>':''}</div></div>
       <div class="stepper"><button data-act="check" data-k="${key}" data-d="-1" aria-label="Eins weniger">−</button><span class="num">${have}</span><button data-act="check" data-k="${key}" data-d="1" aria-label="Eins mehr">+</button></div></div>`; }).join('');
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${v.n}</h1></div>
     <section class="panel"><div class="spread"><span class="label">Vollständigkeit</span><span class="num"><b>${c.checks[k].have}</b> von ${c.checks[k].need}</span></div>${bar(c.checks[k].ratio)}
-    <p class="small muted" style="margin:0">Diese Dinge brauchst du unabhängig von der Anzahl der Tage.</p></section>
+    <p class="small muted" style="margin:0">${k==='klein'?`Für ${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'} und ${c.T} Tage. Windeln, Feuchttücher und Gläschen richten sich nach den Tagen. Die Mengen sind Richtwerte, passe sie an dein Kind an.`:'Diese Dinge brauchst du unabhängig von der Anzahl der Tage.'}</p></section>
     <section class="panel"><div class="list">${rows}</div></section>`;
 }
 
@@ -820,7 +837,10 @@ root.addEventListener('click', async e=>{
     case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.pending=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
-    case 'persons': S.persons=Math.max(1,Math.min(20,S.persons+ +b.dataset.d)); save(); break;
+    case 'pers': { const k=b.dataset.k, d=+b.dataset.d;
+      if(k==='adults'){ if(adults()+d>=1 && S.persons+d<=20) S.persons+=d; }
+      else { const cur=S[k]||0; if(cur+d>=0 && S.persons+d<=20 && (d>0 || cur>0)){ S[k]=cur+d; S.persons+=d; } }
+      save(); break; }
     case 'startOwn': S=emptyState(); save(); askCal(); break;
     case 'count': { const it=S.items.find(i=>i.id===b.dataset.id); if(it){ it.count=Math.max(0,it.count+ +b.dataset.d); } save(); break; }
     case 'del': S.items=S.items.filter(i=>i.id!==b.dataset.id); save(); break;
@@ -917,7 +937,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&UI.sheet){ UI.she
   const ok=await DB.open();
   const saved=ok?await DB.get():null;
   S = saved && Array.isArray(saved.items) ? saved : demoState();
-  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null};
+  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0;
   if(ok){ META=Object.assign(META, await DB.get('meta')||{}); SNAPS=await DB.get('snaps')||[]; }
   snapshot();
   render();

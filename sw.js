@@ -1,5 +1,5 @@
 // Offline-Cache. Bei jeder Änderung an den Dateien VERSION erhöhen.
-const VERSION = 'vorratsplaner-v12';
+const VERSION = 'vorratsplaner-v13';
 const FILES = ['./', 'index.html', 'datenschutz.html', 'versionen.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 
