@@ -149,6 +149,9 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.8r
 .rotlist .rot:first-child{border-top:0;padding-top:0}
 .rot-form{display:flex;flex-direction:column;gap:8px;background:var(--track);border-radius:12px;padding:12px}
 .rot-form select{border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--paper)}
+.filebtn{display:inline-block;text-align:center;cursor:pointer}
+details summary{cursor:pointer;color:var(--muted);font-weight:700}
+.band.backup{border-color:var(--olive)}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -189,7 +192,8 @@ const DOCS = {
     ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
-const APP_VERSION = '1.3';
+const APP_VERSION = '1.4';
+const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
   wasser:'<path d="M12 3c-3 4.2-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.8-6-11z"/>',
@@ -271,11 +275,56 @@ const DB = {
   open(){ return new Promise(res=>{ try{ const r=indexedDB.open('vorratsplaner',1);
     r.onupgradeneeded=()=>r.result.createObjectStore('kv');
     r.onsuccess=()=>{this.db=r.result;res(true)}; r.onerror=()=>res(false);}catch(e){res(false)} }); },
-  get(){ return new Promise(res=>{ if(!this.db) return res(null); try{ const r=this.db.transaction('kv').objectStore('kv').get('state');
+  get(key='state'){ return new Promise(res=>{ if(!this.db) return res(null); try{ const r=this.db.transaction('kv').objectStore('kv').get(key);
     r.onsuccess=()=>res(r.result||null); r.onerror=()=>res(null);}catch(e){res(null)} }); },
-  put(v){ if(!this.db) return; try{ this.db.transaction('kv','readwrite').objectStore('kv').put(v,'state'); }catch(e){} },
+  put(v,key='state'){ if(!this.db) return; try{ this.db.transaction('kv','readwrite').objectStore('kv').put(v,key); }catch(e){} },
 };
-let saveT; function save(){ clearTimeout(saveT); saveT=setTimeout(()=>DB.put(JSON.parse(JSON.stringify(S))),250); }
+// Sicherungs-Status und automatische Tages-Zwischenstände (nur auf diesem Gerät)
+let META = {lastBackup:null, changes:0, snoozeUntil:0};
+let SNAPS = [];
+const today = () => new Date().toISOString().slice(0,10);
+function snapshot(){
+  if(S.demo || !S.items.length && !Object.keys(S.checks||{}).length) return;
+  const data=JSON.parse(JSON.stringify(S)), d=today();
+  SNAPS = SNAPS.filter(x=>x.day!==d); SNAPS.unshift({day:d, at:Date.now(), data});
+  SNAPS = SNAPS.slice(0,7); DB.put(SNAPS,'snaps');
+}
+let saveT; function save(){ clearTimeout(saveT);
+  if(!S.demo){ META.changes=(META.changes||0)+1; DB.put(META,'meta'); }
+  saveT=setTimeout(()=>{ DB.put(JSON.parse(JSON.stringify(S))); snapshot(); },250); }
+function daysSince(ts){ return ts ? Math.floor((Date.now()-ts)/864e5) : null; }
+function backupDue(){
+  if(S.demo || !S.items.length) return false;
+  if(Date.now() < (META.snoozeUntil||0)) return false;
+  const d=daysSince(META.lastBackup);
+  return d===null || d>=BACKUP_DAYS || (META.changes||0)>=BACKUP_CHANGES;
+}
+function backupData(){ return JSON.stringify({app:'vorratsplaner', version:1, savedAt:new Date().toISOString(), ...S}, null, 1); }
+function backupName(){ return `vorratsplaner-sicherung-${today()}.json`; }
+function markBackedUp(){ META.lastBackup=Date.now(); META.changes=0; META.snoozeUntil=0; DB.put(META,'meta'); }
+function canShareFile(){ try{ return !!(navigator.canShare && navigator.canShare({files:[new File(['x'],'t.json',{type:'application/json'})]})); }catch(e){ return false; } }
+async function doBackup(mode){
+  const text=backupData();
+  if(mode==='share'){
+    try{ await navigator.share({files:[new File([text],backupName(),{type:'application/json'})], title:'Vorratsplaner-Sicherung'}); markBackedUp(); UI.msg='Sicherung geteilt.'; }
+    catch(e){ if(e&&e.name==='AbortError') UI.msg='Teilen abgebrochen.'; else UI.msg='Teilen nicht möglich. Nutze „Als Datei speichern“.'; }
+    return;
+  }
+  try{ const url=URL.createObjectURL(new Blob([text],{type:'application/json'})); const a=document.createElement('a');
+    a.href=url; a.download=backupName(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+    markBackedUp(); UI.msg=`Gespeichert als ${backupName()} (Ordner „Downloads“).`;
+  }catch(e){ UI.msg='Speichern nicht möglich. Nutze „Als Text kopieren“.'; }
+}
+function parseBackup(text){
+  const d=JSON.parse(text);
+  if(!d || !Array.isArray(d.items) || typeof d.persons!=='number') throw new Error('ungültig');
+  return {persons:d.persons, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
+}
+function restore(data, msg){
+  if(!S.demo){ const d=today(); SNAPS=SNAPS.filter(x=>x.day!==d+'-vorher'); SNAPS.unshift({day:d+'-vorher', at:Date.now(), data:JSON.parse(JSON.stringify(S))}); SNAPS=SNAPS.slice(0,8); DB.put(SNAPS,'snaps'); }
+  S=data; save(); markBackedUp(); UI.pending=null; UI.msg=msg; UI.view='home';
+}
+function summary(d){ const n=d.items.length; return `${n} ${n===1?'Artikel':'Artikel'}, ${d.persons} ${d.persons===1?'Person':'Personen'}`; }
 
 /* ---------- Zustand ---------- */
 let S = null;
@@ -334,6 +383,8 @@ function viewHome(c){
   return `<div class="topbar"><h1>Vorratsplaner</h1><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
   ${S.demo?`<div class="band info"><div><b>Du siehst Beispieldaten.</b><span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. </span><button class="linkbtn small" data-act="startOwn">Eigenen Vorrat anlegen</button></div></div>`:''}
   ${expiryBand(c)}
+  ${backupDue()?backupBand():''}
+  ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
   <p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>
   <div class="choices">
     <button class="choice" data-act="go" data-v="vorrat"><span class="choice-ico">${icon('shelf')}</span>
@@ -564,19 +615,41 @@ function viewCheck(c){
     <section class="panel"><div class="list">${rows}</div></section>`;
 }
 
+function backupBand(){
+  const d=daysSince(META.lastBackup);
+  const why = d===null ? 'Du hast noch keine Sicherung gemacht.' : `Letzte Sicherung vor ${d} ${d===1?'Tag':'Tagen'}, seitdem ${META.changes||0} Änderungen.`;
+  return `<div class="band info backup"><div style="display:flex;flex-direction:column;gap:8px">
+    <div><b>Vorrat sichern</b><div class="small">${why} Wenn Browserdaten gelöscht werden oder du das Handy wechselst, ist sonst alles weg.</div></div>
+    <div class="row">${canShareFile()?`<button class="primary small" data-act="backup" data-mode="share">Sichern (Drive, Mail …)</button>`:''}
+      <button class="${canShareFile()?'secondary':'primary'} small" data-act="backup" data-mode="file">Als Datei speichern</button>
+      <button class="linkbtn small" data-act="snooze">Morgen erinnern</button></div></div></div>`;
+}
+
 function viewSettings(){
-  const data=JSON.stringify({version:1,...S},null,1);
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Einstellungen</h1></div>
   <section class="panel"><h2>Sicherung</h2>
-    <p class="small muted" style="margin:0">Dein Vorrat liegt nur auf diesem Gerät. Kopiere den Text und speichere ihn z. B. als Notiz, damit nichts verloren geht.</p>
-    <textarea id="exp" readonly>${esc(data)}</textarea>
-    <button class="secondary" data-act="copyExport">Sicherung kopieren</button>
+    <p class="small muted" style="margin:0">Dein Vorrat liegt nur auf diesem Gerät. Sichere ihn regelmäßig als Datei, am besten in Google Drive oder per Mail an dich selbst. ${META.lastBackup?`Letzte Sicherung: ${new Date(META.lastBackup).toLocaleDateString('de-DE')}.`:'<b>Noch keine Sicherung.</b>'}</p>
+    <div class="row">${canShareFile()?`<button class="primary" data-act="backup" data-mode="share">Sichern (Drive, Mail …)</button>`:''}
+      <button class="${canShareFile()?'secondary':'primary'}" data-act="backup" data-mode="file">Als Datei speichern</button></div>
     ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+    <p class="hint" style="margin:0">Die App erinnert dich nach ${BACKUP_DAYS} Tagen oder ${BACKUP_CHANGES} Änderungen an eine neue Sicherung.</p>
   </section>
-  <section class="panel"><h2>Sicherung einspielen</h2>
-    <textarea id="imp" placeholder="Gesicherten Text hier einfügen"></textarea>
-    <button class="secondary" data-act="import">Einspielen</button>
+  <section class="panel"><h2>Wiederherstellen</h2>
+    ${UI.pending?`<div class="band warn"><div style="display:flex;flex-direction:column;gap:8px"><div><b>${esc(UI.pending.label)}</b><div class="small">${esc(summary(UI.pending.data))}. Dein aktueller Stand wird dabei ersetzt. Er bleibt als Zwischenstand „vorher“ erhalten.</div></div>
+      <div class="row"><button class="danger small" data-act="restoreYes">Wiederherstellen</button><button class="secondary small" data-act="restoreNo">Abbrechen</button></div></div></div>`:''}
+    <label class="secondary filebtn" for="restore-file">Sicherungsdatei auswählen</label>
+    <input type="file" id="restore-file" accept=".json,application/json" hidden>
     ${UI.impErr?`<div class="err">${UI.impErr}</div>`:''}
+    <div><div class="label" style="margin-bottom:4px">Automatische Zwischenstände</div>
+      <p class="hint" style="margin:0 0 6px">Die App merkt sich den Stand der letzten 7 Tage, z. B. falls du aus Versehen etwas löschst. Sie liegen auf diesem Gerät und ersetzen keine Sicherungsdatei.</p>
+      ${SNAPS.length?`<div class="list">${SNAPS.map((x,i)=>`<div class="item"><div style="min-width:0"><div style="font-weight:700">${new Date(x.at).toLocaleString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} Uhr${x.day.endsWith('-vorher')?' (vor Wiederherstellung)':''}</div><div class="small muted">${esc(summary(x.data))}</div></div>
+        <button class="secondary small" data-act="snapPick" data-i="${i}">Laden</button></div>`).join('')}</div>`:'<p class="small muted" style="margin:0">Noch keine Zwischenstände.</p>'}
+    </div>
+    <details><summary class="small">Als Text kopieren oder einfügen</summary>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+      <textarea id="exp" readonly>${esc(backupData())}</textarea><button class="secondary small" data-act="copyExport">Text kopieren</button>
+      <textarea id="imp" placeholder="Gesicherten Text hier einfügen"></textarea><button class="secondary small" data-act="import">Text einspielen</button></div>
+    </details>
   </section>
   <section class="panel"><h2>Neu anfangen</h2>
     ${UI.confirmReset?`<p style="margin:0"><b>Wirklich alle Artikel löschen?</b> Das lässt sich nicht rückgängig machen.</p><div class="row"><button class="danger" data-act="resetYes">Ja, alles löschen</button><button class="secondary" data-act="resetNo">Abbrechen</button></div>`
@@ -613,7 +686,7 @@ root.addEventListener('click', async e=>{
   if(a!=='copyList'&&a!=='copyExport') UI.msg='';
   switch(a){
     case 'print': window.print(); return;
-    case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
+    case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.pending=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
     case 'persons': S.persons=Math.max(1,Math.min(20,S.persons+ +b.dataset.d)); save(); break;
@@ -625,7 +698,12 @@ root.addEventListener('click', async e=>{
     case 'add': UI.sheet={cat:b.dataset.cat, group:b.dataset.group||'getreide'}; render(); setTimeout(()=>document.getElementById('f-name')?.focus(),30); return;
     case 'closeSheet': case 'closeBg': UI.sheet=null; break;
     case 'copyList': await copy(listText(calc()), 'Liste kopiert.', null); break;
-    case 'copyExport': await copy(document.getElementById('exp').value, 'Sicherung kopiert.', 'exp'); break;
+    case 'copyExport': { await copy(document.getElementById('exp').value, 'Sicherung kopiert. Füge sie z. B. in eine Notiz ein.', 'exp'); if(UI.msg.startsWith('Sicherung kopiert')) markBackedUp(); break; }
+    case 'backup': await doBackup(b.dataset.mode); break;
+    case 'snooze': META.snoozeUntil=Date.now()+864e5; DB.put(META,'meta'); break;
+    case 'snapPick': { const x=SNAPS[+b.dataset.i]; if(x) UI.pending={label:'Zwischenstand vom '+new Date(x.at).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' Uhr laden?', data:JSON.parse(JSON.stringify(x.data))}; break; }
+    case 'restoreYes': if(UI.pending) restore(UI.pending.data,'Wiederhergestellt.'); break;
+    case 'restoreNo': UI.pending=null; break;
     case 'import': doImport(); break;
     case 'reset': UI.confirmReset=true; break;
     case 'resetNo': UI.confirmReset=false; break;
@@ -647,13 +725,15 @@ async function copy(text,ok,selId){
 }
 function doImport(){
   UI.impErr='';
-  try{ const d=JSON.parse(document.getElementById('imp').value);
-    if(!Array.isArray(d.items)||typeof d.persons!=='number') throw 0;
-    S={persons:d.persons, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}}; save(); UI.msg='Sicherung eingespielt.'; UI.view='home';
-  }catch(e){ UI.impErr='Der Text ist keine gültige Sicherung. Kopiere ihn vollständig aus „Sicherung kopieren“.'; }
+  try{ const d=parseBackup(document.getElementById('imp').value); UI.pending={label:'Eingefügten Text einspielen?', data:d}; }
+  catch(e){ UI.impErr='Der Text ist keine gültige Sicherung. Kopiere ihn vollständig aus „Text kopieren“.'; }
 }
 root.addEventListener('change', e=>{
   const t=e.target;
+  if(t.id==='restore-file' && t.files && t.files[0]){ const f=t.files[0]; UI.impErr='';
+    f.text().then(txt=>{ try{ UI.pending={label:`Sicherung „${f.name}“ wiederherstellen?`, data:parseBackup(txt)}; }
+      catch(err){ UI.impErr='Diese Datei ist keine Vorratsplaner-Sicherung.'; } render(); });
+    return; }
   if(t.dataset.name!==undefined){ S.names=S.names||[]; S.names[+t.dataset.name]=t.value; save(); }
   if(t.dataset.cash){ S.cash=S.cash||{have:0,target:null}; const n=parseNum(t.value); S.cash[t.dataset.cash]= n>0?n:(t.dataset.cash==='have'?0:null); save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); }
 });
@@ -687,6 +767,8 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&UI.sheet){ UI.she
   const saved=ok?await DB.get():null;
   S = saved && Array.isArray(saved.items) ? saved : demoState();
   S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null};
+  if(ok){ META=Object.assign(META, await DB.get('meta')||{}); SNAPS=await DB.get('snaps')||[]; }
+  snapshot();
   render();
 })();
 </script>

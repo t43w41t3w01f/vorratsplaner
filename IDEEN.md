@@ -5,12 +5,12 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 ## Umgesetzt
 
 - [x] **Rotations-Liste „Verbrauchsliste“**: Was in den nächsten 2 Monaten abläuft, mit „Ersetzt – neues Datum“ und „Aufgebraucht“ *(Version 1.3)*
+- [x] **Sicherung als Datei und Erinnerung**: Datei speichern oder teilen (Drive, Mail), Erinnerung nach 7 Tagen oder 10 Änderungen, Wiederherstellen aus Datei, automatische Zwischenstände der letzten 7 Tage *(Version 1.4)*
 
 ## Priorität hoch
 
 - [ ] **Notfall-Modus „Es ist so weit“**: Umschalten auf Tageszähler, Wasserverbrauch pro Tag und Ess-Reihenfolge (erst Kühlschrank, dann Frisches, dann Konserven)
 - [ ] **Notfall-Wissen offline**: Wasser abkochen, Verhalten bei Stromausfall, Kochen ohne Strom, Notfall-Radiosender, Notrufnummern
-- [ ] **Sicherung als Datei und Erinnerung**: Hinweis „Letzte Sicherung vor 60 Tagen, jetzt sichern?“, Sicherung als Datei statt nur Text
 - [ ] **Haushaltsprofil**: Kinder, Babys, Haustiere, Senioren mit eigenen Mengen (Kind ca. halbe Portion, Hund Futter und Wasser extra, Babynahrung, Windeln)
 
 ## Weitere Ideen
