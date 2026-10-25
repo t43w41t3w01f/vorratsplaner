@@ -312,7 +312,7 @@ function render(){
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
   else root.innerHTML=viewCheck(c);
-  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="datenschutz.html" style="color:inherit">Datenschutz &amp; Impressum</a></footer>`);
+  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="datenschutz.html" style="color:inherit">Datenschutz</a></footer>`);
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
 
