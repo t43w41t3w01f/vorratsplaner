@@ -178,6 +178,7 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700}
 .primary svg{width:18px;height:18px;vertical-align:-3px;margin-right:4px}
 .check{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
 .check input{width:20px;height:20px;margin-top:2px;accent-color:var(--olive);flex:none}
+.btnlink{display:inline-block;text-decoration:none;text-align:center}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -230,7 +231,7 @@ const DOCS = {
     ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
-const APP_VERSION = '1.6';
+const APP_VERSION = '1.7';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -322,7 +323,7 @@ const DB = {
   put(v,key='state'){ if(!this.db) return; try{ this.db.transaction('kv','readwrite').objectStore('kv').put(v,key); }catch(e){} },
 };
 // Sicherungs-Status und automatische Tages-Zwischenstände (nur auf diesem Gerät)
-let META = {lastBackup:null, changes:0, snoozeUntil:0};
+let META = {lastBackup:null, changes:0, snoozeUntil:0, cal:null, calFreq:'monthly'};
 let SNAPS = [];
 const today = () => new Date().toISOString().slice(0,10);
 function snapshot(){
@@ -334,6 +335,42 @@ function snapshot(){
 let saveT; function save(){ clearTimeout(saveT);
   if(!S.demo){ META.changes=(META.changes||0)+1; DB.put(META,'meta'); }
   saveT=setTimeout(()=>{ DB.put(JSON.parse(JSON.stringify(S))); snapshot(); },250); }
+/* ---------- Kalender-Erinnerung (Serientermin „Vorratscheck“) ---------- */
+const CAL_FREQ = {weekly:{n:'Wöchentlich', adj:'Wöchentlicher', rule:'FREQ=WEEKLY'}, monthly:{n:'Monatlich', adj:'Monatlicher', rule:'FREQ=MONTHLY'}, quarterly:{n:'Alle 3 Monate', adj:'Vierteljährlicher', rule:'FREQ=MONTHLY;INTERVAL=3'}};
+const APP_URL = 'https://t43w41t3w01f.github.io/vorratsplaner/';
+function nextSaturday10(){ const d=new Date(); d.setHours(10,0,0,0); const add=(6-d.getDay()+7)%7||7; d.setDate(d.getDate()+add); return d; }
+function calStamp(d){ const z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}T${z(d.getHours())}${z(d.getMinutes())}00`; }
+function calTexts(freq){ return {title:'Vorratscheck', details:`${CAL_FREQ[freq].adj} Vorratscheck: Vorratsplaner öffnen, Verbrauchsliste ansehen, fehlende Dinge einkaufen, Sicherung machen.\n${APP_URL}`}; }
+function googleCalUrl(freq){
+  const st=nextSaturday10(), en=new Date(st.getTime()+15*60000), t=calTexts(freq);
+  const q=new URLSearchParams({action:'TEMPLATE', text:t.title, details:t.details, dates:`${calStamp(st)}/${calStamp(en)}`, ctz:'Europe/Berlin', recur:'RRULE:'+CAL_FREQ[freq].rule});
+  return 'https://calendar.google.com/calendar/render?'+q.toString();
+}
+function icsDownload(freq){
+  const st=nextSaturday10(), en=new Date(st.getTime()+15*60000), t=calTexts(freq);
+  const esc2=x=>x.replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Vorratsplaner//DE','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    `UID:vorratscheck-${Date.now()}@vorratsplaner`, `DTSTAMP:${calStamp(new Date())}`, `DTSTART:${calStamp(st)}`, `DTEND:${calStamp(en)}`,
+    `RRULE:${CAL_FREQ[freq].rule}`, `SUMMARY:${esc2(t.title)}`, `DESCRIPTION:${esc2(t.details)}`, `URL:${APP_URL}`,
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Vorratscheck','TRIGGER:-PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  try{ const url=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); const a=document.createElement('a'); a.href=url; a.download='vorratscheck.ics';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); return true; }catch(e){ return false; }
+}
+function calChooser(ctx){
+  const f=META.calFreq||'monthly';
+  return `<div class="chips" role="radiogroup" aria-label="Wie oft?">${Object.entries(CAL_FREQ).map(([k,v])=>`<button class="chip" role="radio" data-act="calFreq" data-f="${k}" aria-pressed="${k===f}" aria-checked="${k===f}">${v.n}</button>`).join('')}</div>
+    <div class="row"><a class="primary small btnlink" href="${googleCalUrl(f)}" target="_blank" rel="noopener" data-act="calGoogle">Im Google Kalender eintragen</a>
+      <button class="secondary small" data-act="calIcs">Anderer Kalender</button></div>
+    <p class="hint" style="margin:0">Der Termin startet am nächsten Samstag um 10 Uhr, Uhrzeit und Tag kannst du im Kalender ändern. „Anderer Kalender“ lädt eine Termindatei, z. B. für Samsung oder iPhone.</p>`;
+}
+function calPrompt(){
+  return `<div class="band info"><div style="display:flex;flex-direction:column;gap:10px">
+    <div><b>Regelmäßig nachsehen?</b><div class="small">Ein Vorrat hilft nur, wenn er aktuell ist. Leg dir einen Serientermin „Vorratscheck“ im Kalender an, dann erinnert dich dein Handy zuverlässig.</div></div>
+    ${calChooser('prompt')}
+    <div class="row"><button class="linkbtn small" data-act="calLater">Später</button><button class="linkbtn small" data-act="calNever">Nein danke</button></div></div></div>`;
+}
+function calDue(){ return !S.demo && (META.cal==='ask' || (META.cal==='later' && !UI.calLaterShown)); }
+
 function daysSince(ts){ return ts ? Math.floor((Date.now()-ts)/864e5) : null; }
 function backupDue(){
   if(S.demo || !S.items.length) return false;
@@ -425,7 +462,7 @@ function viewHome(c){
   return `<div class="topbar"><h1>Vorratsplaner</h1><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
   ${S.demo?`<div class="band info"><div><b>Du siehst Beispieldaten.</b><span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. </span><button class="linkbtn small" data-act="startOwn">Eigenen Vorrat anlegen</button></div></div>`:''}
   ${expiryBand(c)}
-  ${backupDue()?backupBand():''}
+  ${calDue()?calPrompt():(backupDue()?backupBand():'')}
   ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
   <p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>
   <div class="choices">
@@ -693,6 +730,7 @@ function viewCheck(c){
     <section class="panel"><div class="list">${rows}</div></section>`;
 }
 
+function askCal(){ if(!META.cal || META.cal==='later'){ META.cal='ask'; DB.put(META,'meta'); } }
 function backupBand(){
   const d=daysSince(META.lastBackup);
   const why = d===null ? 'Du hast noch keine Sicherung gemacht.' : `Letzte Sicherung vor ${d} ${d===1?'Tag':'Tagen'}, seitdem ${META.changes||0} Änderungen.`;
@@ -705,6 +743,10 @@ function backupBand(){
 
 function viewSettings(){
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Einstellungen</h1></div>
+  <section class="panel"><h2>Erinnerung im Kalender</h2>
+    <p class="small muted" style="margin:0">Serientermin „Vorratscheck“ in deinem Kalender. ${META.cal==='done'?`<b>Eingerichtet (${(CAL_FREQ[META.calFreq]||CAL_FREQ.monthly).n}).</b> Ändern oder löschen kannst du ihn im Kalender.`:'Noch nicht eingerichtet.'}</p>
+    ${calChooser('settings')}
+  </section>
   <section class="panel"><h2>Sicherung</h2>
     <p class="small muted" style="margin:0">Dein Vorrat liegt nur auf diesem Gerät. Sichere ihn regelmäßig als Datei, am besten in Google Drive oder per Mail an dich selbst. ${META.lastBackup?`Letzte Sicherung: ${new Date(META.lastBackup).toLocaleDateString('de-DE')}.`:'<b>Noch keine Sicherung.</b>'}</p>
     <div class="row">${canShareFile()?`<button class="primary" data-act="backup" data-mode="share">Sichern (Drive, Mail …)</button>`:''}
@@ -773,7 +815,7 @@ root.addEventListener('click', async e=>{
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
     case 'persons': S.persons=Math.max(1,Math.min(20,S.persons+ +b.dataset.d)); save(); break;
-    case 'startOwn': S=emptyState(); save(); break;
+    case 'startOwn': S=emptyState(); save(); askCal(); break;
     case 'count': { const it=S.items.find(i=>i.id===b.dataset.id); if(it){ it.count=Math.max(0,it.count+ +b.dataset.d); } save(); break; }
     case 'del': S.items=S.items.filter(i=>i.id!==b.dataset.id); save(); break;
     case 'doc': { S.docs=S.docs||{}; const k=b.dataset.k, v=b.dataset.val==='na'?'na':1; if(S.docs[k]===v) delete S.docs[k]; else S.docs[k]=v; save(); break; }
@@ -783,6 +825,11 @@ root.addEventListener('click', async e=>{
     case 'copyList': await copy(listText(calc()), 'Liste kopiert.', null); break;
     case 'copyExport': { await copy(document.getElementById('exp').value, 'Sicherung kopiert. Füge sie z. B. in eine Notiz ein.', 'exp'); if(UI.msg.startsWith('Sicherung kopiert')) markBackedUp(); break; }
     case 'backup': await doBackup(b.dataset.mode); break;
+    case 'calFreq': META.calFreq=b.dataset.f; DB.put(META,'meta'); break;
+    case 'calGoogle': META.cal='done'; DB.put(META,'meta'); UI.msg='Google Kalender geöffnet: dort „Speichern“ tippen.'; setTimeout(render,50); return;
+    case 'calIcs': if(icsDownload(META.calFreq||'monthly')){ META.cal='done'; DB.put(META,'meta'); UI.msg='Termindatei „vorratscheck.ics“ geladen: öffnen und im Kalender speichern.'; } else UI.msg='Termindatei konnte nicht erstellt werden.'; break;
+    case 'calLater': META.cal='later'; UI.calLaterShown=true; DB.put(META,'meta'); break;
+    case 'calNever': META.cal='never'; DB.put(META,'meta'); break;
     case 'snooze': META.snoozeUntil=Date.now()+864e5; DB.put(META,'meta'); break;
     case 'snapPick': { const x=SNAPS[+b.dataset.i]; if(x) UI.pending={label:'Zwischenstand vom '+new Date(x.at).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' Uhr laden?', data:JSON.parse(JSON.stringify(x.data))}; break; }
     case 'restoreYes': if(UI.pending) restore(UI.pending.data,'Wiederhergestellt.'); break;
@@ -790,7 +837,7 @@ root.addEventListener('click', async e=>{
     case 'import': doImport(); break;
     case 'reset': UI.confirmReset=true; break;
     case 'resetNo': UI.confirmReset=false; break;
-    case 'resetYes': S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; break;
+    case 'resetYes': { const wasDemo=S.demo; S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; if(wasDemo){ askCal(); UI.view='home'; UI.msg=''; } break; }
     case 'rotEdit': UI.rotEdit=b.dataset.id; break;
     case 'rotCancel': UI.rotEdit=null; break;
     case 'rotSave': { const it=S.items.find(i=>i.id===b.dataset.id); const m=document.getElementById('rot-m').value, y=document.getElementById('rot-y').value;

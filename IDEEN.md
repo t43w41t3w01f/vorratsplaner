@@ -8,6 +8,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Sicherung als Datei und Erinnerung**: Datei speichern oder teilen (Drive, Mail), Erinnerung nach 7 Tagen oder 10 Änderungen, Wiederherstellen aus Datei, automatische Zwischenstände der letzten 7 Tage *(Version 1.4)*
 - [x] **Vorrat drucken**: kompletter Bestand als Ausdruck oder PDF, mit Haltbarkeit und Kästchen zum Abhaken *(Version 1.5)*
 - [x] **Nur lange Haltbares**: Beispiele je Gruppe, Hinweis bei MHD unter 3 Monaten, Trockenware und Pulver mit Umrechnungsfaktor *(Version 1.6)*
+- [x] **Vorratscheck-Erinnerung**: Serientermin im Kalender (Google oder Termindatei), wöchentlich, monatlich oder alle 3 Monate, Abfrage beim Anlegen des eigenen Vorrats *(Version 1.7)*
 
 ## Priorität hoch
 
@@ -17,10 +18,10 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 ## Weitere Ideen
 
+- [ ] **Push-Benachrichtigung ohne Server** (Hintergrund-Abruf in Chrome): nur als Versuch, Chrome entscheidet selbst, ob und wie oft das läuft
 - [ ] **Notfallplan der Familie**: Treffpunkt, wichtige Telefonnummern, wer holt die Kinder
 - [ ] **Notgepäck-Checkliste** (Fluchtrucksack nach BBK), unabhängig von den Tagen
 - [ ] **Lagerort pro Artikel** (z. B. „Keller, Regal 2“)
-- [ ] **Vorratscheck-Erinnerung** alle 3 Monate (Hinweis beim Öffnen, keine Push-Benachrichtigung)
 - [ ] **Wasser-Rechner Kochen**: Nudeln und Reis brauchen zusätzliches Wasser
 - [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
 

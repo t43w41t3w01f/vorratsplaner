@@ -4,7 +4,7 @@
 
 👉 **App öffnen:** https://t43w41t3w01f.github.io/vorratsplaner/
 
-Aktuelle Version: **1.6** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.7** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -33,6 +33,10 @@ Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reich
 - **Erinnerung** nach 7 Tagen oder 10 Änderungen.
 - **Wiederherstellen** aus der Sicherungsdatei.
 - **Automatische Zwischenstände** der letzten 7 Tage auf dem Gerät.
+
+### Erinnerung im Kalender
+- Serientermin „Vorratscheck“ im Google Kalender oder als Termindatei für andere Kalender, wöchentlich, monatlich oder alle 3 Monate.
+- Die App fragt beim Anlegen des eigenen Vorrats, einrichtbar auch in den Einstellungen.
 
 ### Privat und offline
 - Alle Daten bleiben auf deinem Gerät, es gibt kein Konto und keine Werbung.

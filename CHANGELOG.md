@@ -2,6 +2,11 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.7 – 25. Oktober 2026
+- **Erinnerung im Kalender:** Beim Anlegen des eigenen Vorrats fragt die App, ob ein Serientermin „Vorratscheck“ angelegt werden soll (wöchentlich, monatlich oder alle 3 Monate).
+- Ein Tipp öffnet den fertigen Termin im Google Kalender, alternativ eine Termindatei für andere Kalender.
+- „Später“ fragt beim nächsten Öffnen erneut, „Nein danke“ nie wieder. Auch in den Einstellungen einrichtbar.
+
 ## 1.6 – 25. Oktober 2026
 - **Nur lange Haltbares:** Jede Lebensmittelgruppe zeigt, was gemeint ist (Dose, Glas, getrocknet), und nennt gut geeignete Beispiele. Die BBK-Mengen beziehen sich auf Konserven und Trockenware, nicht auf Frisches.
 - **Hinweis bei kurzem Haltbarkeitsdatum:** Läuft ein Artikel in weniger als 3 Monaten ab, fragt die App vor dem Speichern nach.
