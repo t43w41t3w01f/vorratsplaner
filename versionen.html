@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Versionen – Vorratsplaner</title>
+<meta name="theme-color" content="#56632a">
+<style>
+:root{--bg:#f5ecda;--fg:#2a2217;--muted:#6a5b44;--line:#c9b48d;--accent:#ad4f26;--olive:#56632a;--tag:#e3d5bb}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1712;--fg:#efe4cf;--muted:#b2a385;--line:#45392a;--accent:#e07c4a;--olive:#97a75a;--tag:#3a3125;color-scheme:dark}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,Roboto,sans-serif;padding:24px max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left))}
+main{max-width:65ch;margin:0 auto}
+h1{font-family:"Roboto Condensed","sans-serif-condensed","Arial Narrow",sans-serif;text-transform:uppercase;font-size:2rem;margin:0 0 4px}
+a{color:var(--accent);font-weight:700}
+.muted{color:var(--muted);font-size:.9rem}
+.rel{border-top:1.5px solid var(--line);padding:18px 0 6px}
+.rel header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.v{font-family:"Roboto Condensed","sans-serif-condensed","Arial Narrow",sans-serif;font-weight:700;font-size:1.5rem}
+.date{color:var(--muted);font-size:.9rem}
+.tag{font-size:.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:1px 8px;background:var(--tag)}
+.tag.now{background:var(--olive);color:var(--bg)}
+.tag.test{background:var(--accent);color:#fff}
+ul{margin:8px 0 0;padding-left:1.2em}
+li{margin:4px 0}
+</style>
+</head>
+<body><main>
+<p><a href="./">‹ Zurück zur App</a></p>
+<h1>Versionen</h1>
+<p class="muted">Was sich am Vorratsplaner geändert hat, die neueste Version steht oben.</p>
+
+<section class="rel">
+  <header><span class="v">1.2</span><span class="date">25. Oktober 2026</span><span class="tag now">Aktuell</span><span class="tag test">Test</span></header>
+  <ul>
+    <li><b>Amtliche Warnungen:</b> Nach Wahl des Landkreises in den Einstellungen zeigt die Startseite aktuelle Warnungen des Bevölkerungsschutzes, des Deutschen Wetterdienstes, der Hochwasserzentralen und der Polizei. Quelle: warnung.bund.de.</li>
+    <li>Antippen einer Warnung zeigt Lage, Verhaltenshinweise und betroffenes Gebiet.</li>
+    <li>Ohne Internet bleibt der zuletzt geladene Stand mit Uhrzeit sichtbar.</li>
+    <li>Neue Seite „Versionen“ (diese Seite), erreichbar unten in der App.</li>
+    <li>Datenschutzhinweise um den Abruf der Warnungen ergänzt.</li>
+  </ul>
+</section>
+
+<section class="rel">
+  <header><span class="v">1.1</span><span class="date">25. Oktober 2026</span></header>
+  <ul>
+    <li>Impressum entfernt, da die App ein privates Projekt ist.</li>
+  </ul>
+</section>
+
+<section class="rel">
+  <header><span class="v">1.0</span><span class="date">25. Oktober 2026</span></header>
+  <ul>
+    <li>Erste installierbare Version, läuft offline und ohne Konto.</li>
+    <li>Startseite mit „Mein Vorrat“ und „Berechnung“.</li>
+    <li>Berechnung nach BBK-Empfehlung: Personen, Ziel-Tage per Regler, Reichweite in Tagen mit Engpass.</li>
+    <li>Einkaufsliste „Noch kaufen“ mit Drucken, PDF und Kopieren.</li>
+    <li>Lebensmittel nach BBK-Gruppen, Wasser in Litern, Haltbarkeits-Warnungen.</li>
+    <li>Checklisten für Erste Hilfe, Medikamente, Hygiene, Licht &amp; Strom, Wärme &amp; Kochen.</li>
+    <li>Dokumentenmappe und Kopien als Checkliste pro Person, Bargeld-Richtwert 100 € pro Person.</li>
+    <li>Sicherung und Wiederherstellung per Kopieren und Einfügen.</li>
+  </ul>
+</section>
+</main></body>
+</html>

@@ -141,6 +141,16 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.8r
 .na{color:var(--muted)}
 .na[aria-pressed=true]{background:var(--track);color:var(--ink);border-style:dashed}
 @media (max-width:420px){.item{grid-template-columns:1fr}.item .actions{justify-content:flex-start}}
+.warnbox{border-color:var(--rust)}
+.wicon{display:inline-grid;place-items:center;color:var(--rust);flex:none}
+.wicon svg{width:24px;height:24px}
+.wlist{display:flex;flex-direction:column}
+.witem{display:flex;flex-direction:column;gap:3px;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:10px 0}
+.wlist .witem:first-child{border-top:0;padding-top:2px}
+.wt{font-weight:700;line-height:1.25}
+.sev{display:inline-block;align-self:flex-start;border-radius:6px;padding:1px 8px;font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff}
+.sev-bad{background:var(--bad)} .sev-warn{background:var(--warn);color:#1b1712} .sev-info{background:var(--muted)}
+.pre{white-space:pre-line;margin:4px 0 0}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -181,6 +191,13 @@ const DOCS = {
     ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
+const APP_VERSION = '1.2';
+/* ---------- Amtliche Warnungen (Quelle: BBK, warnung.bund.de) ---------- */
+const WARN_API = 'https://warnung.bund.de/api31';
+// [Kreisschlüssel, Name, Bundesland]
+const KREISE = [["08425","Alb-Donau-Kreis","Baden-Württemberg"],["08211","Baden-Baden (Stadt)","Baden-Württemberg"],["08426","Biberach","Baden-Württemberg"],["08435","Bodenseekreis","Baden-Württemberg"],["08315","Breisgau-Hochschwarzwald","Baden-Württemberg"],["08115","Böblingen","Baden-Württemberg"],["08235","Calw","Baden-Württemberg"],["08316","Emmendingen","Baden-Württemberg"],["08236","Enzkreis","Baden-Württemberg"],["08116","Esslingen","Baden-Württemberg"],["08311","Freiburg i.Breisgau (Stadt)","Baden-Württemberg"],["08237","Freudenstadt","Baden-Württemberg"],["08117","Göppingen","Baden-Württemberg"],["08221","Heidelberg (Stadt)","Baden-Württemberg"],["08135","Heidenheim","Baden-Württemberg"],["08125","Heilbronn","Baden-Württemberg"],["08121","Heilbronn (Stadt)","Baden-Württemberg"],["08126","Hohenlohekreis","Baden-Württemberg"],["08215","Karlsruhe","Baden-Württemberg"],["08212","Karlsruhe (Stadt)","Baden-Württemberg"],["08335","Konstanz","Baden-Württemberg"],["08118","Ludwigsburg","Baden-Württemberg"],["08336","Lörrach","Baden-Württemberg"],["08128","Main-Tauber-Kreis","Baden-Württemberg"],["08222","Mannheim (Stadt)","Baden-Württemberg"],["08225","Neckar-Odenwald-Kreis","Baden-Württemberg"],["08317","Ortenaukreis","Baden-Württemberg"],["08136","Ostalbkreis","Baden-Württemberg"],["08231","Pforzheim (Stadt)","Baden-Württemberg"],["08216","Rastatt","Baden-Württemberg"],["08436","Ravensburg","Baden-Württemberg"],["08119","Rems-Murr-Kreis","Baden-Württemberg"],["08415","Reutlingen","Baden-Württemberg"],["08226","Rhein-Neckar-Kreis","Baden-Württemberg"],["08325","Rottweil","Baden-Württemberg"],["08326","Schwarzwald-Baar-Kreis","Baden-Württemberg"],["08127","Schwäbisch Hall","Baden-Württemberg"],["08437","Sigmaringen","Baden-Württemberg"],["08111","Stuttgart (Stadt)","Baden-Württemberg"],["08327","Tuttlingen","Baden-Württemberg"],["08416","Tübingen","Baden-Württemberg"],["08421","Ulm (Stadt)","Baden-Württemberg"],["08337","Waldshut","Baden-Württemberg"],["08417","Zollernalbkreis","Baden-Württemberg"],["09771","Aichach-Friedberg","Bayern"],["09171","Altötting","Bayern"],["09361","Amberg (Stadt)","Bayern"],["09371","Amberg-Sulzbach","Bayern"],["09571","Ansbach","Bayern"],["09561","Ansbach (Stadt)","Bayern"],["09671","Aschaffenburg","Bayern"],["09661","Aschaffenburg (Stadt)","Bayern"],["09772","Augsburg","Bayern"],["09761","Augsburg (Stadt)","Bayern"],["09672","Bad Kissingen","Bayern"],["09173","Bad Tölz-Wolfratshausen","Bayern"],["09471","Bamberg","Bayern"],["09461","Bamberg (Stadt)","Bayern"],["09472","Bayreuth","Bayern"],["09462","Bayreuth (Stadt)","Bayern"],["09172","Berchtesgadener Land","Bayern"],["09372","Cham","Bayern"],["09473","Coburg","Bayern"],["09463","Coburg (Stadt)","Bayern"],["09174","Dachau","Bayern"],["09271","Deggendorf","Bayern"],["09773","Dillingen a.d.Donau","Bayern"],["09279","Dingolfing-Landau","Bayern"],["09779","Donau-Ries","Bayern"],["09175","Ebersberg","Bayern"],["09176","Eichstätt","Bayern"],["09177","Erding","Bayern"],["09562","Erlangen (Stadt)","Bayern"],["09572","Erlangen-Höchstadt","Bayern"],["09474","Forchheim","Bayern"],["09178","Freising","Bayern"],["09272","Freyung-Grafenau","Bayern"],["09179","Fürstenfeldbruck","Bayern"],["09573","Fürth","Bayern"],["09563","Fürth (Stadt)","Bayern"],["09180","Garmisch-Partenkirchen","Bayern"],["09774","Günzburg","Bayern"],["09674","Haßberge","Bayern"],["09475","Hof","Bayern"],["09464","Hof (Stadt)","Bayern"],["09161","Ingolstadt (Stadt)","Bayern"],["09762","Kaufbeuren (Stadt)","Bayern"],["09273","Kelheim","Bayern"],["09763","Kempten (Stadt)","Bayern"],["09675","Kitzingen","Bayern"],["09476","Kronach","Bayern"],["09477","Kulmbach","Bayern"],["09181","Landsberg a.Lech","Bayern"],["09274","Landshut","Bayern"],["09261","Landshut (Stadt)","Bayern"],["09478","Lichtenfels","Bayern"],["09776","Lindau","Bayern"],["09677","Main-Spessart","Bayern"],["09764","Memmingen (Stadt)","Bayern"],["09182","Miesbach","Bayern"],["09676","Miltenberg","Bayern"],["09183","Mühldorf a.Inn","Bayern"],["09184","München","Bayern"],["09162","München (Stadt)","Bayern"],["09775","Neu-Ulm","Bayern"],["09185","Neuburg-Schrobenhausen","Bayern"],["09373","Neumarkt i.d.OPf.","Bayern"],["09575","Neustadt a.d.Aisch-Bad Windsheim","Bayern"],["09374","Neustadt a.d.Waldnaab","Bayern"],["09564","Nürnberg (Stadt)","Bayern"],["09574","Nürnberger Land","Bayern"],["09780","Oberallgäu","Bayern"],["09777","Ostallgäu","Bayern"],["09275","Passau","Bayern"],["09262","Passau (Stadt)","Bayern"],["09186","Pfaffenhofen a.d.Ilm","Bayern"],["09276","Regen","Bayern"],["09375","Regensburg","Bayern"],["09362","Regensburg (Stadt)","Bayern"],["09673","Rhön-Grabfeld","Bayern"],["09187","Rosenheim","Bayern"],["09163","Rosenheim (Stadt)","Bayern"],["09576","Roth","Bayern"],["09277","Rottal-Inn","Bayern"],["09565","Schwabach (Stadt)","Bayern"],["09376","Schwandorf","Bayern"],["09678","Schweinfurt","Bayern"],["09662","Schweinfurt (Stadt)","Bayern"],["09188","Starnberg","Bayern"],["09263","Straubing (Stadt)","Bayern"],["09278","Straubing-Bogen","Bayern"],["09377","Tirschenreuth","Bayern"],["09189","Traunstein","Bayern"],["09778","Unterallgäu","Bayern"],["09363","Weiden i.d.OPf. (Stadt)","Bayern"],["09190","Weilheim-Schongau","Bayern"],["09577","Weißenburg-Gunzenhausen","Bayern"],["09479","Wunsiedel i.Fichtelgebirge","Bayern"],["09679","Würzburg","Bayern"],["09663","Würzburg (Stadt)","Bayern"],["11000","Berlin","Berlin"],["12060","Barnim","Brandenburg"],["12051","Brandenburg a.d.Havel (Stadt)","Brandenburg"],["12052","Cottbus (Stadt)","Brandenburg"],["12061","Dahme-Spreewald","Brandenburg"],["12062","Elbe-Elster","Brandenburg"],["12053","Frankfurt (Oder) (Stadt)","Brandenburg"],["12063","Havelland","Brandenburg"],["12064","Märkisch-Oderland","Brandenburg"],["12065","Oberhavel","Brandenburg"],["12066","Oberspreewald-Lausitz","Brandenburg"],["12067","Oder-Spree","Brandenburg"],["12068","Ostprignitz-Ruppin","Brandenburg"],["12054","Potsdam (Stadt)","Brandenburg"],["12069","Potsdam-Mittelmark","Brandenburg"],["12070","Prignitz","Brandenburg"],["12071","Spree-Neiße","Brandenburg"],["12072","Teltow-Fläming","Brandenburg"],["12073","Uckermark","Brandenburg"],["04011","Bremen (Stadt)","Bremen"],["04012","Bremerhaven (Stadt)","Bremen"],["02000","Hamburg","Hamburg"],["06431","Bergstraße","Hessen"],["06411","Darmstadt (Stadt)","Hessen"],["06432","Darmstadt-Dieburg","Hessen"],["06412","Frankfurt am Main (Stadt)","Hessen"],["06631","Fulda","Hessen"],["06531","Gießen","Hessen"],["06433","Groß-Gerau","Hessen"],["06632","Hersfeld-Rotenburg","Hessen"],["06434","Hochtaunuskreis","Hessen"],["06633","Kassel","Hessen"],["06611","Kassel (Stadt)","Hessen"],["06532","Lahn-Dill-Kreis","Hessen"],["06533","Limburg-Weilburg","Hessen"],["06435","Main-Kinzig-Kreis","Hessen"],["06436","Main-Taunus-Kreis","Hessen"],["06534","Marburg-Biedenkopf","Hessen"],["06437","Odenwaldkreis","Hessen"],["06438","Offenbach","Hessen"],["06413","Offenbach (Stadt)","Hessen"],["06439","Rheingau-Taunus-Kreis","Hessen"],["06634","Schwalm-Eder-Kreis","Hessen"],["06535","Vogelsbergkreis","Hessen"],["06635","Waldeck-Frankenberg","Hessen"],["06636","Werra-Meißner-Kreis","Hessen"],["06440","Wetteraukreis","Hessen"],["06414","Wiesbaden (Stadt)","Hessen"],["13076","Ludwigslust-Parchim","Mecklenburg-Vorpommern"],["13071","Mecklenburgische Seenplatte","Mecklenburg-Vorpommern"],["13074","Nordwestmecklenburg","Mecklenburg-Vorpommern"],["13072","Rostock","Mecklenburg-Vorpommern"],["13003","Rostock (Stadt)","Mecklenburg-Vorpommern"],["13004","Schwerin (Stadt)","Mecklenburg-Vorpommern"],["13075","Vorpommern-Greifswald","Mecklenburg-Vorpommern"],["13073","Vorpommern-Rügen","Mecklenburg-Vorpommern"],["03451","Ammerland","Niedersachsen"],["03452","Aurich","Niedersachsen"],["03101","Braunschweig (Stadt)","Niedersachsen"],["03351","Celle","Niedersachsen"],["03453","Cloppenburg","Niedersachsen"],["03352","Cuxhaven","Niedersachsen"],["03401","Delmenhorst (Stadt)","Niedersachsen"],["03251","Diepholz","Niedersachsen"],["03402","Emden (Stadt)","Niedersachsen"],["03454","Emsland","Niedersachsen"],["03455","Friesland","Niedersachsen"],["03151","Gifhorn","Niedersachsen"],["03153","Goslar","Niedersachsen"],["03456","Grafschaft Bentheim","Niedersachsen"],["03159","Göttingen","Niedersachsen"],["03152","Göttingen (alt)","Niedersachsen"],["03252","Hameln-Pyrmont","Niedersachsen"],["03353","Harburg","Niedersachsen"],["03358","Heidekreis","Niedersachsen"],["03154","Helmstedt","Niedersachsen"],["03254","Hildesheim","Niedersachsen"],["03255","Holzminden","Niedersachsen"],["03457","Leer","Niedersachsen"],["03354","Lüchow-Dannenberg","Niedersachsen"],["03355","Lüneburg","Niedersachsen"],["03256","Nienburg (Weser)","Niedersachsen"],["03155","Northeim","Niedersachsen"],["03458","Oldenburg","Niedersachsen"],["03403","Oldenburg (Stadt)","Niedersachsen"],["03459","Osnabrück","Niedersachsen"],["03404","Osnabrück (Stadt)","Niedersachsen"],["03356","Osterholz","Niedersachsen"],["03157","Peine","Niedersachsen"],["03241","Region Hannover","Niedersachsen"],["03357","Rotenburg (Wümme)","Niedersachsen"],["03102","Salzgitter (Stadt)","Niedersachsen"],["03257","Schaumburg","Niedersachsen"],["03359","Stade","Niedersachsen"],["03360","Uelzen","Niedersachsen"],["03460","Vechta","Niedersachsen"],["03361","Verden","Niedersachsen"],["03461","Wesermarsch","Niedersachsen"],["03405","Wilhelmshaven (Stadt)","Niedersachsen"],["03462","Wittmund","Niedersachsen"],["03158","Wolfenbüttel","Niedersachsen"],["03103","Wolfsburg (Stadt)","Niedersachsen"],["05334","Städteregion Aachen","Nordrhein-Westfalen"],["05711","Bielefeld (Stadt)","Nordrhein-Westfalen"],["05911","Bochum (Stadt)","Nordrhein-Westfalen"],["05314","Bonn (Stadt)","Nordrhein-Westfalen"],["05554","Borken","Nordrhein-Westfalen"],["05512","Bottrop (Stadt)","Nordrhein-Westfalen"],["05558","Coesfeld","Nordrhein-Westfalen"],["05913","Dortmund (Stadt)","Nordrhein-Westfalen"],["05112","Duisburg (Stadt)","Nordrhein-Westfalen"],["05358","Düren","Nordrhein-Westfalen"],["05111","Düsseldorf (Stadt)","Nordrhein-Westfalen"],["05954","Ennepe-Ruhr-Kreis","Nordrhein-Westfalen"],["05113","Essen (Stadt)","Nordrhein-Westfalen"],["05366","Euskirchen","Nordrhein-Westfalen"],["05513","Gelsenkirchen (Stadt)","Nordrhein-Westfalen"],["05754","Gütersloh","Nordrhein-Westfalen"],["05914","Hagen (Stadt)","Nordrhein-Westfalen"],["05915","Hamm (Stadt)","Nordrhein-Westfalen"],["05370","Heinsberg","Nordrhein-Westfalen"],["05758","Herford","Nordrhein-Westfalen"],["05916","Herne (Stadt)","Nordrhein-Westfalen"],["05958","Hochsauerlandkreis","Nordrhein-Westfalen"],["05762","Höxter","Nordrhein-Westfalen"],["05154","Kleve","Nordrhein-Westfalen"],["05114","Krefeld (Stadt)","Nordrhein-Westfalen"],["05315","Köln (Stadt)","Nordrhein-Westfalen"],["05316","Leverkusen (Stadt)","Nordrhein-Westfalen"],["05766","Lippe","Nordrhein-Westfalen"],["05158","Mettmann","Nordrhein-Westfalen"],["05770","Minden-Lübbecke","Nordrhein-Westfalen"],["05962","Märkischer Kreis","Nordrhein-Westfalen"],["05116","Mönchengladbach (Stadt)","Nordrhein-Westfalen"],["05117","Mülheim a.d.Ruhr (Stadt)","Nordrhein-Westfalen"],["05515","Münster (Stadt)","Nordrhein-Westfalen"],["05374","Oberbergischer Kreis","Nordrhein-Westfalen"],["05119","Oberhausen (Stadt)","Nordrhein-Westfalen"],["05966","Olpe","Nordrhein-Westfalen"],["05774","Paderborn","Nordrhein-Westfalen"],["05562","Recklinghausen","Nordrhein-Westfalen"],["05120","Remscheid (Stadt)","Nordrhein-Westfalen"],["05362","Rhein-Erft-Kreis","Nordrhein-Westfalen"],["05162","Rhein-Kreis Neuss","Nordrhein-Westfalen"],["05382","Rhein-Sieg-Kreis","Nordrhein-Westfalen"],["05378","Rheinisch-Bergischer Kreis","Nordrhein-Westfalen"],["05970","Siegen-Wittgenstein","Nordrhein-Westfalen"],["05974","Soest","Nordrhein-Westfalen"],["05122","Solingen (Stadt)","Nordrhein-Westfalen"],["05566","Steinfurt","Nordrhein-Westfalen"],["05978","Unna","Nordrhein-Westfalen"],["05166","Viersen","Nordrhein-Westfalen"],["05570","Warendorf","Nordrhein-Westfalen"],["05170","Wesel","Nordrhein-Westfalen"],["05124","Wuppertal (Stadt)","Nordrhein-Westfalen"],["07131","Ahrweiler","Rheinland-Pfalz"],["07132","Altenkirchen","Rheinland-Pfalz"],["07331","Alzey-Worms","Rheinland-Pfalz"],["07332","Bad Dürkheim","Rheinland-Pfalz"],["07133","Bad Kreuznach","Rheinland-Pfalz"],["07231","Bernkastel-Wittlich","Rheinland-Pfalz"],["07134","Birkenfeld","Rheinland-Pfalz"],["07232","Bitburg-Prüm","Rheinland-Pfalz"],["07135","Cochem-Zell","Rheinland-Pfalz"],["07333","Donnersbergkreis","Rheinland-Pfalz"],["07311","Frankenthal (Stadt)","Rheinland-Pfalz"],["07334","Germersheim","Rheinland-Pfalz"],["07335","Kaiserslautern","Rheinland-Pfalz"],["07312","Kaiserslautern (Stadt)","Rheinland-Pfalz"],["07111","Koblenz (Stadt)","Rheinland-Pfalz"],["07336","Kusel","Rheinland-Pfalz"],["07313","Landau i.d.Pfalz (Stadt)","Rheinland-Pfalz"],["07314","Ludwigshafen (Stadt)","Rheinland-Pfalz"],["07315","Mainz (Stadt)","Rheinland-Pfalz"],["07339","Mainz-Bingen","Rheinland-Pfalz"],["07137","Mayen-Koblenz","Rheinland-Pfalz"],["07316","Neustadt a.d.Weinstraße (Stadt)","Rheinland-Pfalz"],["07138","Neuwied","Rheinland-Pfalz"],["07317","Pirmasens (Stadt)","Rheinland-Pfalz"],["07140","Rhein-Hunsrück-Kreis","Rheinland-Pfalz"],["07141","Rhein-Lahn-Kreis","Rheinland-Pfalz"],["07338","Rhein-Pfalz-Kreis","Rheinland-Pfalz"],["07318","Speyer (Stadt)","Rheinland-Pfalz"],["07337","Südliche Weinstraße","Rheinland-Pfalz"],["07340","Südwestpfalz","Rheinland-Pfalz"],["07211","Trier (Stadt)","Rheinland-Pfalz"],["07235","Trier-Saarburg","Rheinland-Pfalz"],["07233","Vulkaneifel","Rheinland-Pfalz"],["07143","Westerwaldkreis","Rheinland-Pfalz"],["07319","Worms (Stadt)","Rheinland-Pfalz"],["07320","Zweibrücken (Stadt)","Rheinland-Pfalz"],["10042","Merzig-Wadern","Saarland"],["10043","Neunkirchen","Saarland"],["10045","Saar-Pfalz-Kreis","Saarland"],["10044","Saarlouis","Saarland"],["10046","Sankt Wendel","Saarland"],["10041","Stadtverband Saarbrücken","Saarland"],["14625","Bautzen","Sachsen"],["14511","Chemnitz (Stadt)","Sachsen"],["14612","Dresden (Stadt)","Sachsen"],["14521","Erzgebirgskreis","Sachsen"],["14626","Görlitz","Sachsen"],["14729","Leipzig","Sachsen"],["14713","Leipzig (Stadt)","Sachsen"],["14627","Meißen","Sachsen"],["14522","Mittelsachsen","Sachsen"],["14730","Nordsachsen","Sachsen"],["14628","Sächsische Schweiz-Osterzgebirge","Sachsen"],["14523","Vogtlandkreis","Sachsen"],["14524","Zwickau","Sachsen"],["15081","Altmarkkreis Salzwedel","Sachsen-Anhalt"],["15082","Anhalt-Bitterfeld","Sachsen-Anhalt"],["15084","Burgenlandkreis","Sachsen-Anhalt"],["15083","Börde","Sachsen-Anhalt"],["15001","Dessau-Roßlau (Stadt)","Sachsen-Anhalt"],["15002","Halle (Stadt)","Sachsen-Anhalt"],["15085","Harz","Sachsen-Anhalt"],["15086","Jerichower Land","Sachsen-Anhalt"],["15003","Magdeburg (Stadt)","Sachsen-Anhalt"],["15087","Mansfeld-Südharz","Sachsen-Anhalt"],["15088","Saalekreis","Sachsen-Anhalt"],["15089","Salzlandkreis","Sachsen-Anhalt"],["15090","Stendal","Sachsen-Anhalt"],["15091","Wittenberg","Sachsen-Anhalt"],["01051","Dithmarschen","Schleswig-Holstein"],["01001","Flensburg (Stadt)","Schleswig-Holstein"],["01053","Herzogtum Lauenburg","Schleswig-Holstein"],["01002","Kiel (Stadt)","Schleswig-Holstein"],["01003","Lübeck (Stadt)","Schleswig-Holstein"],["01004","Neumünster (Stadt)","Schleswig-Holstein"],["01054","Nordfriesland","Schleswig-Holstein"],["01055","Ostholstein","Schleswig-Holstein"],["01056","Pinneberg","Schleswig-Holstein"],["01057","Plön","Schleswig-Holstein"],["01058","Rendsburg-Eckernförde","Schleswig-Holstein"],["01059","Schleswig-Flensburg","Schleswig-Holstein"],["01060","Segeberg","Schleswig-Holstein"],["01061","Steinburg","Schleswig-Holstein"],["01062","Stormarn","Schleswig-Holstein"],["16077","Altenburger Land","Thüringen"],["16061","Eichsfeld","Thüringen"],["16051","Erfurt (Stadt)","Thüringen"],["16052","Gera (Stadt)","Thüringen"],["16067","Gotha","Thüringen"],["16076","Greiz","Thüringen"],["16069","Hildburghausen","Thüringen"],["16070","Ilm-Kreis","Thüringen"],["16053","Jena (Stadt)","Thüringen"],["16065","Kyffhäuserkreis","Thüringen"],["16062","Nordhausen","Thüringen"],["16074","Saale-Holzland-Kreis","Thüringen"],["16075","Saale-Orla-Kreis","Thüringen"],["16073","Saalfeld-Rudolstadt","Thüringen"],["16066","Schmalkalden-Meiningen","Thüringen"],["16072","Sonneberg","Thüringen"],["16054","Suhl (Stadt)","Thüringen"],["16068","Sömmerda","Thüringen"],["16064","Unstrut-Hainich-Kreis","Thüringen"],["16063","Wartburgkreis","Thüringen"],["16055","Weimar (Stadt)","Thüringen"],["16071","Weimarer Land","Thüringen"]];
+const SEV = {Extreme:['Extreme Gefahr','bad'], Severe:['Hohe Gefahr','bad'], Moderate:['Mittlere Gefahr','warn'], Minor:['Geringe Gefahr','warn'], Unknown:['Information','info']};
+const PROVIDER = {MOWAS:'Bevölkerungsschutz (MoWaS)', DWD:'Deutscher Wetterdienst', LHP:'Hochwasserportal', POLICE:'Polizei', KATWARN:'KATWARN', BIWAPP:'BIWAPP'};
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
   wasser:'<path d="M12 3c-3 4.2-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.8-6-11z"/>',
@@ -191,6 +208,7 @@ const ICONS = {
   licht:'<path d="M9.5 18h5M10.5 21h3"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
   waerme:'<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-5 .3 1.6 1 2.6 2 3 0-3 .5-5.5.5-8z"/>',
   doku:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
+  alert:'<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4.5M12 17.5v.01"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
   back:'<path d="M15 5l-7 7 7 7"/>',
   calc:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5v2M4 13h2M18 13h2"/>',
@@ -308,11 +326,12 @@ function render(){
   else if(UI.view==='calc') root.innerHTML=viewCalc(c);
   else if(UI.view==='wasser'||UI.view==='nahrung') root.innerHTML=viewStock(c);
   else if(UI.view==='settings') root.innerHTML=viewSettings();
+  else if(UI.view==='warnung') root.innerHTML=viewWarn();
   else if(UI.view==='docs-orig') root.innerHTML=viewDocs('orig');
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
   else root.innerHTML=viewCheck(c);
-  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="datenschutz.html" style="color:inherit">Datenschutz</a></footer>`);
+  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a></footer>`);
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
 
@@ -323,6 +342,7 @@ function viewHome(c){
   return `<div class="topbar"><h1>Vorratsplaner</h1><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
   ${S.demo?`<div class="band info"><div><b>Du siehst Beispieldaten.</b><span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. </span><button class="linkbtn small" data-act="startOwn">Eigenen Vorrat anlegen</button></div></div>`:''}
   ${expiryBand(c)}
+  ${warnPanel()}
   <p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>
   <div class="choices">
     <button class="choice" data-act="go" data-v="vorrat"><span class="choice-ico">${icon('shelf')}</span>
@@ -519,9 +539,89 @@ function viewCheck(c){
     <section class="panel"><div class="list">${rows}</div></section>`;
 }
 
+function kreisName(ars){ const k=KREISE.find(k=>k[0]===ars); return k?k[1]:ars; }
+function timeText(ts){ if(!ts) return ''; const d=new Date(ts); if(isNaN(d)) return '';
+  return d.toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' Uhr'; }
+function plain(html){ return String(html||'').replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').trim(); }
+
+let WARN = {loading:false, error:''};
+async function loadWarnings(){
+  if(!S.region || WARN.loading) return;
+  WARN.loading=true; WARN.error=''; if(UI.view==='home') render();
+  try{
+    const r=await fetch(`${WARN_API}/dashboard/${S.region}0000000.json`,{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const items=(Array.isArray(data)?data:[]).map(w=>{ const d=(w.payload&&w.payload.data)||{};
+      return {id:(w.payload&&w.payload.id)||w.id, title:(w.i18nTitle&&w.i18nTitle.de)||d.headline||'Warnmeldung',
+        severity:d.severity||'Unknown', provider:d.provider||'', type:d.msgType||'', sent:w.sent||w.startDate||''}; })
+      .filter(w=>w.type!=='Cancel');
+    S.warn={region:S.region, at:Date.now(), items}; save();
+  }catch(e){
+    WARN.error = navigator.onLine===false ? 'offline' : 'fehler';
+  }
+  WARN.loading=false; if(UI.view==='home'||UI.view==='warnung') render();
+}
+async function loadWarnDetail(id){
+  UI.warnDetail={id, loading:true}; render();
+  try{
+    const r=await fetch(`${WARN_API}/warnings/${encodeURIComponent(id)}.json`,{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json(); const info=(d.info||[]).find(i=>/^de/i.test(i.language||''))||(d.info||[])[0]||{};
+    UI.warnDetail={id, headline:info.headline, description:plain(info.description), instruction:plain(info.instruction),
+      sender:info.senderName||'', area:(info.area||[]).map(a=>a.areaDesc).filter(Boolean).join(', '), web:info.web||''};
+  }catch(e){ UI.warnDetail={id, error:true}; }
+  render();
+}
+function warnPanel(){
+  if(!S.region) return `<section class="panel warnbox"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><span class="wicon">${icon('alert')}</span>
+    <div><b>Amtliche Warnungen</b><div class="small muted">Wähle deinen Landkreis, dann siehst du hier aktuelle Warnungen des Bevölkerungsschutzes und des Wetterdienstes.</div>
+    <button class="linkbtn small" data-act="go" data-v="settings" style="margin-top:4px">Landkreis wählen</button></div></div></section>`;
+  const W=S.warn&&S.warn.region===S.region?S.warn:null;
+  let body='';
+  if(WARN.loading && !W) body='<div class="small muted">Warnungen werden geladen …</div>';
+  else if(W){
+    body = W.items.length ? `<div class="wlist">${W.items.map(w=>{ const sv=SEV[w.severity]||SEV.Unknown;
+      return `<button class="witem" data-act="warn" data-id="${esc(w.id)}"><span class="sev sev-${sv[1]}">${sv[0]}</span>
+        <span class="wt">${esc(w.title)}</span><span class="small muted">${esc(PROVIDER[w.provider]||w.provider)}${w.sent?' · '+timeText(w.sent):''}</span></button>`; }).join('')}</div>`
+      : `<div class="small"><b class="t-ok">Keine Warnungen</b> für ${esc(kreisName(S.region))}.</div>`;
+  }
+  const stand = W ? `Stand: ${timeText(W.at)}` : '';
+  const err = WARN.error==='offline' ? `Offline – ${W?'zeige letzten Stand':'noch keine Daten geladen'}.`
+    : WARN.error ? `Warnungen konnten nicht geladen werden${W?', zeige letzten Stand':''}.` : '';
+  return `<section class="panel warnbox"><div class="spread"><div class="row" style="gap:8px;flex-wrap:nowrap;min-width:0"><span class="wicon">${icon('alert')}</span><h2 style="font-size:1.15rem">Warnungen ${esc(kreisName(S.region))}</h2></div>
+      <button class="secondary small" data-act="reloadWarn" ${WARN.loading?'disabled':''}>${WARN.loading?'Lädt …':'Aktualisieren'}</button></div>
+    ${body}
+    ${err?`<div class="small t-warn" style="font-weight:700">${err}</div>`:''}
+    <div class="hint">${stand}${stand?' · ':''}Quelle: BBK, warnung.bund.de. Ersetzt nicht die Warn-App NINA: Diese App benachrichtigt dich nicht bei neuen Warnungen.</div></section>`;
+}
+function viewWarn(){
+  const d=UI.warnDetail||{}; const W=S.warn||{items:[]}; const w=W.items.find(x=>x.id===d.id)||{};
+  const sv=SEV[w.severity]||SEV.Unknown;
+  let body;
+  if(d.loading) body='<p class="muted">Details werden geladen …</p>';
+  else if(d.error) body='<p class="t-warn" style="font-weight:700">Details konnten nicht geladen werden. Prüfe die Internetverbindung.</p>';
+  else body=`${d.description?`<div><div class="label">Lage</div><p class="pre">${esc(d.description)}</p></div>`:''}
+    ${d.instruction?`<div><div class="label">Was du tun solltest</div><p class="pre"><b>${esc(d.instruction)}</b></p></div>`:''}
+    ${d.area?`<div><div class="label">Gebiet</div><p class="small" style="margin:0">${esc(d.area)}</p></div>`:''}
+    ${d.sender?`<p class="small muted" style="margin:0">Herausgeber: ${esc(d.sender)}</p>`:''}`;
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Warnung</h1></div>
+  <section class="panel"><span class="sev sev-${sv[1]}" style="align-self:flex-start">${sv[0]}</span><h2 style="text-transform:none;font-size:1.4rem">${esc(d.headline||w.title||'')}</h2>
+    <div class="small muted">${esc(PROVIDER[w.provider]||w.provider||'')}${w.sent?' · '+timeText(w.sent):''}</div>${body}</section>
+  <p class="hint">Quelle: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe, warnung.bund.de. Für Benachrichtigungen nutze die offizielle Warn-App NINA.</p>`;
+}
+function regionSelect(){
+  const byState={}; KREISE.forEach(k=>(byState[k[2]]=byState[k[2]]||[]).push(k));
+  return `<select id="region"><option value="">– kein Landkreis –</option>${Object.keys(byState).sort((a,b)=>a.localeCompare(b,'de')).map(st=>`<optgroup label="${st}">${byState[st].map(k=>`<option value="${k[0]}" ${k[0]===S.region?'selected':''}>${esc(k[1])}</option>`).join('')}</optgroup>`).join('')}</select>`;
+}
+
 function viewSettings(){
   const data=JSON.stringify({version:1,...S},null,1);
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Einstellungen</h1></div>
+  <section class="panel"><h2>Warnungen</h2>
+    <div class="field"><label for="region">Dein Landkreis oder deine Stadt</label>${regionSelect()}
+      <span class="hint">Für die Anzeige amtlicher Warnungen auf der Startseite. Beim Laden wird deine IP-Adresse an warnung.bund.de übermittelt.</span></div>
+  </section>
   <section class="panel"><h2>Sicherung</h2>
     <p class="small muted" style="margin:0">Dein Vorrat liegt nur auf diesem Gerät. Kopiere den Text und speichere ihn z. B. als Notiz, damit nichts verloren geht.</p>
     <textarea id="exp" readonly>${esc(data)}</textarea>
@@ -585,6 +685,8 @@ root.addEventListener('click', async e=>{
     case 'reset': UI.confirmReset=true; break;
     case 'resetNo': UI.confirmReset=false; break;
     case 'resetYes': S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; break;
+    case 'warn': UI.view='warnung'; window.scrollTo(0,0); loadWarnDetail(b.dataset.id); return;
+    case 'reloadWarn': loadWarnings(); return;
     case 'loadDemo': S=demoState(); save(); UI.view='home'; break;
   }
   render();
@@ -597,11 +699,12 @@ function doImport(){
   UI.impErr='';
   try{ const d=JSON.parse(document.getElementById('imp').value);
     if(!Array.isArray(d.items)||typeof d.persons!=='number') throw 0;
-    S={persons:d.persons, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}}; save(); UI.msg='Sicherung eingespielt.'; UI.view='home';
+    S={persons:d.persons, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}, region:d.region||null}; save(); UI.msg='Sicherung eingespielt.'; UI.view='home';
   }catch(e){ UI.impErr='Der Text ist keine gültige Sicherung. Kopiere ihn vollständig aus „Sicherung kopieren“.'; }
 }
 root.addEventListener('change', e=>{
   const t=e.target;
+  if(t.id==='region'){ S.region=t.value||null; S.warn=null; WARN.error=''; save(); if(S.region) loadWarnings(); return; }
   if(t.dataset.name!==undefined){ S.names=S.names||[]; S.names[+t.dataset.name]=t.value; save(); }
   if(t.dataset.cash){ S.cash=S.cash||{have:0,target:null}; const n=parseNum(t.value); S.cash[t.dataset.cash]= n>0?n:(t.dataset.cash==='have'?0:null); save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); }
 });
@@ -635,6 +738,8 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&UI.sheet){ UI.she
   const saved=ok?await DB.get():null;
   S = saved && Array.isArray(saved.items) ? saved : demoState();
   S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null};
+  setTimeout(loadWarnings,300);
+  window.addEventListener('online',()=>loadWarnings());
   render();
 })();
 </script>
