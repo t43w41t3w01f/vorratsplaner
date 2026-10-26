@@ -4,7 +4,7 @@
 
 👉 **App öffnen:** https://t43w41t3w01f.github.io/vorratsplaner/
 
-Aktuelle Version: **1.14** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.15** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -70,11 +70,12 @@ Entwickelt von Sascha L. · © 2026
 
 ## Technik
 
-HTML, CSS und JavaScript ohne Build-Schritt. Speicherung in IndexedDB, Offline-Betrieb über einen Service Worker, Hosting über GitHub Pages.
+HTML, CSS und JavaScript ohne Build-Schritt. Speicherung in IndexedDB, Offline-Betrieb über einen Service Worker, Hosting über GitHub Pages. Content Security Policy ohne fremde Quellen, alle importierten Daten werden geprüft.
 
 | Datei | Inhalt |
 |---|---|
-| `index.html` | Die App |
+| `index.html` | Die App (Aufbau, Gestaltung, Sicherheitsregeln) |
+| `app.js` | Die Programmlogik |
 | `versionen.html` | Versionsseite in der App |
 | `datenschutz.html` | Datenschutzhinweise |
 | `sw.js` | Offline-Cache |

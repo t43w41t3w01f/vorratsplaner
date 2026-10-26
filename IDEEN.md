@@ -19,6 +19,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Absender in der App**: „Entwickelt von Sascha L. · © 2026“ *(Version 1.12)*
 - [x] **Haushaltsprofil Haustiere**: Hunde (klein, mittel, groß), Katzen, Kleintiere; Wasser zählt mit, eigene Kachel mit Futter und Zubehör *(Version 1.13)*
 - [x] **Haustiere per Kästchen**: deutlich sichtbarer Haken statt Aufklapp-Pfeil *(Version 1.14)*
+- [x] **Sicherheits- und Qualitätsprüfung**: Datenprüfung beim Import, Content Security Policy, robuster Offline-Cache, Kontraste *(Version 1.15)*
 
 ## Priorität hoch
 
@@ -36,6 +37,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 ## Offen
 
+- [ ] **Impressum und Verantwortlicher im Datenschutz**, sobald die App öffentlich im Dorf verteilt wird. *Bewusst verschoben.*
 - [ ] **Haustier-Mengen prüfen** (Wasser und Futter pro Tier und Tag), bisher eigene Richtwerte
 - [ ] **Notfall-Infopunkte der eigenen Gemeinde** eintragbar machen (Adresse des nächsten Leuchtturms)
 - [ ] **Kleinkind-Mengen prüfen** (6 Windeln, 1 Gläschen pro Tag usw.), bisher eigene Richtwerte

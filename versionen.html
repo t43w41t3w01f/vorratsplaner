@@ -2,6 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Versionen – Vorratsplaner</title>
 <meta name="theme-color" content="#56632a">
@@ -30,7 +32,18 @@ li{margin:4px 0}
 <p class="muted">Was sich am Vorratsplaner geändert hat, die neueste Version steht oben.</p>
 
 <section class="rel">
-  <header><span class="v">1.14</span><span class="date">26. Oktober 2026</span><span class="tag now">Aktuell</span></header>
+  <header><span class="v">1.15</span><span class="date">26. Oktober 2026</span><span class="tag now">Aktuell</span></header>
+  <ul>
+    <li><b>Sicherheit:</b> Sicherungsdateien werden beim Einspielen streng geprüft. Manipulierte Dateien können keinen Schadcode mehr ausführen und die App nicht mehr zum Absturz bringen.</li>
+    <li>Zusätzliche Schutzregeln im Browser (Content Security Policy): Die App lädt und startet nur ihre eigenen Dateien.</li>
+    <li><b>Schneller bei schlechtem Netz:</b> Nach 3 Sekunden ohne Antwort startet die App aus dem Gerätespeicher.</li>
+    <li><b>Besser lesbar:</b> Stärkere Kontraste für Hinweise und Knöpfe, lange Überschriften brechen auf schmalen Handys sauber um.</li>
+    <li>Datenschutzseite um die Google-Kalender-Funktion ergänzt.</li>
+  </ul>
+</section>
+
+<section class="rel">
+  <header><span class="v">1.14</span><span class="date">26. Oktober 2026</span></header>
   <ul>
     <li><b>Haustiere deutlicher:</b> Statt eines kleinen Aufklapp-Pfeils gibt es jetzt ein Kästchen „Haustiere im Haushalt“. Haken setzen, dann erscheinen die Tier-Zähler. Haken entfernen setzt die Tiere auf null.</li>
   </ul>

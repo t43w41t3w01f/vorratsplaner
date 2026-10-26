@@ -2,6 +2,13 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.15 – 26. Oktober 2026
+- **Sicherheit:** Sicherungsdateien und gespeicherte Daten werden streng geprüft (nur bekannte Felder und gültige Werte). Manipulierte Dateien können keinen Schadcode ausführen und die App nicht abstürzen lassen.
+- Content Security Policy: Die App führt nur eigene Skripte aus (Code nach `app.js` ausgelagert).
+- Offline-Cache: nach 3 s ohne Netz aus dem Gerätespeicher, nur gültige Antworten werden gespeichert, nur eigene Dateien.
+- Barrierefreiheit: Kontraste auf mindestens 4,5:1 angehoben, lange Überschriften brechen um, fehlende Beschriftungen ergänzt.
+- Datenschutzseite: Hinweis zur Google-Kalender-Funktion.
+
 ## 1.14 – 26. Oktober 2026
 - **Haustiere deutlicher:** Kästchen „Haustiere im Haushalt“ statt Aufklapp-Pfeil. Haken setzen zeigt die Tier-Zähler, Haken entfernen setzt die Tiere auf null.
 
