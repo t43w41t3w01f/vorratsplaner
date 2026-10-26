@@ -2,6 +2,11 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.13 – 26. Oktober 2026
+- **Haustiere im Haushalt:** kleine, mittlere und große Hunde, Katzen und Kleintiere unter „Berechnung“.
+- Trinkwasser der Tiere zählt beim Wasser und in der Reichweite mit.
+- **Neue Kachel „Haustiere“** (nur mit Tieren): Futter und Katzenstreu nach Tagen, Napf, Transportbox oder Leine, Kotbeutel, Medikamente und Heimtierausweis.
+
 ## 1.12 – 26. Oktober 2026
 - **Absender:** „Entwickelt von Sascha L. · © 2026“ unten in der App, auf der Versions- und der Datenschutzseite.
 

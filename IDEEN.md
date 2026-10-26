@@ -17,11 +17,12 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Haushaltsprofil Kinder**: Zähler für Kinder 4–9 (Nahrung ×0,7) und Kleinkinder 1–3 (×0,5) nach DGE, Kleinkind-Kachel mit Windeln und Kleinkindnahrung *(Version 1.10)*
 - [x] **Notfall-Wissen offline**: 23 Karten für alle Krisenlagen in Deutschland, Notrufnummern, Giftnotruf je Bundesland, Suche, Druck *(Version 1.11)*
 - [x] **Absender in der App**: „Entwickelt von Sascha L. · © 2026“ *(Version 1.12)*
+- [x] **Haushaltsprofil Haustiere**: Hunde (klein, mittel, groß), Katzen, Kleintiere; Wasser zählt mit, eigene Kachel mit Futter und Zubehör *(Version 1.13)*
 
 ## Priorität hoch
 
 - [ ] **Notfall-Modus „Es ist so weit“**: Umschalten auf Tageszähler, Wasserverbrauch pro Tag und Ess-Reihenfolge (erst Kühlschrank, dann Frisches, dann Konserven)
-- [ ] **Haushaltsprofil Teil 2**: Haustiere (Futter und Wasser extra), Senioren, Säuglinge unter 1 Jahr
+- [ ] **Haushaltsprofil Teil 3**: Senioren, Säuglinge unter 1 Jahr
 
 ## Weitere Ideen
 
@@ -34,6 +35,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 ## Offen
 
+- [ ] **Haustier-Mengen prüfen** (Wasser und Futter pro Tier und Tag), bisher eigene Richtwerte
 - [ ] **Notfall-Infopunkte der eigenen Gemeinde** eintragbar machen (Adresse des nächsten Leuchtturms)
 - [ ] **Kleinkind-Mengen prüfen** (6 Windeln, 1 Gläschen pro Tag usw.), bisher eigene Richtwerte
 - [ ] **Feedback per E-Mail**: Textfeld in der App öffnet die Mail-App mit fertigem Text und App-Version. *Wartet auf eine eigene E-Mail-Adresse.*

@@ -208,6 +208,10 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700}
 #printout .pw ol,#printout .pw ul{margin:2pt 0 2pt 14pt;padding:0}
 #printout .pw li{margin:1pt 0}
 footer .brand{display:block;margin-top:10px;font-family:var(--f-display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;color:var(--muted)}
+.pets summary{cursor:pointer;list-style:none}
+.pets summary::-webkit-details-marker{display:none}
+.pets summary::after{content:' ›';display:inline-block;transition:transform .2s}
+.pets[open] summary::after{transform:rotate(90deg)}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -248,6 +252,10 @@ const CHECK = {
   licht:   {n:'Licht & Strom', items:[['lampe','Taschenlampe',1],['batt','Ersatzbatterien (Pack)',2],['radio','Radio mit Kurbel oder Batterie',1],['kerzen','Kerzen',6],['feuer','Feuerzeug oder Streichhölzer',2],['powerbank','Powerbank',1]]},
   waerme:  {n:'Wärme & Kochen', items:[['decke','Warme Decke oder Schlafsack',1,true],['kocher','Campingkocher',1],['kartusche','Gaskartuschen',3]]},
   // pp:'k' = pro Kleinkind, 5. Feld true = pro Tag. Mengen sind eigene Richtwerte
+  // Haustiere: pp 'pf' = Trockenfutter kg (Summe aller Tiere pro Tag × Tage), 'pl' = Katzenstreu, 'pn' = pro Tier, 'pd' = pro Hund
+  tiere:   {n:'Haustiere', only:'pets', items:[['tfutter','Tierfutter, trocken oder Dose (kg)',1,'pf'],['streu','Katzenstreu (kg)',1,'pl'],
+    ['napf','Ersatznapf und Wasser für unterwegs',1,'pn'],['tbox','Transportbox, Leine oder Geschirr',1,'pn'],['kotb','Kotbeutel (Rolle)',1,'pd'],
+    ['tmed','Medikamente und Heimtierausweis des Tiers',1,'pn']]},
   klein:   {n:'Kleinkind', only:'kids1', items:[['windeln','Windeln (Stück)',6,'k',true],['feucht','Feuchttücher (Packung, je 5 Tage)',0.2,'k',true],
     ['brei','Kleinkindnahrung: Gläschen oder Brei',1,'k',true],['mpulver','Milchpulver oder H-Milch für Kleinkinder (Packung)',1,'k'],
     ['becher','Trinkbecher oder Flasche',1,'k'],['kfieber','Fieber- und Schmerzmittel für Kinder',1],['wund','Wundschutzcreme',1],['spiel','Beschäftigung (Buch, Kuscheltier, Spiel)',1,'k']]},
@@ -269,10 +277,30 @@ const EAT_KIDS4 = 0.7, EAT_KIDS1 = 0.5;
 const kids4 = () => S.kids4||0, kids1 = () => S.kids1||0;
 const adults = () => S.persons - kids4() - kids1();
 const eatUnits = () => adults() + kids4()*EAT_KIDS4 + kids1()*EAT_KIDS1;
-function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0)); }
-function needOf(item, p, T){ const [,, q, pp, perDay]=item; const mult = pp==='k' ? kids1() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
-function needText(item){ const [,, q, pp, perDay]=item; return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION = '1.12';
+// Haustiere: Richtwerte pro Tier und Tag (eigene Annahmen, keine amtlichen Werte)
+const PETS = [
+  {k:'dogS', n:'Hund klein (bis 10 kg)', water:0.5, food:0.15},
+  {k:'dogM', n:'Hund mittel (10–25 kg)', water:1, food:0.3},
+  {k:'dogL', n:'Hund groß (über 25 kg)', water:2, food:0.5},
+  {k:'cat',  n:'Katze', water:0.25, food:0.06, litter:0.15},
+  {k:'small',n:'Kleintier (Kaninchen, Meerschweinchen)', water:0.1, food:0.1},
+];
+const petN = k => (S.pets&&S.pets[k])||0;
+const petCount = () => PETS.reduce((a,x)=>a+petN(x.k),0);
+const dogCount = () => petN('dogS')+petN('dogM')+petN('dogL');
+const petWater = () => PETS.reduce((a,x)=>a+petN(x.k)*x.water,0);
+const petFood  = () => PETS.reduce((a,x)=>a+petN(x.k)*x.food,0);
+const petLitter= () => PETS.reduce((a,x)=>a+petN(x.k)*(x.litter||0),0);
+function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0) || (v.only==='pets' && petCount()>0)); }
+function needOf(item, p, T){ const [,, q, pp, perDay]=item;
+  if(pp==='pf') return Math.ceil(petFood()*T); if(pp==='pl') return Math.ceil(petLitter()*T);
+  if(pp==='pn') return q*petCount(); if(pp==='pd') return q*dogCount();
+  const mult = pp==='k' ? kids1() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
+function needText(item){ const [,, q, pp, perDay]=item;
+  if(pp==='pf') return `${fmt(petFood(),2)} kg pro Tag für alle Tiere`; if(pp==='pl') return `${fmt(petLitter(),2)} kg pro Tag`;
+  if(pp==='pn') return `${q} pro Tier`; if(pp==='pd') return `${q} pro Hund`;
+  return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
+const APP_VERSION = '1.13';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -289,6 +317,7 @@ const ICONS = {
   klein:'<path d="M9 3h6M10 3v3M14 3v3"/><rect x="7" y="6" width="10" height="15" rx="3"/><path d="M7 11h10M10 15h4"/>',
   rotate:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>',
   calc:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5v2M4 13h2M18 13h2"/>',
+  tiere:'<circle cx="6" cy="10" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="18" cy="10" r="2"/><path d="M12 12c-3 0-5 3.5-5 6 0 1.5 1.2 2 2.5 2s1.6-.7 2.5-.7 1.2.7 2.5.7 2.5-.5 2.5-2c0-2.5-2-6-5-6z"/>',
   sos:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/>',
   phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
   shelf:'<path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16"/><rect x="7" y="7" width="4" height="5"/><rect x="13" y="9" width="4" height="3"/><rect x="8" y="15" width="7" height="5"/>',
@@ -570,7 +599,7 @@ function demoState(){
       it('nahrung','fett','Rapsöl',500,'ml',1,'2027-09'),
     ]};
 }
-function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
+function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, pets:S?S.pets||{}:{}, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
 
 /* ---------- Helfer ---------- */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -691,7 +720,7 @@ async function doBackup(mode){
 function parseBackup(text){
   const d=JSON.parse(text);
   if(!d || !Array.isArray(d.items) || typeof d.persons!=='number') throw new Error('ungültig');
-  return {land:d.land||null, persons:d.persons, kids4:d.kids4||0, kids1:d.kids1||0, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
+  return {land:d.land||null, persons:d.persons, kids4:d.kids4||0, kids1:d.kids1||0, pets:d.pets||{}, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
 }
 function restore(data, msg){
   if(!S.demo){ const d=today(); SNAPS=SNAPS.filter(x=>x.day!==d+'-vorher'); SNAPS.unshift({day:d+'-vorher', at:Date.now(), data:JSON.parse(JSON.stringify(S))}); SNAPS=SNAPS.slice(0,8); DB.put(SNAPS,'snaps'); }
@@ -719,7 +748,8 @@ function calc(){
   });
   const foodTotal=Object.values(food).reduce((a,b)=>a+b,0);
   const eat=eatUnits();
-  const waterReach=water/(p*WATER_DAY), foodReach=foodTotal/(eat*FOOD_DAY);
+  const wDay=p*WATER_DAY+petWater();
+  const waterReach=water/wDay, foodReach=foodTotal/(eat*FOOD_DAY);
   const reach=Math.floor(Math.min(waterReach,foodReach)+1e-9);
   const checks={};
   for(const [k,c] of activeChecks()){
@@ -729,7 +759,7 @@ function calc(){
   }
   return {p,T,water,food,foodTotal,waterReach,foodReach,reach,
     bottleneck: waterReach<=foodReach?'Wasser':'Nahrung', expired, soon, checks,
-    waterNeed:p*WATER_DAY*T, foodNeed:eat*FOOD_DAY*T, eat};
+    waterNeed:wDay*T, petWaterNeed:petWater()*T, foodNeed:eat*FOOD_DAY*T, eat};
 }
 
 /* ---------- Ansichten ---------- */
@@ -814,6 +844,10 @@ function viewCalc(c){
     <div class="spread"><span>${n}</span>
       <div class="stepper"><button data-act="pers" data-k="${k}" data-d="-1" aria-label="${n}: eins weniger">−</button><span class="num">${v}</span><button data-act="pers" data-k="${k}" data-d="1" aria-label="${n}: eins mehr">+</button></div></div>`).join('')}
     <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll. Richtwerte nach DGE.${kids1()?' Für Kleinkinder gibt es eine eigene Kachel „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>
+    <details class="pets" ${petCount()?'open':''}><summary class="label">Haustiere${petCount()?` <span class="num" style="letter-spacing:0">(${petCount()})</span>`:''}</summary>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+      ${PETS.map(x=>`<div class="spread"><span>${x.n}</span><div class="stepper"><button data-act="pet" data-k="${x.k}" data-d="-1" aria-label="${x.n}: eins weniger">−</button><span class="num">${petN(x.k)}</span><button data-act="pet" data-k="${x.k}" data-d="1" aria-label="${x.n}: eins mehr">+</button></div></div>`).join('')}
+      <p class="hint" style="margin:0">Haustiere bekommen eigenes Wasser (zählt beim Wasser mit) und eine eigene Kachel „Haustiere“ mit Futter, Streu und Zubehör. Pro Tag gerechnet: kleiner Hund 0,5 l und 150 g, mittlerer 1 l und 300 g, großer 2 l und 500 g, Katze 0,25 l und 60 g, Kleintier 0,1 l und 100 g. Das sind grobe Richtwerte, die Packung oder der Tierarzt wissen es genauer.</p></div></details>
     <div class="spread"><label class="label" for="days">Ziel: so lange ohne Einkaufen</label><span class="display num" style="font-size:1.6rem;white-space:nowrap" id="dl">${T} Tage</span></div>
     <input type="range" id="days" min="1" max="90" value="${T}" aria-describedby="dl">
     <div class="chips">${[3,10,30,90].map(d=>`<button class="chip" data-act="days" data-d="${d}" aria-pressed="${d===T}">${d} Tage${d===10?' (BBK)':''}</button>`).join('')}</div>
@@ -908,7 +942,7 @@ function printInventory(){
   const L=buyLines(c); const buyN=L.water.length+L.food.length+L.checks.reduce((a,[,r])=>a+r.length,0);
   document.getElementById('printout').innerHTML=`
     <h1>Notvorrat – Bestandsliste</h1>
-    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):''].filter(Boolean).join(', ')})`:''} · Ziel ${c.T} Tage · Vorratsplaner ${APP_VERSION}</div>
+    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):''].filter(Boolean).join(', ')})`:''}${petCount()?` · ${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`:''} · Ziel ${c.T} Tage · Vorratsplaner ${APP_VERSION}</div>
     <div class="sum"><div>Reicht für<b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b></div><div>Wasser<b>${fmt(c.water)} / ${fmt(c.waterNeed)} l</b></div>
       <div>Nahrung<b>${fmt(c.foodTotal)} / ${fmt(c.foodNeed)} kg</b></div><div>Noch kaufen<b>${buyN} Posten</b></div></div>
     ${c.expired.length||c.soon.length?`<p class="exp">Abgelaufen: ${c.expired.map(i=>esc(i.name)).join(', ')||'–'} · Läuft bald ab: ${c.soon.map(i=>esc(i.name)).join(', ')||'–'}</p>`:''}
@@ -1012,7 +1046,7 @@ function viewStock(c){
   if(isW){
     const items=S.items.filter(i=>i.cat==='wasser');
     return `${head}<section class="panel"><div class="spread"><span class="label">Bestand</span><span class="num"><b>${fmt(c.water)}</b> von ${fmt(c.waterNeed)} l</span></div>${bar(c.water/c.waterNeed)}
-      <p class="small muted" style="margin:0">BBK: 2 Liter pro Person und Tag zum Trinken und Kochen.</p></section>
+      <p class="small muted" style="margin:0">BBK: 2 Liter pro Person und Tag zum Trinken und Kochen.${petCount()?` Darin enthalten: ${fmt(c.petWaterNeed)} l für deine Haustiere.`:''}</p></section>
       <section class="panel"><div class="list">${items.length?items.map(itemRow).join(''):'<p class="muted">Noch kein Wasser eingetragen. Füge zum Beispiel eine Kiste Mineralwasser hinzu.</p>'}</div>
       <button class="primary" data-act="add" data-cat="wasser">Wasser hinzufügen</button></section>`;
   }
@@ -1077,7 +1111,7 @@ function viewCheck(c){
       <div class="stepper"><button data-act="check" data-k="${key}" data-d="-1" aria-label="Eins weniger">−</button><span class="num">${have}</span><button data-act="check" data-k="${key}" data-d="1" aria-label="Eins mehr">+</button></div></div>`; }).join('');
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${v.n}</h1></div>
     <section class="panel"><div class="spread"><span class="label">Vollständigkeit</span><span class="num"><b>${c.checks[k].have}</b> von ${c.checks[k].need}</span></div>${bar(c.checks[k].ratio)}
-    <p class="small muted" style="margin:0">${k==='klein'?`Für ${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'} und ${c.T} Tage. Windeln, Feuchttücher und Gläschen richten sich nach den Tagen. Die Mengen sind Richtwerte, passe sie an dein Kind an.`:'Diese Dinge brauchst du unabhängig von der Anzahl der Tage.'}</p></section>
+    <p class="small muted" style="margin:0">${k==='tiere'?`Für ${petCount()} ${petCount()===1?'Tier':'Tiere'} und ${c.T} Tage. Futter und Streu richten sich nach den Tagen, Wasser für die Tiere zählt beim Wasser mit. Richtwerte, passe sie an dein Tier an.`:k==='klein'?`Für ${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'} und ${c.T} Tage. Windeln, Feuchttücher und Gläschen richten sich nach den Tagen. Die Mengen sind Richtwerte, passe sie an dein Kind an.`:'Diese Dinge brauchst du unabhängig von der Anzahl der Tage.'}</p></section>
     <section class="panel"><div class="list">${rows}</div></section>`;
 }
 
@@ -1166,6 +1200,7 @@ root.addEventListener('click', async e=>{
     case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.pending=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
+    case 'pet': { S.pets=S.pets||{}; const k=b.dataset.k; S.pets[k]=Math.max(0,Math.min(20,petN(k)+ +b.dataset.d)); save(); break; }
     case 'pers': { const k=b.dataset.k, d=+b.dataset.d;
       if(k==='adults'){ if(adults()+d>=1 && S.persons+d<=20) S.persons+=d; }
       else { const cur=S[k]||0; if(cur+d>=0 && S.persons+d<=20 && (d>0 || cur>0)){ S[k]=cur+d; S.persons+=d; } }
@@ -1271,7 +1306,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&UI.sheet){ UI.she
   const ok=await DB.open();
   const saved=ok?await DB.get():null;
   S = saved && Array.isArray(saved.items) ? saved : demoState();
-  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0;
+  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0; S.pets=S.pets||{};
   if(ok){ META=Object.assign(META, await DB.get('meta')||{}); SNAPS=await DB.get('snaps')||[]; }
   snapshot();
   render();
