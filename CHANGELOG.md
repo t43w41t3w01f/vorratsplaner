@@ -2,6 +2,9 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.14 – 26. Oktober 2026
+- **Haustiere deutlicher:** Kästchen „Haustiere im Haushalt“ statt Aufklapp-Pfeil. Haken setzen zeigt die Tier-Zähler, Haken entfernen setzt die Tiere auf null.
+
 ## 1.13 – 26. Oktober 2026
 - **Haustiere im Haushalt:** kleine, mittlere und große Hunde, Katzen und Kleintiere unter „Berechnung“.
 - Trinkwasser der Tiere zählt beim Wasser und in der Reichweite mit.

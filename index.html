@@ -208,10 +208,9 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700}
 #printout .pw ol,#printout .pw ul{margin:2pt 0 2pt 14pt;padding:0}
 #printout .pw li{margin:1pt 0}
 footer .brand{display:block;margin-top:10px;font-family:var(--f-display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;color:var(--muted)}
-.pets summary{cursor:pointer;list-style:none}
-.pets summary::-webkit-details-marker{display:none}
-.pets summary::after{content:' ›';display:inline-block;transition:transform .2s}
-.pets[open] summary::after{transform:rotate(90deg)}
+.petcheck{border-color:var(--olive)}
+.petcheck input{width:24px;height:24px}
+.petbox{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--olive) 10%,var(--paper));border:1.5px solid var(--olive)}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -300,7 +299,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(pp==='pf') return `${fmt(petFood(),2)} kg pro Tag für alle Tiere`; if(pp==='pl') return `${fmt(petLitter(),2)} kg pro Tag`;
   if(pp==='pn') return `${q} pro Tier`; if(pp==='pd') return `${q} pro Hund`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION = '1.13';
+const APP_VERSION = '1.14';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -599,7 +598,7 @@ function demoState(){
       it('nahrung','fett','Rapsöl',500,'ml',1,'2027-09'),
     ]};
 }
-function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, pets:S?S.pets||{}:{}, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
+function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, pets:S?S.pets||{}:{}, petsOn:S?!!S.petsOn:false, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
 
 /* ---------- Helfer ---------- */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -720,7 +719,7 @@ async function doBackup(mode){
 function parseBackup(text){
   const d=JSON.parse(text);
   if(!d || !Array.isArray(d.items) || typeof d.persons!=='number') throw new Error('ungültig');
-  return {land:d.land||null, persons:d.persons, kids4:d.kids4||0, kids1:d.kids1||0, pets:d.pets||{}, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
+  return {land:d.land||null, persons:d.persons, kids4:d.kids4||0, kids1:d.kids1||0, pets:d.pets||{}, petsOn:!!d.petsOn, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
 }
 function restore(data, msg){
   if(!S.demo){ const d=today(); SNAPS=SNAPS.filter(x=>x.day!==d+'-vorher'); SNAPS.unshift({day:d+'-vorher', at:Date.now(), data:JSON.parse(JSON.stringify(S))}); SNAPS=SNAPS.slice(0,8); DB.put(SNAPS,'snaps'); }
@@ -844,10 +843,10 @@ function viewCalc(c){
     <div class="spread"><span>${n}</span>
       <div class="stepper"><button data-act="pers" data-k="${k}" data-d="-1" aria-label="${n}: eins weniger">−</button><span class="num">${v}</span><button data-act="pers" data-k="${k}" data-d="1" aria-label="${n}: eins mehr">+</button></div></div>`).join('')}
     <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll. Richtwerte nach DGE.${kids1()?' Für Kleinkinder gibt es eine eigene Kachel „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>
-    <details class="pets" ${petCount()?'open':''}><summary class="label">Haustiere${petCount()?` <span class="num" style="letter-spacing:0">(${petCount()})</span>`:''}</summary>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+    <label class="check petcheck"><input type="checkbox" id="pets-on" ${S.petsOn||petCount()?'checked':''}> <span><b>Haustiere im Haushalt</b>${petCount()?` <span class="num">(${petCount()})</span>`:''}<br><span class="hint">Haken setzen, um Hund, Katze oder Kleintier einzutragen.</span></span></label>
+    ${S.petsOn||petCount()?`<div class="petbox">
       ${PETS.map(x=>`<div class="spread"><span>${x.n}</span><div class="stepper"><button data-act="pet" data-k="${x.k}" data-d="-1" aria-label="${x.n}: eins weniger">−</button><span class="num">${petN(x.k)}</span><button data-act="pet" data-k="${x.k}" data-d="1" aria-label="${x.n}: eins mehr">+</button></div></div>`).join('')}
-      <p class="hint" style="margin:0">Haustiere bekommen eigenes Wasser (zählt beim Wasser mit) und eine eigene Kachel „Haustiere“ mit Futter, Streu und Zubehör. Pro Tag gerechnet: kleiner Hund 0,5 l und 150 g, mittlerer 1 l und 300 g, großer 2 l und 500 g, Katze 0,25 l und 60 g, Kleintier 0,1 l und 100 g. Das sind grobe Richtwerte, die Packung oder der Tierarzt wissen es genauer.</p></div></details>
+      <p class="hint" style="margin:0">Haustiere bekommen eigenes Wasser (zählt beim Wasser mit) und eine eigene Kachel „Haustiere“ mit Futter, Streu und Zubehör. Pro Tag gerechnet: kleiner Hund 0,5 l und 150 g, mittlerer 1 l und 300 g, großer 2 l und 500 g, Katze 0,25 l und 60 g, Kleintier 0,1 l und 100 g. Das sind grobe Richtwerte, die Packung oder der Tierarzt wissen es genauer.</p></div>`:''}
     <div class="spread"><label class="label" for="days">Ziel: so lange ohne Einkaufen</label><span class="display num" style="font-size:1.6rem;white-space:nowrap" id="dl">${T} Tage</span></div>
     <input type="range" id="days" min="1" max="90" value="${T}" aria-describedby="dl">
     <div class="chips">${[3,10,30,90].map(d=>`<button class="chip" data-act="days" data-d="${d}" aria-pressed="${d===T}">${d} Tage${d===10?' (BBK)':''}</button>`).join('')}</div>
@@ -1251,6 +1250,7 @@ function doImport(){
 }
 root.addEventListener('change', e=>{
   const t=e.target;
+  if(t.id==='pets-on'){ if(t.checked){ S.petsOn=true; } else { S.petsOn=false; S.pets={}; } save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='land'){ S.land=t.value||null; save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='f-group'){ const g=FOOD.find(x=>x.k===t.value); if(!g) return;
     document.getElementById('f-ex').textContent=`Lange haltbar, z. B. ${g.ex}. Mischgerichte zählst du bei der Hauptzutat.`;
