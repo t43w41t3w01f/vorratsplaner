@@ -2,7 +2,7 @@
 
 Bei **jeder** veröffentlichten Änderung an der App gemeinsam aktualisieren:
 
-1. `index.html` – `APP_VERSION` hochzählen.
+1. `app.js` – `APP_VERSION` hochzählen.
 2. `sw.js` – `VERSION` hochzählen (sonst laden installierte Apps das Update nicht zuverlässig).
 3. `versionen.html` – neuen Eintrag oben, Tag „Aktuell“ verschieben.
 4. `CHANGELOG.md` – derselbe Eintrag.
