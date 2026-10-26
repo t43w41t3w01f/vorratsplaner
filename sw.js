@@ -1,5 +1,5 @@
 // Offline-Cache. Bei jeder Änderung an den Dateien VERSION erhöhen.
-const VERSION = 'vorratsplaner-v19';
+const VERSION = 'vorratsplaner-v20';
 const FILES = ['./', 'index.html', 'app.js', 'datenschutz.html', 'versionen.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 const NET_TIMEOUT = 3000; // bei schlechtem Netz nach 3 s auf die gespeicherte Version zurückgreifen

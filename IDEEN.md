@@ -20,9 +20,12 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Haushaltsprofil Haustiere**: Hunde (klein, mittel, groß), Katzen, Kleintiere; Wasser zählt mit, eigene Kachel mit Futter und Zubehör *(Version 1.13)*
 - [x] **Haustiere per Kästchen**: deutlich sichtbarer Haken statt Aufklapp-Pfeil *(Version 1.14)*
 - [x] **Sicherheits- und Qualitätsprüfung**: Datenprüfung beim Import, Content Security Policy, robuster Offline-Cache, Kontraste *(Version 1.15)*
+- [x] **Einfach für alle (Paket 1)**: Einstieg in 3 Schritten, Schnellauswahl beim Eintragen, Installationshilfe, große Schrift, Alltagssprache, aufgeräumte Berechnung *(Version 1.16)*
 
 ## Priorität hoch
 
+- [ ] **Einfach für alle (Paket 2)**: Zielmarken („Dein Vorrat reicht jetzt 3 Tage – nächstes Ziel: 10“) und Knopf „App weiterempfehlen“ (Link per WhatsApp teilen)
+- [ ] **Praxistest mit 2–3 Senioren** aus dem Dorf vor der Verteilung
 - [ ] **Notfall-Modus „Es ist so weit“**: Umschalten auf Tageszähler, Wasserverbrauch pro Tag und Ess-Reihenfolge (erst Kühlschrank, dann Frisches, dann Konserven)
 - [ ] **Haushaltsprofil Teil 3**: Senioren, Säuglinge unter 1 Jahr
 

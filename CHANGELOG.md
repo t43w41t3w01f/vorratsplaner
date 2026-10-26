@@ -2,6 +2,15 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.16 – 26. Oktober 2026
+Einfach für alle (Paket 1). Rücksprungpunkt: Zweig `stand-v1.15`.
+- **Einstieg in 3 Schritten** (Haushalt, Haustiere, Bundesland) statt Beispieldaten beim ersten Öffnen.
+- **Schnellauswahl** mit 28 fertigen Produkten beim Eintragen, Anzahl mit + und −, Datum optional. Freies Formular weiterhin verfügbar.
+- **Installationshilfe** auf der Startseite (Knopf unter Android/Chrome, Anleitung für iPhone und andere Browser).
+- **Große Schrift** als Schalter, allgemein größere Texte, Knöpfe mindestens 48 px.
+- **Alltagssprache:** „Haltbar bis“, „Am meisten fehlt“, „Bereich“.
+- **Berechnung aufgeräumt:** Haushalt als Zusammenfassung mit „Ändern“.
+
 ## 1.15 – 26. Oktober 2026
 - **Sicherheit:** Sicherungsdateien und gespeicherte Daten werden streng geprüft (nur bekannte Felder und gültige Werte). Manipulierte Dateien können keinen Schadcode ausführen und die App nicht abstürzen lassen.
 - Content Security Policy: Die App führt nur eigene Skripte aus (Code nach `app.js` ausgelagert).

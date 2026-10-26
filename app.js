@@ -77,7 +77,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(pp==='pf') return `${fmt(petFood(),2)} kg pro Tag für alle Tiere`; if(pp==='pl') return `${fmt(petLitter(),2)} kg pro Tag`;
   if(pp==='pn') return `${q} pro Tier`; if(pp==='pd') return `${q} pro Hund`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION = '1.15';
+const APP_VERSION = '1.16';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -92,6 +92,7 @@ const ICONS = {
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
   back:'<path d="M15 5l-7 7 7 7"/>',
   klein:'<path d="M9 3h6M10 3v3M14 3v3"/><rect x="7" y="6" width="10" height="15" rx="3"/><path d="M7 11h10M10 15h4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
   rotate:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>',
   calc:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5v2M4 13h2M18 13h2"/>',
   tiere:'<circle cx="6" cy="10" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="18" cy="10" r="2"/><path d="M12 12c-3 0-5 3.5-5 6 0 1.5 1.2 2 2.5 2s1.6-.7 2.5-.7 1.2.7 2.5.7 2.5-.5 2.5-2c0-2.5-2-6-5-6z"/>',
@@ -384,13 +385,23 @@ const NOW = new Date(); const CUR = NOW.getFullYear()*12+NOW.getMonth();
 function ym(offset){ const i=CUR+offset; return `${Math.floor(i/12)}-${String(i%12+1).padStart(2,'0')}`; }
 function mhdIdx(m){ if(!m) return null; const [y,mo]=m.split('-').map(Number); return y*12+mo-1; }
 function mhdState(m){ const i=mhdIdx(m); if(i===null) return 'none'; if(i<CUR) return 'expired'; if(i-CUR<=2) return 'soon'; return 'ok'; }
-function mhdText(m){ if(!m || !/^\d{4}-\d{2}$/.test(m)) return 'ohne MHD'; const [y,mo]=m.split('-').map(Number); return `${(MONTHS[mo-1]||'').slice(0,3)} ${y}`; }
+function mhdText(m){ if(!m || !/^\d{4}-\d{2}$/.test(m)) return 'ohne Datum'; const [y,mo]=m.split('-').map(Number); return `${(MONTHS[mo-1]||'').slice(0,3)} ${y}`; }
 const fmt = (n,d=1)=> Number(n).toLocaleString('de-DE',{maximumFractionDigits:d});
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base = it => (it.unit==='g'||it.unit==='ml') ? it.size/1000 : it.size;
 // Faktor für Trockenware/Pulver (nur Nahrung, nur Gruppen mit form)
 const factor = it => { if(it.cat!=='nahrung'||!it.dry) return 1; const g=FOOD.find(x=>x.k===it.group); return g&&g.form?g.form.f:1; };
 const amount = it => base(it)*it.count*factor(it);
+// Schnellauswahl beim Eintragen: [Name, Gruppe (oder 'wasser'), Menge, Einheit, getrocknet/Pulver]
+const PRESETS = [
+  ['Wasserflasche 1,5 l','wasser',1.5,'l'],['Kiste Wasser (6 × 1,5 l)','wasser',9,'l'],['Wasserflasche 0,5 l','wasser',0.5,'l'],['Wasserkanister 5 l','wasser',5,'l'],
+  ['Nudeln','getreide',500,'g'],['Reis','getreide',1,'kg'],['Haferflocken','getreide',500,'g'],['Knäckebrot','getreide',250,'g'],['Zwieback','getreide',225,'g'],['Ravioli oder Eintopf (Dose)','getreide',800,'g'],
+  ['Gemüse (Dose)','gemuese',400,'g'],['Bohnen oder Erbsen (Dose)','gemuese',400,'g'],['Rotkohl (Glas)','gemuese',720,'g'],['Tomaten (Dose)','gemuese',400,'g'],['Linsen, getrocknet','gemuese',500,'g',true],
+  ['Obst (Dose)','obst',820,'g'],['Apfelmus (Glas)','obst',720,'g'],['Trockenobst','obst',200,'g',true],['Nüsse','obst',200,'g'],
+  ['H-Milch','milch',1,'l'],['Milchpulver','milch',500,'g',true],['Kondensmilch (Dose)','milch',340,'g'],['Hartkäse','milch',400,'g'],
+  ['Thunfisch (Dose)','fleisch',150,'g'],['Fleisch oder Wurst (Dose)','fleisch',400,'g'],['Volleipulver','fleisch',250,'g',true],
+  ['Rapsöl','fett',1,'l'],['Olivenöl','fett',500,'ml'],
+];
 const SHORT_MONTHS = 3; // MHD unter 3 Monaten: Hinweis beim Eintragen
 const sizeText = it => `${fmt(it.size,2)} ${it.unit}`;
 const status = r => r>=1 ? 'ok' : r>=.5 ? 'warn' : 'bad';
@@ -576,6 +587,8 @@ function calc(){
 const root=document.getElementById('app');
 function render(){
   const c=calc();
+  document.documentElement.classList.toggle('big', !!META.big);
+  if(UI.view==='start'){ root.innerHTML=viewStart(); return; }
   if(UI.view==='home') root.innerHTML=viewHome(c);
   else if(UI.view==='vorrat') root.innerHTML=viewVorrat(c);
   else if(UI.view==='calc') root.innerHTML=viewCalc(c);
@@ -587,7 +600,7 @@ function render(){
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
   else root.innerHTML=viewCheck(c);
-  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
+  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
 
@@ -596,9 +609,9 @@ function bar(r){ return `<div class="bar" role="presentation"><i class="s-${stat
 function viewHome(c){
   const nItems=S.items.length, nParts=Object.values(S.checks).reduce((a,b)=>a+b,0)+Object.values(S.docs||{}).filter(v=>v===1).length;
   return `<div class="topbar"><h1>Vorratsplaner</h1><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
-  ${S.demo?`<div class="band info"><div><b>Du siehst Beispieldaten.</b><span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. </span><button class="linkbtn small" data-act="startOwn">Eigenen Vorrat anlegen</button></div></div>`:''}
+  ${S.demo?`<div class="band info"><div style="display:flex;flex-direction:column;gap:8px"><div><b>Das ist ein Beispiel.</b> <span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. Das sind nicht deine Sachen.</span></div><button class="primary big" data-act="startOwn" style="align-self:flex-start">Meinen eigenen Vorrat anlegen</button></div></div>`:''}
   ${expiryBand(c)}
-  ${calDue()?calPrompt():(backupDue()?backupBand():'')}
+  ${calDue()?calPrompt():(backupDue()?backupBand():installBand())}
   ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
   <p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>
   <div class="choices">
@@ -617,15 +630,17 @@ function viewHome(c){
 
 function viewVorrat(c){
   const nW=S.items.filter(i=>i.cat==='wasser').length, nF=S.items.filter(i=>i.cat==='nahrung').length;
-  const warn=cat=>{ const n=S.items.filter(i=>i.cat===cat&&mhdState(i.mhd)!=='ok'&&mhdState(i.mhd)!=='none').length; return n?`<span class="small t-warn" style="font-weight:700">${n} mit MHD-Hinweis</span>`:`<span class="small muted">MHD in Ordnung</span>`; };
+  const warn=cat=>{ const n=S.items.filter(i=>i.cat===cat&&mhdState(i.mhd)!=='ok'&&mhdState(i.mhd)!=='none').length; return n?`<span class="small t-warn" style="font-weight:700">${n} ${n===1?'läuft':'laufen'} bald ab</span>`:`<span class="small muted">Haltbarkeit in Ordnung</span>`; };
   const t=(k,name,val,extra)=>`<button class="tile" data-act="go" data-v="${k}"><div class="head">${icon(k)}<span class="name">${name}</span></div><span class="val num">${val}</span>${extra}</button>`;
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Mein Vorrat</h1></div>
+  <button class="primary big addbig" data-act="add">${icon('plus')} Lebensmittel oder Wasser eintragen</button>
+  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
   ${expiryBand(c)}
   <button class="choice rot-entry" data-act="go" data-v="rotation"><span class="choice-ico">${icon('rotate')}</span>
     <span class="choice-txt"><span class="ct" style="font-size:1.35rem">Verbrauchsliste</span>
     <span class="small muted">Was bald abläuft: jetzt essen, neu kaufen, Datum aktualisieren</span>
     <span class="small num choice-fact ${rotItems().length?'t-warn':'t-ok'}">${rotItems().length?`${rotItems().length} ${rotItems().length===1?'Artikel':'Artikel'} in den nächsten 2 Monaten oder abgelaufen`:'Nichts läuft in den nächsten 2 Monaten ab'}</span></span></button>
-  <p class="small muted" style="margin:0">Tippe auf eine Kategorie, um Artikel einzutragen oder Mengen zu ändern.</p>
+  <p class="small muted" style="margin:0">Tippe auf einen Bereich, um Mengen zu ändern oder abzuhaken.</p>
   <div class="grid">
     ${t('wasser','Wasser',`${fmt(c.water)} l in ${nW} ${nW===1?'Eintrag':'Einträgen'}`,warn('wasser'))}
     ${t('nahrung','Nahrung',`${fmt(c.foodTotal)} kg in ${nF} ${nF===1?'Eintrag':'Einträgen'}`,warn('nahrung'))}
@@ -635,11 +650,49 @@ function viewVorrat(c){
   ${CAN_PRINT?`<p class="hint" style="margin:0">Druckt den kompletten Vorrat mit Mengen, Haltbarkeit und Checklisten, auch als PDF. Tipp: ausgedruckt zum Vorrat legen, das funktioniert auch ohne Strom.</p>`:''}`;
 }
 
+function householdEditor(){
+  return `${[['adults','Erwachsene und Kinder ab 10 Jahren',adults()],['kids4','Kinder 4–9 Jahre',kids4()],['kids1','Kleinkinder 1–3 Jahre',kids1()]].map(([k,n,v])=>`
+    <div class="spread"><span>${n}</span>
+      <div class="stepper"><button data-act="pers" data-k="${k}" data-d="-1" aria-label="${n}: eins weniger">−</button><span class="num">${v}</span><button data-act="pers" data-k="${k}" data-d="1" aria-label="${n}: eins mehr">+</button></div></div>`).join('')}
+    <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll (Richtwerte der Deutschen Gesellschaft für Ernährung).${kids1()?' Für Kleinkinder gibt es einen eigenen Bereich „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>`;
+}
+function petEditor(){
+  return `<label class="check petcheck"><input type="checkbox" id="pets-on" ${S.petsOn||petCount()?'checked':''}> <span><b>Haustiere im Haushalt</b>${petCount()?` <span class="num">(${petCount()})</span>`:''}<br><span class="hint">Haken setzen, um Hund, Katze oder Kleintier einzutragen.</span></span></label>
+    ${S.petsOn||petCount()?`<div class="petbox">
+      ${PETS.map(x=>`<div class="spread"><span>${x.n}</span><div class="stepper"><button data-act="pet" data-k="${x.k}" data-d="-1" aria-label="${x.n}: eins weniger">−</button><span class="num">${petN(x.k)}</span><button data-act="pet" data-k="${x.k}" data-d="1" aria-label="${x.n}: eins mehr">+</button></div></div>`).join('')}
+      <p class="hint" style="margin:0">Haustiere bekommen eigenes Wasser (zählt beim Wasser mit) und einen eigenen Bereich „Haustiere“ mit Futter, Streu und Zubehör. Pro Tag gerechnet: kleiner Hund 0,5 l und 150 g, mittlerer 1 l und 300 g, großer 2 l und 500 g, Katze 0,25 l und 60 g, Kleintier 0,1 l und 100 g. Das sind grobe Richtwerte, die Packung oder der Tierarzt wissen es genauer.</p></div>`:''}`;
+}
+function householdText(){
+  const parts=[`${adults()} ${adults()===1?'Erwachsener':'Erwachsene'}`];
+  if(kids4()) parts.push(`${kids4()} ${kids4()===1?'Kind':'Kinder'} (4–9)`);
+  if(kids1()) parts.push(`${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'}`);
+  if(petCount()) parts.push(`${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`);
+  return parts.join(', ');
+}
+function viewStart(){
+  const st=UI.ob||1;
+  const dots=`<div class="obdots" aria-label="Schritt ${st} von 3">${[1,2,3].map(i=>`<span class="${i<=st?'on':''}"></span>`).join('')}</div>`;
+  let body='';
+  if(st===1) body=`<h1>Willkommen</h1>
+    <p class="lead" style="margin:0">Der Vorratsplaner hilft dir, für Notfälle wie einen langen Stromausfall vorzusorgen. Drei kurze Fragen, dann geht es los.</p>
+    <label class="check"><input type="checkbox" id="big-font" ${META.big?'checked':''}> <span><b>Große Schrift</b><br><span class="hint">Alles wird größer und leichter lesbar. Lässt sich jederzeit in den Einstellungen ändern.</span></span></label>
+    <section class="panel"><h2 style="font-size:1.2rem">Wer lebt in deinem Haushalt?</h2>${householdEditor()}</section>`;
+  else if(st===2) body=`<h1>Haustiere</h1><p class="lead" style="margin:0">Haben Tiere bei dir ein Zuhause? Dann rechnet die App ihr Wasser und Futter mit.</p>
+    <section class="panel">${petEditor()}</section>`;
+  else body=`<h1>Fast fertig</h1><p class="lead" style="margin:0">In welchem Bundesland wohnst du? Dann zeigt die App im Notfall-Wissen den richtigen Giftnotruf.</p>
+    <section class="panel"><div class="field"><label for="land">Bundesland (kann auch leer bleiben)</label>
+      <select id="land"><option value="">– bitte wählen –</option>${LAENDER.map(l=>`<option ${l===S.land?'selected':''}>${l}</option>`).join('')}</select></div></section>
+    <p class="small muted" style="margin:0">Alles, was du einträgst, bleibt nur auf diesem Handy. Es gibt kein Konto und keine Werbung.</p>`;
+  return `${dots}${body}
+    <div class="row obnav">${st>1?`<button class="secondary big" data-act="ob" data-d="-1">Zurück</button>`:''}<button class="primary big" data-act="ob" data-d="1">${st<3?'Weiter':'Los geht’s'}</button></div>
+    ${st===1?`<button class="linkbtn small" data-act="loadDemo">Erst einmal ein Beispiel ansehen</button>`:''}`;
+}
+
 function viewCalc(c){
   const T=c.T;
   const ringR=58, circ=2*Math.PI*ringR, prog=Math.min(c.reach/T,1);
-  const verdict = c.reach>=T ? `<span class="t-ok"><b>Ziel erreicht</b></span> – nach BBK-Empfehlung reicht dein Vorrat für ${T} Tage.`
-    : `Für dein Ziel fehlen noch ${T-c.reach} Tage. <b>Engpass: ${c.bottleneck}</b>.`;
+  const verdict = c.reach>=T ? `<span class="t-ok"><b>Ziel erreicht</b></span> – dein Vorrat reicht für ${T} Tage.`
+    : `Für dein Ziel fehlen noch ${T-c.reach} Tage. <b>Am meisten fehlt: ${c.bottleneck}</b>.`;
   const tiles = [
     tile('wasser','Wasser', `${fmt(c.water)} von ${fmt(c.waterNeed)} l`, c.water/c.waterNeed, `reicht ${Math.floor(c.waterReach)} Tage`),
     tile('nahrung','Nahrung', `${fmt(c.foodTotal)} von ${fmt(c.foodNeed)} kg`, c.foodTotal/c.foodNeed, `reicht ${Math.floor(c.foodReach)} Tage`),
@@ -649,18 +702,12 @@ function viewCalc(c){
   <div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Berechnung</h1></div>
   ${expiryBand(c)}
   <section class="panel" aria-label="Haushalt und Ziel">
-    <div class="label">Personen im Haushalt <span class="num" style="letter-spacing:0">(${c.p})</span></div>
-    ${[['adults','Erwachsene und Kinder ab 10 Jahren',adults()],['kids4','Kinder 4–9 Jahre',kids4()],['kids1','Kleinkinder 1–3 Jahre',kids1()]].map(([k,n,v])=>`
-    <div class="spread"><span>${n}</span>
-      <div class="stepper"><button data-act="pers" data-k="${k}" data-d="-1" aria-label="${n}: eins weniger">−</button><span class="num">${v}</span><button data-act="pers" data-k="${k}" data-d="1" aria-label="${n}: eins mehr">+</button></div></div>`).join('')}
-    <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll. Richtwerte nach DGE.${kids1()?' Für Kleinkinder gibt es eine eigene Kachel „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>
-    <label class="check petcheck"><input type="checkbox" id="pets-on" ${S.petsOn||petCount()?'checked':''}> <span><b>Haustiere im Haushalt</b>${petCount()?` <span class="num">(${petCount()})</span>`:''}<br><span class="hint">Haken setzen, um Hund, Katze oder Kleintier einzutragen.</span></span></label>
-    ${S.petsOn||petCount()?`<div class="petbox">
-      ${PETS.map(x=>`<div class="spread"><span>${x.n}</span><div class="stepper"><button data-act="pet" data-k="${x.k}" data-d="-1" aria-label="${x.n}: eins weniger">−</button><span class="num">${petN(x.k)}</span><button data-act="pet" data-k="${x.k}" data-d="1" aria-label="${x.n}: eins mehr">+</button></div></div>`).join('')}
-      <p class="hint" style="margin:0">Haustiere bekommen eigenes Wasser (zählt beim Wasser mit) und eine eigene Kachel „Haustiere“ mit Futter, Streu und Zubehör. Pro Tag gerechnet: kleiner Hund 0,5 l und 150 g, mittlerer 1 l und 300 g, großer 2 l und 500 g, Katze 0,25 l und 60 g, Kleintier 0,1 l und 100 g. Das sind grobe Richtwerte, die Packung oder der Tierarzt wissen es genauer.</p></div>`:''}
-    <div class="spread"><label class="label" for="days">Ziel: so lange ohne Einkaufen</label><span class="display num" style="font-size:1.6rem;white-space:nowrap" id="dl">${T} Tage</span></div>
+    <div class="spread"><div style="min-width:0"><div class="label">Dein Haushalt</div><div style="font-weight:700">${householdText()}</div></div>
+      <button class="secondary small" data-act="editHH" aria-expanded="${!!UI.editHH}">${UI.editHH?'Fertig':'Ändern'}</button></div>
+    ${UI.editHH?`<div class="petbox" style="background:var(--paper)">${householdEditor()}${petEditor()}</div>`:''}
+    <div class="spread"><label class="label" for="days">Für wie viele Tage vorsorgen?</label><span class="display num" style="font-size:1.6rem;white-space:nowrap" id="dl">${T} Tage</span></div>
     <input type="range" id="days" min="1" max="90" value="${T}" aria-describedby="dl">
-    <div class="chips">${[3,10,30,90].map(d=>`<button class="chip" data-act="days" data-d="${d}" aria-pressed="${d===T}">${d} Tage${d===10?' (BBK)':''}</button>`).join('')}</div>
+    <div class="chips">${[3,10,30,90].map(d=>`<button class="chip" data-act="days" data-d="${d}" aria-pressed="${d===T}">${d} Tage${d===10?' (empfohlen)':''}</button>`).join('')}</div>
   </section>
   <div class="tabs" role="tablist">
     <button role="tab" aria-selected="${UI.tab==='reach'}" data-act="tab" data-v="reach">Reicht für</button>
@@ -736,7 +783,7 @@ function printInventory(){
   const c=calc(), d=new Date();
   const mhdCell=it=>{ const st=mhdState(it.mhd); return `<td class="n${st==='expired'||st==='soon'?' exp':''}">${it.mhd?mhdText(it.mhd):'–'}${st==='expired'?' (abgelaufen)':st==='soon'?' (bald)':''}</td>`; };
   const tot=it=>{ const b=amount(it), u=(it.unit==='g'||it.unit==='kg'?'kg':'l'); return fmt(b, b<10?2:1)+' '+u+(factor(it)>1?` <span class="meta">(${it.group==='milch'||it.group==='fleisch'?'Pulver':'getrocknet'} ×${fmt(factor(it))})</span>`:''); };
-  const table=items=>items.length?`<table class="t6"><thead><tr><th></th><th>Artikel</th><th class="n">Je Stück</th><th class="n">Anzahl</th><th class="n">Gesamt</th><th class="n">MHD</th></tr></thead><tbody>
+  const table=items=>items.length?`<table class="t6"><thead><tr><th></th><th>Artikel</th><th class="n">Je Stück</th><th class="n">Anzahl</th><th class="n">Gesamt</th><th class="n">Haltbar bis</th></tr></thead><tbody>
     ${items.map(it=>`<tr><td><span class="box"></span></td><td>${esc(it.name)}</td><td class="n">${sizeText(it)}</td><td class="n">${it.count}</td><td class="n">${tot(it)}</td>${mhdCell(it)}</tr>`).join('')}</tbody></table>`
     :'<p class="meta">Keine Einträge.</p>';
   const water=S.items.filter(i=>i.cat==='wasser');
@@ -843,7 +890,7 @@ function listText(c){
 
 function itemRow(it){
   const st=mhdState(it.mhd);
-  const pill = st==='expired'?`<span class="pill expired">abgelaufen ${mhdText(it.mhd)}</span>`: st==='soon'?`<span class="pill soon">bald ab: ${mhdText(it.mhd)}</span>`:`<span class="pill">MHD ${mhdText(it.mhd)}</span>`;
+  const pill = st==='expired'?`<span class="pill expired">abgelaufen ${mhdText(it.mhd)}</span>`: st==='soon'?`<span class="pill soon">bald ab: ${mhdText(it.mhd)}</span>`:`<span class="pill">haltbar bis ${mhdText(it.mhd)}</span>`;
   return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${esc(it.name)}</div>
       <div class="meta"><span class="num">${sizeText(it)} je Stück</span>${factor(it)>1?`<span class="pill">${it.group==='milch'||it.group==='fleisch'?'Pulver':'getrocknet'}, zählt ×${fmt(factor(it))}</span>`:''}${pill}${it.demo?'<span class="pill demo">Beispiel</span>':''}</div></div>
     <div class="actions"><div class="stepper"><button data-act="count" data-id="${it.id}" data-d="-1" aria-label="Eins weniger">−</button><span class="num">${it.count}</span><button data-act="count" data-id="${it.id}" data-d="1" aria-label="Eins mehr">+</button></div>
@@ -852,13 +899,13 @@ function itemRow(it){
 
 function viewStock(c){
   const isW=UI.view==='wasser';
-  const head=`<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${isW?'Wasser':'Nahrung'}</h1></div>`;
+  const head=`<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${isW?'Wasser':'Nahrung'}</h1></div>${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}`;
   if(isW){
     const items=S.items.filter(i=>i.cat==='wasser');
     return `${head}<section class="panel"><div class="spread"><span class="label">Bestand</span><span class="num"><b>${fmt(c.water)}</b> von ${fmt(c.waterNeed)} l</span></div>${bar(c.water/c.waterNeed)}
       <p class="small muted" style="margin:0">BBK: 2 Liter pro Person und Tag zum Trinken und Kochen.${petCount()?` Darin enthalten: ${fmt(c.petWaterNeed)} l für deine Haustiere.`:''}</p></section>
       <section class="panel"><div class="list">${items.length?items.map(itemRow).join(''):'<p class="muted">Noch kein Wasser eingetragen. Füge zum Beispiel eine Kiste Mineralwasser hinzu.</p>'}</div>
-      <button class="primary" data-act="add" data-cat="wasser">Wasser hinzufügen</button></section>`;
+      <button class="primary" data-act="add" data-cat="wasser">Wasser eintragen</button></section>`;
   }
   const groups=FOOD.map(g=>{
     const items=S.items.filter(i=>i.cat==='nahrung'&&i.group===g.k);
@@ -866,7 +913,7 @@ function viewStock(c){
     return `<section class="panel"><div class="spread"><div style="min-width:0"><h2 style="font-size:1.15rem">${g.n}</h2>${g.how?`<div class="small" style="font-weight:700;color:var(--olive)">${g.how}</div>`:''}</div><span class="num small"><b>${fmt(have,2)}</b> / ${fmt(need,2)} kg</span></div>${bar(need?have/need:1)}
       <div class="hint">Gut geeignet: ${g.ex}</div>
       <div class="list">${items.map(itemRow).join('')||'<p class="small muted" style="margin:0">Noch nichts eingetragen.</p>'}</div>
-      <button class="secondary" data-act="add" data-cat="nahrung" data-group="${g.k}">Hinzufügen</button></section>`;
+      <button class="secondary" data-act="add" data-cat="nahrung" data-group="${g.k}">Eintragen</button></section>`;
   }).join('');
   return `${head}<section class="panel"><div class="spread"><span class="label">Gesamt</span><span class="num"><b>${fmt(c.foodTotal)}</b> von ${fmt(c.foodNeed)} kg</span></div>${bar(c.foodTotal/c.foodNeed)}
     <p class="small muted" style="margin:0">Mengen nach der BBK-Beispielliste. Gemeint sind lange haltbare Lebensmittel, also Konserven, Gläser und Trockenware, kein Frischgemüse. Ein Mischgericht wie Ravioli trägst du bei seiner Hauptzutat ein.</p></section>${groups}`;
@@ -938,6 +985,9 @@ function backupBand(){
 
 function viewSettings(){
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Einstellungen</h1></div>
+  <section class="panel"><h2>Anzeige</h2>
+    <label class="check"><input type="checkbox" id="big-font" ${META.big?'checked':''}> <span><b>Große Schrift</b><br><span class="hint">Alles wird größer und leichter lesbar.</span></span></label>
+  </section>
   <section class="panel"><h2>Erinnerung im Kalender</h2>
     <p class="small muted" style="margin:0">Serientermin „Vorratscheck“ in deinem Kalender. ${META.cal==='done'?`<b>Eingerichtet (${(CAL_FREQ[META.calFreq]||CAL_FREQ.monthly).n}).</b> Ändern oder löschen kannst du ihn im Kalender.`:'Noch nicht eingerichtet.'}</p>
     ${calChooser('settings')}
@@ -972,21 +1022,42 @@ function viewSettings(){
   </section>`;
 }
 
+function presetLabel(pr){ return `${pr[0]}${/\d/.test(pr[0])?'':` · ${fmt(pr[2],2)} ${pr[3]}`}`; }
+function viewQuick(f){
+  const years=[]; for(let y=NOW.getFullYear();y<=NOW.getFullYear()+10;y++) years.push(y);
+  if(f.preset!=null){ const pr=PRESETS[f.preset];
+    return `<h2 id="sh">${esc(pr[0])}</h2>
+      <p class="small muted" style="margin:0">${fmt(pr[2],2)} ${pr[3]} pro Stück${pr[4]?' · zählt umgerechnet, weil es zubereitet mehr ergibt':''}</p>
+      <div class="spread"><span style="font-weight:700">Wie viele?</span><div class="stepper big"><button type="button" data-act="qcount" data-d="-1" aria-label="Eins weniger">−</button><span class="num">${f.count||1}</span><button type="button" data-act="qcount" data-d="1" aria-label="Eins mehr">+</button></div></div>
+      <div class="field"><span style="font-weight:700">Haltbar bis <span class="muted" style="font-weight:400">(steht auf der Packung, kann leer bleiben)</span></span><div class="two">
+        <select id="f-month" aria-label="Monat"><option value="">Monat</option>${MONTHS.map((m,i)=>`<option value="${i+1}" ${String(i+1)===String(f.m)?'selected':''}>${m}</option>`).join('')}</select>
+        <select id="f-year" aria-label="Jahr"><option value="">Jahr</option>${years.map(y=>`<option ${String(y)===String(f.y)?'selected':''}>${y}</option>`).join('')}</select></div></div>
+      ${f.err?`<div class="err" role="alert">${f.err}</div>`:''}
+      ${f.short?`<div class="band warn" role="alert"><div class="small"><b>${f.short==='expired'?'Dieses Datum liegt in der Vergangenheit.':'Läuft in weniger als 3 Monaten ab.'}</b> ${f.short==='expired'?'Abgelaufenes zählt nicht zum Vorrat.':'Für den Notvorrat besser etwas, das länger hält.'} Du kannst trotzdem speichern.</div></div>`:''}
+      <div class="row"><button type="button" class="primary big" data-act="quickSave">${f.short?'Trotzdem eintragen':'Eintragen'}</button><button type="button" class="secondary" data-act="quickBack">Zurück</button></div>`;
+  }
+  const groups = f.cat==='wasser' ? [['wasser','Wasser']] : f.group ? [[f.group, FOOD.find(g=>g.k===f.group).n]] : [['wasser','Wasser'], ...FOOD.map(g=>[g.k,g.n])];
+  return `<h2 id="sh">Was möchtest du eintragen?</h2>
+    <p class="small muted" style="margin:0">Tippe auf das, was du hast. Menge und Datum kannst du danach noch angeben.</p>
+    ${groups.map(([k,n])=>`<div><div class="label" style="margin:6px 0">${n}</div><div class="qgrid">${PRESETS.map((pr,i)=>pr[1]===k?`<button type="button" class="qbtn" data-act="preset" data-i="${i}">${esc(presetLabel(pr))}</button>`:'').join('')}</div></div>`).join('')}
+    <div class="row"><button type="button" class="secondary" data-act="toForm">Etwas anderes eintragen</button><button type="button" class="linkbtn" data-act="closeSheet">Abbrechen</button></div>`;
+}
 function dryHint(g){ return `Zählt ${fmt(g.form.f)}-fach, weil es zubereitet mehr wiegt.${g.k==='gemuese'||g.k==='milch'||g.k==='fleisch'?' Braucht zusätzlich Wasser zum Zubereiten.':''}`; }
 function viewSheet(){
   const f=UI.sheet; const isW=f.cat==='wasser';
   const years=[]; for(let y=NOW.getFullYear()-1;y<=NOW.getFullYear()+10;y++) years.push(y);
   const units=isW?['l','ml']:['g','kg','ml','l'];
+  if(f.mode!=='form') return `<div class="overlay" data-act="closeBg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh">${viewQuick(f)}</div></div>`;
   return `<div class="overlay" data-act="closeBg"><form class="sheet" id="itemForm" role="dialog" aria-modal="true" aria-labelledby="sh">
-    <h2 id="sh">${isW?'Wasser hinzufügen':'Lebensmittel hinzufügen'}</h2>
+    <h2 id="sh">${isW?'Wasser eintragen':'Lebensmittel eintragen'}</h2>
     <div class="field"><label for="f-name">Was ist es?</label><input id="f-name" value="${esc(f.name||'')}" placeholder="${isW?'z. B. Mineralwasser 1,5 l':'z. B. Ravioli Dose'}" autocomplete="off"></div>
-    ${isW?'':(()=>{ const g=FOOD.find(x=>x.k===f.group)||FOOD[0]; return `<div class="field"><label for="f-group">Gruppe</label><select id="f-group">${FOOD.map(x=>`<option value="${x.k}" ${x.k===g.k?'selected':''}>${x.n}</option>`).join('')}</select>
+    ${isW?'':(()=>{ const g=FOOD.find(x=>x.k===f.group)||FOOD[0]; return `<div class="field"><label for="f-group">Art des Lebensmittels</label><select id="f-group">${FOOD.map(x=>`<option value="${x.k}" ${x.k===g.k?'selected':''}>${x.n}</option>`).join('')}</select>
       <span class="hint" id="f-ex">Lange haltbar, z. B. ${g.ex}. Mischgerichte zählst du bei der Hauptzutat.</span></div>
       <label class="check" id="f-dry-wrap" ${g.form?'':'hidden'}><input type="checkbox" id="f-dry" ${f.dry?'checked':''}> <span><b id="f-dry-label">${g.form?g.form.label:''}</b><br><span class="hint" id="f-dry-hint">${g.form?dryHint(g):''}</span></span></label>`; })()}
     <div class="two"><div class="field"><label for="f-size">Menge pro Stück</label><input id="f-size" inputmode="decimal" value="${f.size??(isW?'1,5':'')}" placeholder="${isW?'1,5':'400'}"></div>
       <div class="field"><label for="f-unit">Einheit</label><select id="f-unit">${units.map(u=>`<option ${u===(f.unit||(isW?'l':'g'))?'selected':''}>${u}</option>`).join('')}</select></div></div>
     <div class="field"><label for="f-count">Anzahl</label><input id="f-count" inputmode="numeric" value="${f.count??(isW?'6':'1')}"></div>
-    <div class="field"><span style="font-weight:700;font-size:.9rem">Mindestens haltbar bis</span><div class="two">
+    <div class="field"><span style="font-weight:700;font-size:.95rem">Haltbar bis</span><div class="two">
       <select id="f-month" aria-label="Monat"><option value="">Monat</option>${MONTHS.map((m,i)=>`<option value="${i+1}" ${String(i+1)===String(f.m)?'selected':''}>${m}</option>`).join('')}</select>
       <select id="f-year" aria-label="Jahr"><option value="">Jahr</option>${years.map(y=>`<option ${String(y)===String(f.y)?'selected':''}>${y}</option>`).join('')}</select></div>
       <span class="hint">Steht auf der Packung. Du bekommst einen Hinweis, bevor es abläuft.</span></div>
@@ -1015,12 +1086,27 @@ root.addEventListener('click', async e=>{
       if(k==='adults'){ if(adults()+d>=1 && S.persons+d<=20) S.persons+=d; }
       else { const cur=S[k]||0; if(cur+d>=0 && S.persons+d<=20 && (d>0 || cur>0)){ S[k]=cur+d; S.persons+=d; } }
       save(); break; }
-    case 'startOwn': S=emptyState(); save(); askCal(); break;
+    case 'startOwn': S=emptyState(); S.persons=1; S.kids4=0; S.kids1=0; S.pets={}; S.petsOn=false; UI.view='start'; UI.ob=1; window.scrollTo(0,0); break;
+    case 'editHH': UI.editHH=!UI.editHH; break;
+    case 'ob': { const d=+b.dataset.d; UI.ob=(UI.ob||1)+d; window.scrollTo(0,0); if(UI.ob>3){ META.onboarded=true; DB.put(META,'meta'); S.demo=false; save(); askCal(); UI.view='home'; UI.ob=1; } break; }
+    case 'install': if(INSTALL.ev){ INSTALL.ev.prompt(); try{ const r=await INSTALL.ev.userChoice; if(r&&r.outcome==='accepted'){ META.installHidden=true; DB.put(META,'meta'); } }catch(err){} INSTALL.ev=null; } break;
+    case 'installHide': META.installHidden=true; DB.put(META,'meta'); break;
     case 'count': { const it=S.items.find(i=>i.id===b.dataset.id); if(it){ it.count=Math.max(0,it.count+ +b.dataset.d); } save(); break; }
     case 'del': S.items=S.items.filter(i=>i.id!==b.dataset.id); save(); break;
     case 'doc': { S.docs=S.docs||{}; const k=b.dataset.k, v=b.dataset.val==='na'?'na':1; if(S.docs[k]===v) delete S.docs[k]; else S.docs[k]=v; save(); break; }
     case 'check': { const k=b.dataset.k; S.checks[k]=Math.max(0,(S.checks[k]||0)+ +b.dataset.d); save(); break; }
-    case 'add': UI.sheet={cat:b.dataset.cat, group:b.dataset.group||'getreide'}; render(); setTimeout(()=>document.getElementById('f-name')?.focus(),30); return;
+    case 'add': UI.sheet={cat:b.dataset.cat||'any', group:b.dataset.group||null, mode:'quick', count:1}; break;
+    case 'toForm': { const f=UI.sheet; f.mode='form'; if(f.cat==='any') f.cat='nahrung'; f.group=f.group||'getreide'; f.count=undefined; render(); setTimeout(()=>document.getElementById('f-name')?.focus(),30); return; }
+    case 'preset': { const f=UI.sheet; f.preset=+b.dataset.i; f.count=PRESETS[f.preset][1]==='wasser'&&PRESETS[f.preset][2]<9?6:1; f.m=''; f.y=''; f.short=null; f.err=''; break; }
+    case 'quickBack': { const f=UI.sheet; f.preset=null; f.short=null; f.err=''; break; }
+    case 'qcount': { const f=UI.sheet; f.count=Math.max(1,Math.min(999,(f.count||1)+ +b.dataset.d)); break; }
+    case 'quickSave': { const f=UI.sheet, pr=PRESETS[f.preset]; const m=f.m||'', y=f.y||''; f.err='';
+      if((m&&!y)||(!m&&y)){ f.err='Bitte Monat und Jahr wählen oder beides leer lassen.'; break; }
+      const mhd = m&&y ? `${y}-${String(m).padStart(2,'0')}` : null, left = mhd ? mhdIdx(mhd)-CUR : null;
+      if(left!==null && left<SHORT_MONTHS && !f.short){ f.short = left<0?'expired':'soon'; break; }
+      const isW=pr[1]==='wasser';
+      S.items.push({id:uid(), cat:isW?'wasser':'nahrung', group:isW?null:pr[1], name:pr[0], size:pr[2], unit:pr[3], count:f.count||1, mhd, ...(pr[4]?{dry:true}:{})});
+      UI.msg=`${pr[0]} eingetragen.`; UI.sheet=null; save(); break; }
     case 'closeSheet': case 'closeBg': UI.sheet=null; break;
     case 'copyList': await copy(listText(calc()), 'Liste kopiert.', null); break;
     case 'copyExport': { await copy(document.getElementById('exp').value, 'Sicherung kopiert. Füge sie z. B. in eine Notiz ein.', 'exp'); if(UI.msg.startsWith('Sicherung kopiert')) markBackedUp(); break; }
@@ -1038,7 +1124,7 @@ root.addEventListener('click', async e=>{
     case 'import': doImport(); break;
     case 'reset': UI.confirmReset=true; break;
     case 'resetNo': UI.confirmReset=false; break;
-    case 'resetYes': { const wasDemo=S.demo; S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; if(wasDemo){ askCal(); UI.view='home'; UI.msg=''; } break; }
+    case 'resetYes': { const wasDemo=S.demo; S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; if(wasDemo){ S.persons=1; S.kids4=0; S.kids1=0; UI.view='start'; UI.ob=1; UI.msg=''; } break; }
     case 'rotEdit': UI.rotEdit=b.dataset.id; break;
     case 'rotCancel': UI.rotEdit=null; break;
     case 'rotSave': { const it=S.items.find(i=>i.id===b.dataset.id); const m=document.getElementById('rot-m').value, y=document.getElementById('rot-y').value;
@@ -1061,6 +1147,8 @@ function doImport(){
 }
 root.addEventListener('change', e=>{
   const t=e.target;
+  if(t.id==='big-font'){ META.big=t.checked; DB.put(META,'meta'); render(); return; }
+  if((t.id==='f-month'||t.id==='f-year') && UI.sheet && UI.sheet.mode!=='form'){ UI.sheet[t.id==='f-month'?'m':'y']=t.value; UI.sheet.short=null; return; }
   if(t.id==='pets-on'){ if(t.checked){ S.petsOn=true; } else { S.petsOn=false; S.pets={}; } save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='land'){ S.land=t.value||null; save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='f-group'){ const g=FOOD.find(x=>x.k===t.value); if(!g) return;
@@ -1102,7 +1190,7 @@ root.addEventListener('submit', e=>{
   if(!name) f.err='Bitte einen Namen eingeben.';
   else if(!(size>0)) f.err='Bitte die Menge pro Stück als Zahl eingeben, z. B. 400.';
   else if(!(count>=1)) f.err='Bitte die Anzahl eingeben, mindestens 1.';
-  else if((m&&!y)||(!m&&y)) f.err='Bitte Monat und Jahr des MHD wählen oder beides leer lassen.';
+  else if((m&&!y)||(!m&&y)) f.err='Bitte bei „Haltbar bis“ Monat und Jahr wählen oder beides leer lassen.';
   else if(left!==null && left<SHORT_MONTHS && !f.short){ f.short = left<0?'expired':'soon'; }
   else {
     S.items.push({id:uid(),cat:f.cat,group:f.cat==='nahrung'?f.group:null,name,size,unit:f.unit,count,mhd,...(dry?{dry:true}:{})});
@@ -1112,15 +1200,33 @@ root.addEventListener('submit', e=>{
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&UI.sheet){ UI.sheet=null; render(); } });
 
+/* ---------- App auf den Startbildschirm ---------- */
+const INSTALL = {ev:null};
+const IS_STANDALONE = () => { try{ return matchMedia('(display-mode: standalone)').matches || navigator.standalone===true; }catch(e){ return false; } };
+const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent||'');
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); INSTALL.ev=e; if(UI.view==='home') render(); });
+window.addEventListener('appinstalled', ()=>{ META.installHidden=true; DB.put(META,'meta'); INSTALL.ev=null; render(); });
+function installBand(){
+  if(IS_STANDALONE() || META.installHidden || S.demo || !CAN_PRINT) return '';
+  const how = INSTALL.ev ? `<button class="primary big" data-act="install">${icon('plus')} Auf den Startbildschirm legen</button>`
+    : IS_IOS ? `<ol class="steps small"><li>Unten in Safari auf das Teilen-Zeichen tippen (Quadrat mit Pfeil nach oben).</li><li>Nach unten wischen und <b>„Zum Home-Bildschirm“</b> wählen.</li><li>Oben rechts auf <b>„Hinzufügen“</b> tippen.</li></ol>`
+    : `<ol class="steps small"><li>Oben rechts auf die drei Punkte <b>⋮</b> tippen.</li><li><b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b> wählen.</li></ol>`;
+  return `<div class="band info"><div style="display:flex;flex-direction:column;gap:8px">
+    <div><b>Als App auf dein Handy legen</b><div class="small">Dann findest du den Vorratsplaner mit eigenem Symbol neben deinen anderen Apps, und er funktioniert ohne Internet.</div></div>
+    ${how}<button class="linkbtn small" data-act="installHide" style="align-self:flex-start">Schon erledigt, ausblenden</button></div></div>`;
+}
+
 /* ---------- Start ---------- */
 (async()=>{
   try{ navigator.storage?.persist?.(); }catch(e){}
   const ok=await DB.open();
   const saved=ok?await DB.get():null;
-  try{ S = saved ? cleanState(saved) : demoState(); }catch(e){ S = demoState(); }
+  let first=false;
+  try{ if(saved) S=cleanState(saved); else { first=true; S=cleanState({items:[],persons:1}); } }catch(e){ first=true; S=cleanState({items:[],persons:1}); }
   S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0; S.pets=S.pets||{};
   if(ok){ META=Object.assign(META, await DB.get('meta')||{}); SNAPS=(await DB.get('snaps')||[]).map(x=>{ try{ return {day:String(x.day).slice(0,20), at:Number(x.at)||Date.now(), data:cleanState(x.data)}; }catch(e){ return null; } }).filter(Boolean); }
   snapshot();
+  if(first){ UI.view='start'; UI.ob=1; }
   render();
 })();
 
