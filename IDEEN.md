@@ -16,6 +16,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Einkaufsliste aufgeräumt**: Zeilenumbruch bei langen Texten unter „Noch kaufen“ *(Version 1.9)*
 - [x] **Haushaltsprofil Kinder**: Zähler für Kinder 4–9 (Nahrung ×0,7) und Kleinkinder 1–3 (×0,5) nach DGE, Kleinkind-Kachel mit Windeln und Kleinkindnahrung *(Version 1.10)*
 - [x] **Notfall-Wissen offline**: 23 Karten für alle Krisenlagen in Deutschland, Notrufnummern, Giftnotruf je Bundesland, Suche, Druck *(Version 1.11)*
+- [x] **Absender in der App**: „Entwickelt von Sascha L. · © 2026“ *(Version 1.12)*
 
 ## Priorität hoch
 

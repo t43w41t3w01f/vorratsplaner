@@ -207,6 +207,7 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700}
 #printout .pw{break-inside:avoid;margin-bottom:6pt}
 #printout .pw ol,#printout .pw ul{margin:2pt 0 2pt 14pt;padding:0}
 #printout .pw li{margin:1pt 0}
+footer .brand{display:block;margin-top:10px;font-family:var(--f-display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.78rem;color:var(--muted)}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -271,7 +272,7 @@ const eatUnits = () => adults() + kids4()*EAT_KIDS4 + kids1()*EAT_KIDS1;
 function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0)); }
 function needOf(item, p, T){ const [,, q, pp, perDay]=item; const mult = pp==='k' ? kids1() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
 function needText(item){ const [,, q, pp, perDay]=item; return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION = '1.11';
+const APP_VERSION = '1.12';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -746,7 +747,7 @@ function render(){
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
   else root.innerHTML=viewCheck(c);
-  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a></footer>`);
+  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
 

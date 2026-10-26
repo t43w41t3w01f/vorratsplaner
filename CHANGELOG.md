@@ -2,6 +2,9 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.12 – 26. Oktober 2026
+- **Absender:** „Entwickelt von Sascha L. · © 2026“ unten in der App, auf der Versions- und der Datenschutzseite.
+
 ## 1.11 – 26. Oktober 2026
 - **Notfall-Wissen:** dritter Knopf auf der Startseite, 23 Anleitungen für ganz Deutschland, offline lesbar.
 - Themen: Notruf, Warnungen und Sirenen, Informiert bleiben, Telefonausfall, Stromausfall, Wasser und Abkochgebot, Hygiene ohne Wasser, Heizungsausfall, Unwetter, Hochwasser, Hitze, Kälte, Waldbrand, Erdbeben, Wohnungsbrand, Kohlenmonoxid, Gefahrstoffe, radioaktive Stoffe, Evakuierung, Amok und Terror, Luftalarm, Pandemie, seelische Belastung.
