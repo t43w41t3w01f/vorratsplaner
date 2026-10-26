@@ -2,6 +2,13 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.11 – 26. Oktober 2026
+- **Notfall-Wissen:** dritter Knopf auf der Startseite, 23 Anleitungen für ganz Deutschland, offline lesbar.
+- Themen: Notruf, Warnungen und Sirenen, Informiert bleiben, Telefonausfall, Stromausfall, Wasser und Abkochgebot, Hygiene ohne Wasser, Heizungsausfall, Unwetter, Hochwasser, Hitze, Kälte, Waldbrand, Erdbeben, Wohnungsbrand, Kohlenmonoxid, Gefahrstoffe, radioaktive Stoffe, Evakuierung, Amok und Terror, Luftalarm, Pandemie, seelische Belastung.
+- Karten mit „Sofort tun“ und Hintergründen, Abgleich mit der Ausrüstung im Vorrat.
+- Notrufnummern zum Antippen, Giftnotruf je Bundesland (Quelle: BfR).
+- Suche, Drucken und PDF.
+
 ## 1.10 – 25. Oktober 2026
 - **Haushalt mit Kindern:** Zähler für Erwachsene und Kinder ab 10, Kinder 4–9 Jahre und Kleinkinder 1–3 Jahre.
 - Nahrung nach DGE-Richtwerten: Kinder 4–9 Jahre ca. 70 %, Kleinkinder ca. 50 %. Wasser, Hygiene, Dokumente und Bargeld zählen für alle voll.

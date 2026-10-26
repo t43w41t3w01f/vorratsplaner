@@ -4,7 +4,7 @@
 
 👉 **App öffnen:** https://t43w41t3w01f.github.io/vorratsplaner/
 
-Aktuelle Version: **1.10** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.11** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -25,6 +25,12 @@ Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reich
 - **Kleinkind-Kachel** mit Windeln, Feuchttüchern, Kleinkindnahrung und Zubehör, erscheint nur mit Kleinkindern im Haushalt.
 - **Dokumentenmappe** und Kopien als Checkliste pro Person, **Bargeld-Richtwert** 100 € pro Person.
 - **Vorrat drucken:** kompletter Bestand als Ausdruck oder PDF, mit Kästchen zum Abhaken.
+
+### Notfall-Wissen
+- **23 Anleitungen für ganz Deutschland**, auch ohne Internet: Notruf, Warnungen und Sirenen, Strom-, Wasser-, Heizungs- und Telefonausfall, Unwetter, Hochwasser, Hitze, Kälte, Waldbrand, Erdbeben, Brand, Kohlenmonoxid, Gefahrstoffe, radioaktive Stoffe, Evakuierung, Amok und Terror, Luftalarm, Pandemie, seelische Belastung.
+- „Sofort tun“ in Schritten plus Hintergründe, Abgleich mit der Ausrüstung im Vorrat.
+- **Notrufnummern** zum Antippen und **Giftnotruf je Bundesland**.
+- Suche, Drucken und PDF.
 
 ### Haltbarkeit im Blick
 - Warnung auf der Startseite, wenn etwas abläuft. Abgelaufenes zählt nicht mehr zum Vorrat.

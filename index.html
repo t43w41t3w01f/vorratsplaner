@@ -184,6 +184,29 @@ details summary{cursor:pointer;color:var(--muted);font-weight:700}
 .whatsnew{display:block;font-size:.9rem;color:var(--muted);text-decoration:none;padding:4px 2px;line-height:1.45}
 .whatsnew b{color:var(--ink)}
 .newdot{display:inline-block;background:var(--rust);color:#fff;font-weight:700;font-size:.75rem;letter-spacing:.03em;border-radius:6px;padding:1px 7px;margin-right:4px}
+.choice.sos .choice-ico{background:var(--rust);color:#fff}
+.notruf{border-color:var(--rust)}
+.nlist{display:flex;flex-direction:column}
+.nrow{display:grid;grid-template-columns:7.5em 1fr;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
+.nlist .nrow:first-child{border-top:0;padding-top:0}
+.nnum{font-family:var(--f-display);font-weight:800;font-size:1.35rem;color:var(--rust);line-height:1.1;overflow-wrap:anywhere}
+.wsec{font-size:1.2rem;margin-top:8px}
+#wlist{display:flex;flex-direction:column;gap:8px}
+.wcard{background:var(--paper);border:1.5px solid var(--line);border-radius:14px}
+.wcard summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;font-weight:700;cursor:pointer}
+.wcard summary::-webkit-details-marker{display:none}
+.wcard .chev{transition:transform .2s;color:var(--muted);font-size:1.3rem}
+.wcard[open] .chev{transform:rotate(90deg)}
+.wcard[open]{border-color:var(--olive)}
+.wbody{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.steps{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+.wmore ul{margin:4px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.gear{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gchip{font-size:.8rem;font-weight:700;border-radius:999px;padding:2px 9px;border:1.5px solid}
+.gchip.ok{color:var(--ok);border-color:var(--ok)} .gchip.no{color:var(--bad);border-color:var(--bad)}
+#printout .pw{break-inside:avoid;margin-bottom:6pt}
+#printout .pw ol,#printout .pw ul{margin:2pt 0 2pt 14pt;padding:0}
+#printout .pw li{margin:1pt 0}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
@@ -248,7 +271,7 @@ const eatUnits = () => adults() + kids4()*EAT_KIDS4 + kids1()*EAT_KIDS1;
 function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0)); }
 function needOf(item, p, T){ const [,, q, pp, perDay]=item; const mult = pp==='k' ? kids1() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
 function needText(item){ const [,, q, pp, perDay]=item; return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION = '1.10';
+const APP_VERSION = '1.11';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -265,12 +288,264 @@ const ICONS = {
   klein:'<path d="M9 3h6M10 3v3M14 3v3"/><rect x="7" y="6" width="10" height="15" rx="3"/><path d="M7 11h10M10 15h4"/>',
   rotate:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>',
   calc:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5v2M4 13h2M18 13h2"/>',
+  sos:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/>',
+  phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
   shelf:'<path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16"/><rect x="7" y="7" width="4" height="5"/><rect x="13" y="9" width="4" height="3"/><rect x="8" y="15" width="7" height="5"/>',
   print:'<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
 };
 const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+/* ---------- Notfall-Wissen (eigene Texte nach Empfehlungen von BBK, BfR, BfS, Polizei, DWD; Stand Oktober 2026) ---------- */
+const GIFT = [
+  {lands:['Baden-Württemberg'], ort:'Freiburg', tel:'0761 19240'},
+  {lands:['Bayern'], ort:'München', tel:'089 19240'},
+  {lands:['Berlin','Brandenburg'], ort:'Berlin', tel:'030 19240'},
+  {lands:['Bremen','Hamburg','Niedersachsen','Schleswig-Holstein'], ort:'Göttingen (GIZ-Nord)', tel:'0551 19240'},
+  {lands:['Hessen','Rheinland-Pfalz','Saarland'], ort:'Mainz', tel:'06131 19240'},
+  {lands:['Nordrhein-Westfalen'], ort:'Bonn', tel:'0228 19240'},
+  {lands:['Mecklenburg-Vorpommern','Sachsen','Sachsen-Anhalt','Thüringen'], ort:'Erfurt', tel:'0361 730730'},
+];
+const LAENDER = GIFT.flatMap(g=>g.lands).sort((a,b)=>a.localeCompare(b,'de'));
+const giftFor = land => GIFT.find(g=>g.lands.includes(land));
+
+const NUMMERN = [
+  ['112','Feuerwehr und Rettungsdienst','europaweit, kostenlos, auch ohne Guthaben'],
+  ['110','Polizei',''],
+  ['116117','Ärztlicher Bereitschaftsdienst','wenn es kein Notfall ist, die Praxis aber zu hat'],
+  ['08001110111','Telefonseelsorge','kostenlos, rund um die Uhr, auch 0800 111 0 222'],
+  ['115','Behördennummer','Fragen an Ämter, nicht überall erreichbar'],
+];
+
+// gear: Schlüssel aus den Checklisten, die für die Lage wichtig sind
+const WISSEN = [
+ {sec:'Grundlagen'},
+ {id:'notruf', t:'Notruf richtig absetzen', tags:'112 110 anrufen w-fragen',
+  now:['Ruhig bleiben, 112 wählen (Feuerwehr, Rettungsdienst) oder 110 (Polizei).',
+       '<b>Wo</b> ist es passiert? Ort, Straße, Hausnummer, Stockwerk.',
+       '<b>Was</b> ist passiert? Brand, Unfall, Erkrankung.',
+       '<b>Wie viele</b> Verletzte oder Betroffene?',
+       '<b>Welche</b> Verletzungen oder Beschwerden?',
+       '<b>Warten</b> auf Rückfragen. Erst auflegen, wenn die Leitstelle es sagt.'],
+  more:[['Gut zu wissen',['112 funktioniert in ganz Europa, kostenlos und auch ohne Guthaben im Handy.',
+       'Wer nicht sprechen oder hören kann, nutzt die offizielle Notruf-App „nora“ der Bundesländer. Sie muss vorher eingerichtet werden.',
+       'Erste Hilfe lernt man im Kurs, nicht aus einer App. Ein Auffrischungskurs alle paar Jahre lohnt sich.']]]},
+ {id:'warnung', t:'Warnungen erkennen', tags:'sirene cell broadcast nina katwarn radio',
+  now:['<b>Sirene, 1 Minute auf- und abschwellender Heulton:</b> Warnung. Ins Haus gehen, Fenster und Türen schließen, Radio einschalten.',
+       '<b>Sirene, 1 Minute Dauerton:</b> Entwarnung. Die Gefahr ist vorbei, weiter auf Durchsagen achten.',
+       '<b>Handy schrillt laut mit Warntext (Cell Broadcast):</b> Text genau lesen und den Anweisungen folgen.',
+       'Durchsagen von Feuerwehr- oder Polizeifahrzeugen befolgen.'],
+  more:[['Warnung auf dem Handy',['Cell Broadcast kommt ohne App auf jedes eingeschaltete Handy mit Empfang, wenn die Software aktuell ist (Android ab 11, iOS ab 16.1).',
+       'Entwarnungen kommen auf der niedrigsten Warnstufe. Diese Stufe in den Handy-Einstellungen eingeschaltet lassen.',
+       'Warn-Apps wie NINA oder KATWARN zeigen zusätzlich Hinweise. Dafür den eigenen Ort abonnieren.',
+       'Nicht jeder Ort hat Sirenen. Deshalb immer einen zweiten Warnweg nutzen.'],],
+   ['Sonstiges',['Zwei kurze Dauertöne mit Unterbrechung sind ein Feuerwehralarm und nur für die Einsatzkräfte gedacht.']]]},
+ {id:'info', t:'Informiert bleiben ohne Strom und Internet', tags:'radio kurbelradio ukw autoradio',
+  gear:['radio','batt','powerbank'],
+  now:['Batterie-, Kurbel- oder Solarradio einschalten und einen regionalen UKW-Sender suchen.',
+       'Zur Not geht das Autoradio. Den Motor dabei nur im Freien laufen lassen.',
+       'Akkus von Handy und Powerbank schonen: Helligkeit runter, Energiesparmodus, nur kurz einschalten.',
+       'Nur offiziellen Quellen glauben: Behörden, Rundfunk, Warn-Apps. Gerüchte nicht weiterverbreiten.'],
+  more:[['Wo es Informationen gibt',['Viele Städte und Gemeinden richten bei großen Lagen Notfall-Infopunkte ein (oft „Katastrophenschutz-Leuchttürme“ genannt), meist an Feuerwehrhäusern, Rathäusern oder Schulen.',
+       'Wo diese Punkte bei dir sind, erfährst du vorab bei deiner Gemeinde. Am besten jetzt nachschauen und hier notieren.']]]},
+ {id:'netz', t:'Telefon und Notruf funktionieren nicht', tags:'netzausfall handy kein empfang notruf ausgefallen',
+  now:['Notruf 112 trotzdem versuchen, auch über ein anderes Netz oder Festnetz.',
+       'Klappt es nicht: zum nächsten Feuerwehrhaus, zur Polizeiwache oder zu einem Notfall-Infopunkt gehen. Dort kann Hilfe gerufen werden.',
+       'Bei Lebensgefahr Nachbarn um Hilfe bitten, jemand bleibt bei der verletzten Person.',
+       'Radio hören, dort wird gesagt, wo Hilfe erreichbar ist.'],
+  more:[['Vorher klären',['Mit der Familie einen Treffpunkt vereinbaren, falls niemand erreichbar ist.',
+       'Wichtige Nummern auf Papier notieren, das Handy kann leer sein.']]]},
+
+ {sec:'Ausfall der Versorgung'},
+ {id:'strom', t:'Stromausfall', tags:'blackout licht kühlschrank heizung',
+  gear:['lampe','batt','radio','kerzen','feuer','powerbank','kocher'],
+  now:['Ruhe bewahren. Prüfen, ob nur die eigene Wohnung betroffen ist (Sicherungskasten, Nachbarn).',
+       'Taschenlampe statt Kerze nehmen. Kerzen nie unbeaufsichtigt brennen lassen.',
+       'Radio einschalten, um zu erfahren, wie groß und lang der Ausfall ist.',
+       'Herd, Bügeleisen und andere Wärmegeräte ausschalten, damit nichts passiert, wenn der Strom zurückkommt. Eine Lampe angeschaltet lassen, dann merkst du es.',
+       'Kühlschrank und Gefriertruhe geschlossen halten.',
+       'Nach älteren oder kranken Nachbarn sehen.'],
+  more:[['Was alles ausfallen kann',['Auch Gas- und Ölheizungen fallen aus, weil Pumpe und Steuerung Strom brauchen.',
+       'Handynetz und Internet halten oft nur wenige Stunden durch.',
+       'Geldautomaten, Kartenzahlung, Tankstellen und Supermarktkassen funktionieren nicht. Bargeld hilft.',
+       'In höheren Etagen kann das Wasser ausbleiben, weil Pumpen stehen. Bei Ankündigung Wasser abfüllen.'],],
+   ['Lebensmittel',['Erst den Kühlschrank leer essen, dann die Gefriertruhe, zuletzt den Vorrat.',
+       'Eine volle, geschlossene Gefriertruhe hält meist etwa einen Tag kalt.',
+       'Aufgetautes nicht wieder einfrieren, sondern bald verbrauchen.'],],
+   ['Kochen und Wärme',['Campingkocher nur bei offenem Fenster oder draußen benutzen.',
+       'Grill, Gasheizer und Notstromaggregat nie in Wohnung, Keller oder Garage betreiben: Lebensgefahr durch Kohlenmonoxid (siehe eigene Karte).']]]},
+ {id:'wasser', t:'Kein Wasser oder Abkochgebot', tags:'trinkwasser abkochen wasserausfall keime',
+  now:['Bei Ankündigung Wasser abfüllen: Badewanne, Eimer, Töpfe, Kanister. Auch für die Toilettenspülung.',
+       'Trinkwasser aus dem Vorrat zuerst zum Trinken und Kochen verwenden.',
+       '<b>Abkochgebot:</b> Wasser sprudelnd aufkochen und einige Minuten kochen lassen, dann abkühlen lassen.',
+       'Abgekochtes Wasser in einem sauberen, geschlossenen Gefäß aufbewahren und innerhalb weniger Stunden verbrauchen, am besten gekühlt.'],
+  more:[['Wichtig',['Abkochen tötet Keime, hilft aber nicht gegen Chemikalien. Bei chemischer Verunreinigung das Leitungswasser nach Anweisung der Behörde gar nicht verwenden.',
+       'Abgekochtes oder abgepacktes Wasser auch zum Zähneputzen, Gemüsewaschen und für Babynahrung nehmen.',
+       'Pro Person rechnet man mit 2 Litern am Tag zum Trinken und Kochen.']]]},
+ {id:'hygiene', t:'Hygiene ohne fließendes Wasser', tags:'toilette notklo waschen müll',
+  gear:['muell','handdes','klo'],
+  now:['Hände trotzdem gründlich waschen, mit wenig Wasser und Seife oder mit Desinfektionsmittel.',
+       '<b>Notfall-Toilette:</b> Toilette oder Eimer mit einem stabilen Müllbeutel auslegen, nach jeder Benutzung etwas Katzenstreu, Sägespäne oder Zeitungspapier darüber, Beutel gut verschließen.',
+       'Volle Beutel kühl und abgedeckt außerhalb der Wohnung lagern.',
+       'Einweggeschirr und Haushaltspapier statt Spülen und nasser Lappen.'],
+  more:[['Vorrat dafür',['Müllbeutel, Feuchttücher, Händedesinfektion, Haushaltshandschuhe, Toilettenpapier, Einweggeschirr.']]]},
+ {id:'heizung', t:'Heizung fällt aus', tags:'kälte wohnung heizen frieren',
+  gear:['decke','kocher'],
+  now:['In einen Raum zurückziehen, möglichst klein und auf der Sonnenseite. Türen zu den anderen Räumen schließen.',
+       'Mehrere Schichten Kleidung, Mütze und Socken tragen, Decken und Schlafsäcke nutzen.',
+       'Fenster abdichten, Vorhänge zuziehen, Rollläden nachts schließen.',
+       'Warm essen und trinken, sich bewegen.',
+       '<b>Nie</b> mit Grill, Gaskocher, Gasheizer oder offenem Feuer in geschlossenen Räumen heizen.'],
+  more:[['Wer besonders gefährdet ist',['Babys, ältere und kranke Menschen kühlen schneller aus. Regelmäßig nach ihnen sehen.',
+       'Wenn es in der Wohnung zu kalt wird, nach Wärmestuben fragen, die Gemeinden bei längeren Ausfällen einrichten.']]]},
+
+ {sec:'Wetter und Natur'},
+ {id:'unwetter', t:'Unwetter, Sturm und Gewitter', tags:'sturm orkan hagel blitz gewitter dwd',
+  now:['Warnungen des Deutschen Wetterdienstes beachten (Warn-App, Radio).',
+       'Draußen lose Gegenstände sichern oder reinholen, wenn noch Zeit ist.',
+       'Drinnen bleiben, Fenster, Türen und Rollläden schließen. Abstand zu Fenstern halten.',
+       'Empfindliche Geräte vom Netz trennen.',
+       'Im Auto bleiben, wenn du unterwegs bist. Keine blanken Metallteile anfassen. Nicht unter Bäumen parken.'],
+  more:[['Gewitter im Freien',['Gebäude oder Auto aufsuchen. Wälder, einzelne Bäume, Hügel und Wasser meiden.',
+       'Wenn kein Schutz da ist: in eine Mulde hocken, Füße eng zusammen, nicht hinlegen.',
+       'Mindestens 50 Meter Abstand zu Strommasten und Überlandleitungen. Keine Regenschirme, nicht an Zäune lehnen.'],],
+   ['Hagel',['Ohne Schutz flach hinlegen und Kopf und Nacken mit den Händen schützen.'],],
+   ['Danach',['Schäden vor dem Aufräumen fotografieren (Versicherung).',
+       'Nicht unter beschädigte Bäume, Dächer oder Fassaden gehen. Heruntergefallene Stromleitungen nicht berühren, 112 rufen.',
+       'Ausgelaufenes Heizöl oder andere Gefahrstoffe der Feuerwehr melden.']]]},
+ {id:'hochwasser', t:'Hochwasser und Starkregen', tags:'überschwemmung flut keller pegel starkregen',
+  gear:['radio','lampe'],
+  now:['Pegel- und Warnmeldungen verfolgen (Warn-App, Radio, Hochwasserzentralen).',
+       'Wertsachen, Dokumente und Medikamente nach oben bringen. Notgepäck bereitstellen.',
+       '<b>Keller und Tiefgaragen nicht mehr betreten.</b> Lebensgefahr durch Ertrinken und Stromschlag.',
+       'Strom in betroffenen Räumen abschalten (Sicherung raus), aber nur, wenn du dabei nicht im Wasser stehst.',
+       'Nicht durch überflutete Straßen und Unterführungen fahren oder gehen. Schon 30 Zentimeter strömendes Wasser kann ein Auto mitreißen.',
+       'Bei Aufforderung sofort evakuieren. Kinder, Kranke und Haustiere früh in Sicherheit bringen.'],
+  more:[['Vorbereiten',['Sandsäcke, Bretter und Dichtmaterial besorgen, Rückstauklappen prüfen lassen.',
+       'Heizöltank gegen Aufschwimmen sichern, Chemikalien hoch lagern.',
+       'Auto rechtzeitig aus Garage und Tiefgarage auf höhere Flächen fahren.'],],
+   ['Danach',['Erst abpumpen, wenn das Grundwasser gesunken ist, sonst kann das Gebäude Schaden nehmen.',
+       'Schäden fotografieren, Räume schnell trocknen (Schimmel).',
+       'Elektrik, Heizöltank und Statik prüfen lassen, bevor du sie wieder nutzt.',
+       'Lebensmittel, die mit Hochwasser in Kontakt kamen, und Obst und Gemüse aus überfluteten Gärten nicht essen.']]]},
+ {id:'hitze', t:'Hitze', tags:'hitzewelle sommer hitzschlag sonne',
+  now:['Viel trinken, mindestens 1,5 bis 2 Liter am Tag: Wasser, Tee, Saftschorle. Kein Alkohol.',
+       'Wohnung tagsüber abdunkeln, früh morgens und nachts lüften.',
+       'Anstrengung in die kühlen Morgen- und Abendstunden legen. Mittagssonne meiden.',
+       'Leichte, helle Kleidung, Kopfbedeckung, Sonnencreme.',
+       'Nach älteren, alleinlebenden und kranken Menschen sehen. Kindern regelmäßig Getränke anbieten.',
+       '<b>Nie</b> Kinder oder Tiere im Auto lassen, auch nicht kurz.'],
+  more:[['Wenn es jemandem schlecht geht',['Bei Schwindel, Kopfschmerz, Übelkeit, Verwirrtheit oder heißer, trockener Haut: in den Schatten bringen, Kleidung lockern, kühlen, zu trinken geben, wenn die Person bei Bewusstsein ist.',
+       'Bei Verwirrtheit oder Bewusstlosigkeit sofort 112 rufen.',
+       'Wer regelmäßig Medikamente nimmt, sollte mit dem Arzt klären, ob bei Hitze etwas angepasst werden muss.']]]},
+ {id:'kaelte', t:'Kälte, Schnee und Glatteis', tags:'winter frost schnee eis unterkühlung',
+  gear:['decke'],
+  now:['Wege nur wenn nötig, festes Schuhwerk, warm in Schichten anziehen.',
+       'Autofahrten bei Glatteis vermeiden. Im Auto immer Decke, Getränk und geladenes Handy dabeihaben.',
+       'Im liegengebliebenen Auto bleiben, Warnblinker an. Motor nur zeitweise laufen lassen und den Auspuff von Schnee freihalten (Kohlenmonoxid).',
+       'Nach älteren Nachbarn sehen.'],
+  more:[['Unterkühlung erkennen',['Starkes Zittern, Müdigkeit, Verwirrtheit, langsames Sprechen: Person langsam in die Wärme bringen, nasse Kleidung ausziehen, zudecken, warme süße Getränke geben, wenn sie wach ist. Bei Bewusstseinsstörung 112.',
+       'Kein Alkohol, er macht nur scheinbar warm.'],],
+   ['Am Haus',['Bei viel Schnee Dachlasten beachten, besonders bei Flachdächern und Hallen.',
+       'Wasserleitungen in unbeheizten Räumen vor Frost schützen.']]]},
+ {id:'waldbrand', t:'Waldbrand und Flächenbrand', tags:'feuer rauch wald vegetation',
+  now:['Feuer oder Rauch sofort über 112 melden, mit möglichst genauem Ort.',
+       'Bei Rauch in der Nähe: Fenster und Türen schließen, Lüftung aus.',
+       'Aufforderungen zum Verlassen des Gebiets sofort folgen. Notgepäck mitnehmen.',
+       'Im Wald: nicht gegen den Wind und nicht bergauf vor dem Feuer fliehen. Quer zur Windrichtung auf breite Wege, Felder oder schon verbrannte Flächen gehen.',
+       'Zufahrtswege frei halten, nicht zum Schauen anhalten.'],
+  more:[['Vorbeugen',['Bei Waldbrandgefahr kein Feuer, kein Grillen und nicht rauchen im und am Wald.',
+       'Autos nicht auf trockenem Gras parken, heiße Teile können es entzünden.']]]},
+ {id:'erdbeben', t:'Erdbeben', tags:'beben nachbeben',
+  now:['Drinnen bleiben, nicht nach draußen rennen.',
+       'Unter einen stabilen Tisch kriechen oder an eine tragende Innenwand, Kopf schützen. Weg von Fenstern, Regalen und Lampen.',
+       'Draußen: Abstand zu Gebäuden, Mauern und Leitungen halten.',
+       'Nach dem Beben: Gas und Wasser abdrehen, Strom aus, offene Flammen löschen. Bei Schäden das Haus mit Notgepäck verlassen.',
+       'Mit Nachbeben rechnen. Beschädigte Gebäude erst nach Prüfung wieder betreten.'],
+  more:[['Wo in Deutschland?',['Spürbare Beben sind in Deutschland selten, am ehesten im Oberrheingraben, in der Niederrheinischen Bucht, auf der Schwäbischen Alb und im Vogtland.']]]},
+
+ {sec:'Feuer und Gefahrstoffe'},
+ {id:'brand', t:'Brand in der Wohnung oder im Haus', tags:'feuer rauch rauchmelder fett löschen',
+  now:['Ruhe bewahren, alle warnen und das Gebäude verlassen. Eigene Sicherheit geht vor.',
+       '112 rufen.',
+       'Türen hinter dir schließen, aber nicht abschließen. Keinen Aufzug benutzen.',
+       'Verrauchte Räume nicht betreten. Ist der Flur voller Rauch: in der Wohnung bleiben, Tür schließen, Ritzen abdichten, am Fenster bemerkbar machen.',
+       'Draußen prüfen, ob alle da sind, und es der Feuerwehr sagen.'],
+  more:[['Kleine Brände löschen',['Nur, wenn es ohne Gefahr geht.',
+       'Brennendes Fett oder Öl <b>nie mit Wasser</b> löschen. Deckel drauf, Herd aus.',
+       'Von unten nach oben und von vorne nach hinten löschen.'],],
+   ['Vorbeugen',['Rauchmelder in Schlafräumen, Kinderzimmern und Fluren, regelmäßig testen.',
+       'Feuerlöscher oder Löschdecke griffbereit haben.']]]},
+ {id:'co', t:'Kohlenmonoxid (CO)', tags:'vergiftung abgas grill gasheizer notstromaggregat co-melder',
+  now:['CO ist unsichtbar und riecht nicht. Es entsteht bei jeder Verbrennung: Grill, Gasheizer, Gaskocher, Ofen, Notstromaggregat, Automotor.',
+       '<b>Anzeichen:</b> Kopfschmerz, Schwindel, Übelkeit, Müdigkeit, Verwirrtheit, mehrere Personen gleichzeitig betroffen.',
+       'Verdacht: sofort Fenster und Türen auf, Gerät ausschalten, raus an die frische Luft, 112 rufen.',
+       'Bewusstlose nur retten, wenn du dich nicht selbst in Gefahr bringst.'],
+  more:[['Vorbeugen',['Grill, Gasheizer und Notstromaggregat nie in Wohnung, Keller, Garage oder Zelt betreiben.',
+       'Ein CO-Melder in Räumen mit Ofen, Gastherme oder Kamin warnt rechtzeitig.']]]},
+ {id:'gefahrstoff', t:'Gefahrstoffe, Chemieunfall, Großbrand mit Rauch', tags:'chemie gas giftig rauchwolke cbrn',
+  now:['Sofort ins nächste Gebäude gehen. Draußen quer zur Windrichtung, Mund und Nase bedecken.',
+       'Fenster und Türen schließen, Lüftung, Klimaanlage und Dunstabzug ausschalten.',
+       'In einen innenliegenden Raum ohne Fenster gehen, möglichst nicht in den Keller (Gase sind oft schwerer als Luft).',
+       'Radio einschalten und den Durchsagen folgen. Nur im Notfall telefonieren, damit die Netze frei bleiben.',
+       'Im Auto: Fenster zu, Lüftung aus, Radio hören.'],
+  more:[['Wenn du Kontakt hattest',['Oberbekleidung und Schuhe ausziehen und in einem Beutel außerhalb der Wohnräume lagern.',
+       'Hände, Gesicht, Haare, Nase und Ohren mit Wasser und Seife waschen.',
+       'Bei Beschwerden 112 rufen oder den Giftnotruf deines Bundeslands.']]]},
+ {id:'atom', t:'Unfall mit radioaktiven Stoffen', tags:'radioaktiv atom kernkraftwerk strahlung jod',
+  now:['Ins Haus gehen und drinnen bleiben, Fenster und Türen schließen, Lüftung aus.',
+       'Einen Raum in der Gebäudemitte oder einen Keller aufsuchen.',
+       'Radio und Warn-App verfolgen und den Anweisungen der Behörden folgen.',
+       '<b>Jodtabletten nur nach ausdrücklicher Aufforderung der Behörden einnehmen</b>, nicht vorsorglich auf eigene Faust.'],
+  more:[['Zu Jodtabletten',['Sie schützen nur die Schilddrüse vor radioaktivem Jod und nur, wenn sie zum richtigen Zeitpunkt genommen werden.',
+       'Menschen über 45 Jahre sollen sie nicht einnehmen, das Risiko von Nebenwirkungen ist größer als der Nutzen.',
+       'Die Tabletten werden im Ernstfall von den Behörden verteilt. Hochdosiertes Jod ist kein Nahrungsergänzungsmittel.'],],
+   ['Nach dem Aufenthalt draußen',['Kleidung wechseln und in einen Beutel geben, duschen, Haare waschen.',
+       'Lebensmittel aus dem Garten erst nach Freigabe essen.']]]},
+
+ {sec:'Sicherheitslagen'},
+ {id:'evakuierung', t:'Evakuierung (z. B. Bombenentschärfung)', tags:'räumen verlassen notgepäck sammelstelle',
+  gear:['mappe','bargeld'],
+  now:['Den Anweisungen von Polizei und Feuerwehr folgen, ohne Umwege.',
+       'Notgepäck, Dokumentenmappe, Medikamente, Handy und Ladegerät mitnehmen.',
+       'Herd und Elektrogeräte ausschalten, Fenster schließen, Wohnung abschließen.',
+       'Nachbarn Bescheid geben, besonders älteren oder kranken Menschen. Haustiere mitnehmen.',
+       'Zur angegebenen Sammelstelle gehen oder bei Freunden und Verwandten außerhalb unterkommen und dich dort abmelden, wenn darum gebeten wird.'],
+  more:[['Notgepäck pro Person',['Ein Rucksack: Erste-Hilfe-Set, persönliche Medikamente, Dokumententasche, Verpflegung und Wasser für zwei Tage, Radio, Taschenlampe, Decke oder Schlafsack, Wechselkleidung, Hygieneartikel, Bargeld.',
+       'Kindern einen Zettel mit Name, Anschrift und Telefonnummer mitgeben.']]]},
+ {id:'amok', t:'Amok, Terror, bewaffneter Angriff', tags:'angriff waffe gewalt flüchten verstecken',
+  now:['<b>Flüchten:</b> Den Gefahrenbereich sofort verlassen, andere mitnehmen. Hinter stabilen Mauern Deckung suchen.',
+       '<b>Verstecken:</b> Geht Flucht nicht, in einem Raum einschließen, Tür verbarrikadieren. Licht aus, Handy lautlos, leise sein, auf den Boden legen, weg von Türen und Fenstern.',
+       '<b>Alarmieren:</b> Sobald du sicher bist, 110 anrufen.',
+       '<b>Wenn die Polizei kommt:</b> ruhig bleiben, Hände sichtbar über den Kopf, keine schnellen Bewegungen, Anweisungen befolgen.'],
+  more:[['Danach',['Keine Fotos oder Videos von Opfern oder Einsatzkräften verbreiten.',
+       'Hilfe für belastete Menschen: Telefonseelsorge 0800 111 0 111, kostenlos und rund um die Uhr.']]]},
+ {id:'luftalarm', t:'Warnung vor Angriffen aus der Luft', tags:'luftalarm krieg bombe rakete schutzraum',
+  now:['Sofort Schutz in einem Gebäude suchen.',
+       'Möglichst in einen Raum ohne Fenster, am besten in den Keller. Ohne Keller: innenliegender Flur, Treppenhaus oder Bad.',
+       '<b>Zwei-Wände-Regel:</b> Zwischen dir und draußen sollten mindestens zwei Wände liegen.',
+       'Abstand zu Fenstern, Türen und Glas halten. Keine Aufzüge benutzen.',
+       'Radio und Warn-App verfolgen und erst nach Entwarnung den Schutzraum verlassen.'],
+  more:[['Gut zu wissen',['Ein flächendeckendes öffentliches Bunkersystem gibt es in Deutschland nicht. Der beste Schutz ist meist das eigene Haus mit Keller oder innenliegendem Raum.',
+       'Vorsorge wie bei allen Lagen: Vorrat, Dokumente griffbereit, Radio, geladene Akkus.']]]},
+
+ {sec:'Gesundheit und Belastung'},
+ {id:'pandemie', t:'Ansteckende Krankheiten, Pandemie', tags:'seuche quarantäne infektion virus',
+  gear:['handdes','schmerz','thermo'],
+  now:['Hände oft und gründlich waschen, in die Armbeuge husten und niesen.',
+       'Abstand halten, Menschenmengen meiden, Maske tragen, wenn empfohlen.',
+       'Bei Krankheitszeichen zu Hause bleiben und bei Bedarf die Praxis oder 116117 anrufen, nicht unangemeldet hingehen.',
+       'Den Anweisungen des Gesundheitsamts folgen.'],
+  more:[['Vorrat für Quarantäne',['Lebensmittel und Getränke für mindestens 10 bis 14 Tage, wichtige Medikamente, Fieberthermometer, Schmerz- und Fiebermittel.',
+       'Absprechen, wer für wen einkaufen kann.']]]},
+ {id:'psyche', t:'Angst und seelische Belastung', tags:'stress panik angst kinder seelsorge',
+  now:['Ruhig und langsam atmen, auf das Ausatmen konzentrieren.',
+       'Mit anderen sprechen, nicht allein bleiben. Feste Abläufe helfen, auch in der Krise.',
+       'Kindern ehrlich und altersgerecht erklären, was los ist. Nachrichten nicht ständig laufen lassen.',
+       'Hilfe annehmen: Telefonseelsorge 0800 111 0 111 oder 0800 111 0 222, kostenlos und rund um die Uhr.'],
+  more:[]},
+];
 
 /* ---------- Beispieldaten ---------- */
 function demoState(){
@@ -294,7 +569,7 @@ function demoState(){
       it('nahrung','fett','Rapsöl',500,'ml',1,'2027-09'),
     ]};
 }
-function emptyState(){ return {persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
+function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
 
 /* ---------- Helfer ---------- */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -415,7 +690,7 @@ async function doBackup(mode){
 function parseBackup(text){
   const d=JSON.parse(text);
   if(!d || !Array.isArray(d.items) || typeof d.persons!=='number') throw new Error('ungültig');
-  return {persons:d.persons, kids4:d.kids4||0, kids1:d.kids1||0, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
+  return {land:d.land||null, persons:d.persons, kids4:d.kids4||0, kids1:d.kids1||0, days:d.days||10, demo:false, checks:d.checks||{}, items:d.items, docs:d.docs||{}, names:d.names||[], cash:d.cash||{have:0,target:null}};
 }
 function restore(data, msg){
   if(!S.demo){ const d=today(); SNAPS=SNAPS.filter(x=>x.day!==d+'-vorher'); SNAPS.unshift({day:d+'-vorher', at:Date.now(), data:JSON.parse(JSON.stringify(S))}); SNAPS=SNAPS.slice(0,8); DB.put(SNAPS,'snaps'); }
@@ -466,6 +741,7 @@ function render(){
   else if(UI.view==='wasser'||UI.view==='nahrung') root.innerHTML=viewStock(c);
   else if(UI.view==='settings') root.innerHTML=viewSettings();
   else if(UI.view==='rotation') root.innerHTML=viewRotation(c);
+  else if(UI.view==='wissen') root.innerHTML=viewWissen();
   else if(UI.view==='docs-orig') root.innerHTML=viewDocs('orig');
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
@@ -491,6 +767,9 @@ function viewHome(c){
     <button class="choice" data-act="go" data-v="calc"><span class="choice-ico">${icon('calc')}</span>
       <span class="choice-txt"><span class="ct">Berechnung</span><span class="small muted">Wie lange reicht es? Was muss ich noch kaufen?</span>
       <span class="small num choice-fact t-${status(c.reach/c.T)}">Reicht ${c.reach} von ${c.T} Tagen · ${c.p} ${c.p===1?'Person':'Personen'}</span></span></button>
+    <button class="choice sos" data-act="go" data-v="wissen"><span class="choice-ico">${icon('sos')}</span>
+      <span class="choice-txt"><span class="ct">Notfall-Wissen</span><span class="small muted">Was tun bei Stromausfall, Hochwasser, Brand und anderen Krisen</span>
+      <span class="small choice-fact">Funktioniert auch ohne Internet</span></span></button>
   </div>
   <a class="whatsnew" href="versionen.html" data-act="seenVersion">${META.seenVersion!==APP_VERSION?`<span class="newdot">Neu: Version ${APP_VERSION}</span> `:''}Was kann die App alles? Unter <b>„Was ist neu?“</b> stehen alle Funktionen und Änderungen der Versionen. ›</a>`;
 }
@@ -558,6 +837,54 @@ function viewCalc(c){
 function tile(k,name,val,r,sub){
   return `<button class="tile" data-act="go" data-v="${k}"><div class="head">${icon(k)}<span class="name">${name}</span></div>
     <span class="val num">${val}</span>${bar(r)}<span class="small t-${status(r)}" style="font-weight:700">${sub}</span></button>`;
+}
+
+function gearChips(keys){
+  if(!keys||!keys.length) return '';
+  const all={}; Object.values(CHECK).forEach(v=>v.items.forEach(it=>all[it[0]]=it));
+  return `<div class="gear"><span class="small muted">Aus deinem Vorrat:</span> ${keys.filter(k=>all[k]).map(k=>{ const ok=have(k)>0;
+    return `<span class="gchip ${ok?'ok':'no'}">${ok?'✓':'✗'} ${esc(all[k][1].replace(/ \(.*\)$/,''))}</span>`; }).join('')}</div>`;
+}
+function wissenCard(w, forPrint){
+  const steps=`<ol class="steps">${w.now.map(x=>`<li>${x}</li>`).join('')}</ol>`;
+  const more=(w.more||[]).map(([h,list])=>`<div class="wmore"><div class="label">${h}</div><ul>${list.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
+  if(forPrint) return `<section class="pw"><h3>${w.t}</h3>${steps}${more}</section>`;
+  return `<details class="wcard" id="w-${w.id}" data-search="${esc((w.t+' '+(w.tags||'')+' '+w.now.join(' ')).toLowerCase().replace(/<[^>]+>/g,''))}">
+    <summary><span>${w.t}</span><span class="chev" aria-hidden="true">›</span></summary>
+    <div class="wbody"><div class="label">Sofort tun</div>${steps}${gearChips(w.gear)}${more}</div></details>`;
+}
+function notrufBar(){
+  const g=S.land?giftFor(S.land):null;
+  return `<section class="panel notruf"><div class="label">Notrufnummern</div>
+    <div class="nlist">${NUMMERN.map(([n,name,sub])=>`<a class="nrow" href="tel:${n}"><span class="nnum num">${n==='08001110111'?'0800 111 0 111':n}</span><span><b>${name}</b>${sub?`<br><span class="small muted">${sub}</span>`:''}</span></a>`).join('')}
+    ${g?`<a class="nrow" href="tel:${g.tel.replace(/\s/g,'')}"><span class="nnum num">${g.tel}</span><span><b>Giftnotruf ${g.ort}</b><br><span class="small muted">für ${g.lands.join(', ')}</span></span></a>`:''}</div>
+    <div class="field"><label for="land">Dein Bundesland (für den Giftnotruf)</label>
+      <select id="land"><option value="">– bitte wählen –</option>${LAENDER.map(l=>`<option ${l===S.land?'selected':''}>${l}</option>`).join('')}</select></div></section>`;
+}
+function viewWissen(){
+  let body='';
+  WISSEN.forEach(w=>{ body += w.sec ? `<h2 class="wsec">${w.sec}</h2>` : wissenCard(w); });
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Notfall-Wissen</h1></div>
+  <p class="small muted" style="margin:0">Kurze Anleitungen für Krisen in Deutschland, gespeichert auf deinem Gerät und auch ohne Internet lesbar. Im Ernstfall gelten immer zuerst die Anweisungen von Behörden, Feuerwehr und Polizei.</p>
+  ${notrufBar()}
+  <div class="field"><label for="wsearch" class="label">Suchen</label><input id="wsearch" type="search" placeholder="z. B. Strom, Wasser, Sirene, Brand" autocomplete="off"></div>
+  <div id="wlist">${body}</div>
+  <p class="small muted" id="wnone" hidden>Nichts gefunden. Versuche ein anderes Wort.</p>
+  <div class="row">${CAN_PRINT?`<button class="primary" data-act="printWissen">${icon('print')} Notfall-Wissen drucken</button>`:''}</div>
+  <p class="hint" style="margin:0">Eigene Zusammenfassung nach Empfehlungen von Bundesamt für Bevölkerungsschutz (BBK), Bundesinstitut für Risikobewertung (Giftnotrufe), Verbraucherzentrale (Jodtabletten), Polizei und Deutschem Wetterdienst. Ersetzt keinen Erste-Hilfe-Kurs. Stand: Oktober 2026.</p>`;
+}
+function printWissen(){
+  const g=S.land?giftFor(S.land):null;
+  document.getElementById('printout').innerHTML=`<h1>Notfall-Wissen</h1>
+    <div class="meta">Vorratsplaner ${APP_VERSION} · Stand Oktober 2026 · Im Ernstfall gelten zuerst die Anweisungen der Behörden.</div>
+    <div class="sum" style="grid-template-columns:repeat(3,1fr)">${NUMMERN.slice(0,3).map(([n,name])=>`<div>${name}<b>${n}</b></div>`).join('')}</div>
+    <p class="meta">${g?`<b>Giftnotruf ${g.ort}: ${g.tel}</b> · `:''}Telefonseelsorge: 0800 111 0 111 · Notfall-Infopunkt in meiner Nähe: ______________________________</p>
+    ${WISSEN.map(w=>w.sec?`<h2>${w.sec}</h2>`:wissenCard(w,true)).join('')}
+    <p class="meta" style="margin-top:12pt">Eigene Zusammenfassung nach Empfehlungen von BBK, BfR, Verbraucherzentrale, Polizei und DWD. Ersetzt keinen Erste-Hilfe-Kurs.</p>`;
+  document.body.classList.add('pinv');
+  const done=()=>{ document.body.classList.remove('pinv'); window.removeEventListener('afterprint',done); };
+  window.addEventListener('afterprint',done);
+  setTimeout(()=>window.print(),50);
 }
 
 function printInventory(){
@@ -834,6 +1161,7 @@ root.addEventListener('click', async e=>{
   switch(a){
     case 'print': window.print(); return;
     case 'printInv': printInventory(); return;
+    case 'printWissen': printWissen(); return;
     case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.pending=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
@@ -887,6 +1215,7 @@ function doImport(){
 }
 root.addEventListener('change', e=>{
   const t=e.target;
+  if(t.id==='land'){ S.land=t.value||null; save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='f-group'){ const g=FOOD.find(x=>x.k===t.value); if(!g) return;
     document.getElementById('f-ex').textContent=`Lange haltbar, z. B. ${g.ex}. Mischgerichte zählst du bei der Hauptzutat.`;
     const w=document.getElementById('f-dry-wrap'); w.hidden=!g.form;
@@ -901,6 +1230,10 @@ root.addEventListener('change', e=>{
   if(t.dataset.cash){ S.cash=S.cash||{have:0,target:null}; const n=parseNum(t.value); S.cash[t.dataset.cash]= n>0?n:(t.dataset.cash==='have'?0:null); save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); }
 });
 root.addEventListener('input', e=>{
+  if(e.target.id==='wsearch'){ const q=e.target.value.trim().toLowerCase(); let n=0;
+    document.querySelectorAll('#wlist .wcard').forEach(el=>{ const hit=!q||el.dataset.search.includes(q); el.hidden=!hit; if(hit) n++; if(q&&hit) el.open=true; });
+    document.querySelectorAll('#wlist .wsec').forEach(h=>{ let x=h.nextElementSibling, any=false; while(x&&!x.classList.contains('wsec')){ if(!x.hidden) any=true; x=x.nextElementSibling; } h.hidden=!any; });
+    document.getElementById('wnone').hidden=n>0; return; }
   if(e.target.id==='days'){ setDays(+e.target.value);
     const c=calc(); document.getElementById('dl').textContent=`${c.T} Tage`;
     clearTimeout(window._rt); window._rt=setTimeout(()=>{ const pos=window.scrollY; render(); window.scrollTo(0,pos); document.getElementById('days')?.focus(); },120);
