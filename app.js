@@ -77,7 +77,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(pp==='pf') return `${fmt(petFood(),2)} kg pro Tag für alle Tiere`; if(pp==='pl') return `${fmt(petLitter(),2)} kg pro Tag`;
   if(pp==='pn') return `${q} pro Tier`; if(pp==='pd') return `${q} pro Hund`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION = '1.16';
+const APP_VERSION = '1.17';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -92,6 +92,7 @@ const ICONS = {
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
   back:'<path d="M15 5l-7 7 7 7"/>',
   klein:'<path d="M9 3h6M10 3v3M14 3v3"/><rect x="7" y="6" width="10" height="15" rx="3"/><path d="M7 11h10M10 15h4"/>',
+  share:'<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
   rotate:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>',
   calc:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5v2M4 13h2M18 13h2"/>',
@@ -606,6 +607,46 @@ function render(){
 
 function bar(r){ return `<div class="bar" role="presentation"><i class="s-${status(r)}" style="width:${Math.min(r,1)*100}%"></i></div>`; }
 
+/* ---------- Zielmarken ---------- */
+function milestones(T){ return [...new Set([3,10,T])].filter(x=>x<=T).sort((a,b)=>a-b); }
+function goalPanel(c){
+  if(S.demo || !S.items.length) return '';
+  const levels=milestones(c.T), next=levels.find(x=>c.reach<x);
+  const reached=levels.filter(x=>c.reach>=x);
+  const top=reached.length?reached[reached.length-1]:0;
+  const celebrate = top>0 && (META.mile||0)<top;
+  let todo='';
+  if(next){
+    const wMiss=Math.max(0,(c.waterNeed/c.T)*next-c.water), fMiss=Math.max(0,(c.foodNeed/c.T)*next-c.foodTotal);
+    const parts=[]; if(wMiss>0.05) parts.push(`${fmt(Math.ceil(wMiss*2)/2)} l Wasser`); if(fMiss>0.05) parts.push(`${fmt(fMiss, fMiss<1?2:1)} kg Lebensmittel`);
+    todo = parts.length ? `Dafür fehlen noch ${parts.join(' und ')}.` : '';
+  }
+  return `<section class="panel goal ${celebrate?'cele':''}">
+    ${celebrate?`<div class="cheer" role="status">🎉 <b>Geschafft: Dein Vorrat reicht ${top} ${top===1?'Tag':'Tage'}!</b>${top>=10?' Damit erfüllst du die Empfehlung des Bundesamts.':''}</div>`:''}
+    <div class="label">Deine Ziele</div>
+    <div class="miles">${levels.map(x=>`<div class="mile ${c.reach>=x?'done':''}"><span class="mdot">${c.reach>=x?'✓':x}</span><span class="small">${x} Tage${x===3?'<br><span class="muted">Grundschutz</span>':x===10?'<br><span class="muted">empfohlen</span>':'<br><span class="muted">dein Ziel</span>'}</span></div>`).join('<span class="mline"></span>')}</div>
+    <p style="margin:0">${next?`Dein Vorrat reicht jetzt <b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b>. Nächstes Ziel: <b>${next} Tage</b>. ${todo}`:`<b>Alle Ziele erreicht.</b> Denk an die Verbrauchsliste, damit nichts abläuft.`}</p>
+    ${celebrate?`<button class="secondary small" data-act="mileOk" data-v="${top}" style="align-self:flex-start">Super, weiter</button>`:''}
+  </section>`;
+}
+/* ---------- Weiterempfehlen ---------- */
+const SHARE_TEXT = 'Ich sorge mit dem Vorratsplaner für Notfälle vor: Er zeigt, wie lange der Vorrat reicht, was noch fehlt und was bei Stromausfall, Hochwasser & Co. zu tun ist. Kostenlos, ohne Anmeldung, funktioniert auch ohne Internet:';
+async function shareApp(){
+  const url=APP_URL;
+  try{ if(navigator.share){ await navigator.share({title:'Vorratsplaner', text:SHARE_TEXT, url}); UI.msg='Danke fürs Weiterempfehlen!'; return; } }
+  catch(e){ if(e&&e.name==='AbortError'){ UI.msg=''; return; } }
+  UI.shareOpen=true;
+}
+function shareBox(){
+  const full=`${SHARE_TEXT} ${APP_URL}`;
+  return `<section class="panel"><div class="label">App weiterempfehlen</div>
+    <p class="small" style="margin:0">Je mehr Menschen vorsorgen, desto besser kommt das ganze Dorf durch eine Krise.</p>
+    <div class="row"><button class="primary" data-act="share">${icon('share')} Weiterempfehlen</button></div>
+    ${UI.shareOpen?`<div class="row"><a class="secondary btnlink" href="https://wa.me/?text=${encodeURIComponent(full)}" target="_blank" rel="noopener">Per WhatsApp senden</a><button class="secondary" data-act="shareCopy">Link kopieren</button></div>
+      <p class="hint" style="margin:0">${esc(APP_URL)}</p>`:''}
+  </section>`;
+}
+
 function viewHome(c){
   const nItems=S.items.length, nParts=Object.values(S.checks).reduce((a,b)=>a+b,0)+Object.values(S.docs||{}).filter(v=>v===1).length;
   return `<div class="topbar"><h1>Vorratsplaner</h1><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
@@ -613,7 +654,7 @@ function viewHome(c){
   ${expiryBand(c)}
   ${calDue()?calPrompt():(backupDue()?backupBand():installBand())}
   ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
-  <p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>
+  ${goalPanel(c)||'<p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>'}
   <div class="choices">
     <button class="choice" data-act="go" data-v="vorrat"><span class="choice-ico">${icon('shelf')}</span>
       <span class="choice-txt"><span class="ct">Mein Vorrat</span><span class="small muted">Artikel eintragen, Mengen und Haltbarkeit ändern</span>
@@ -625,7 +666,8 @@ function viewHome(c){
       <span class="choice-txt"><span class="ct">Notfall-Wissen</span><span class="small muted">Was tun bei Stromausfall, Hochwasser, Brand und anderen Krisen</span>
       <span class="small choice-fact">Funktioniert auch ohne Internet</span></span></button>
   </div>
-  <a class="whatsnew" href="versionen.html" data-act="seenVersion">${META.seenVersion!==APP_VERSION?`<span class="newdot">Neu: Version ${APP_VERSION}</span> `:''}Was kann die App alles? Unter <b>„Was ist neu?“</b> stehen alle Funktionen und Änderungen der Versionen. ›</a>`;
+  <a class="whatsnew" href="versionen.html" data-act="seenVersion">${META.seenVersion!==APP_VERSION?`<span class="newdot">Neu: Version ${APP_VERSION}</span> `:''}Was kann die App alles? Unter <b>„Was ist neu?“</b> stehen alle Funktionen und Änderungen der Versionen. ›</a>
+  ${S.demo?'':shareBox()}`;
 }
 
 function viewVorrat(c){
@@ -985,6 +1027,7 @@ function backupBand(){
 
 function viewSettings(){
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Einstellungen</h1></div>
+  ${shareBox()}
   <section class="panel"><h2>Anzeige</h2>
     <label class="check"><input type="checkbox" id="big-font" ${META.big?'checked':''}> <span><b>Große Schrift</b><br><span class="hint">Alles wird größer und leichter lesbar.</span></span></label>
   </section>
@@ -1087,6 +1130,9 @@ root.addEventListener('click', async e=>{
       else { const cur=S[k]||0; if(cur+d>=0 && S.persons+d<=20 && (d>0 || cur>0)){ S[k]=cur+d; S.persons+=d; } }
       save(); break; }
     case 'startOwn': S=emptyState(); S.persons=1; S.kids4=0; S.kids1=0; S.pets={}; S.petsOn=false; UI.view='start'; UI.ob=1; window.scrollTo(0,0); break;
+    case 'mileOk': META.mile=Math.max(META.mile||0,+b.dataset.v); DB.put(META,'meta'); break;
+    case 'share': await shareApp(); break;
+    case 'shareCopy': await copy(`${SHARE_TEXT} ${APP_URL}`, 'Text mit Link kopiert. Jetzt z. B. in WhatsApp einfügen.', null); break;
     case 'editHH': UI.editHH=!UI.editHH; break;
     case 'ob': { const d=+b.dataset.d; UI.ob=(UI.ob||1)+d; window.scrollTo(0,0); if(UI.ob>3){ META.onboarded=true; DB.put(META,'meta'); S.demo=false; save(); askCal(); UI.view='home'; UI.ob=1; } break; }
     case 'install': if(INSTALL.ev){ INSTALL.ev.prompt(); try{ const r=await INSTALL.ev.userChoice; if(r&&r.outcome==='accepted'){ META.installHidden=true; DB.put(META,'meta'); } }catch(err){} INSTALL.ev=null; } break;

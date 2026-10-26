@@ -4,7 +4,7 @@
 
 👉 **App öffnen:** https://t43w41t3w01f.github.io/vorratsplaner/
 
-Aktuelle Version: **1.16** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.17** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -15,6 +15,8 @@ Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reich
 - **Schnell eintragen:** fertige Produkte antippen (z. B. „Nudeln 500 g“, „Kiste Wasser“), Anzahl mit + und −.
 - **Große Schrift** per Schalter, große Knöpfe, Alltagssprache.
 - **Installationshilfe** direkt in der App.
+- **Zielmarken:** 3 Tage, 10 Tage, eigenes Ziel – mit Angabe, was bis zum nächsten Ziel fehlt.
+- **App weiterempfehlen** per WhatsApp oder Link.
 
 ### Berechnung
 - Personen im Haushalt und Ziel-Tage (1–90) einstellen, Standard sind 10 Tage nach BBK.

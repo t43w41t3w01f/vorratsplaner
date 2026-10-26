@@ -2,6 +2,11 @@
 
 Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.17 – 26. Oktober 2026
+Einfach für alle (Paket 2). Rücksprungpunkt: Zweig `stand-v1.16`.
+- **Zielmarken** auf der Startseite: 3 Tage (Grundschutz), 10 Tage (empfohlen), eigenes Ziel. Mit konkreter Angabe, was bis zum nächsten Ziel fehlt, und einmaligem Glückwunsch beim Erreichen.
+- **App weiterempfehlen:** Teilen mit Text und Link (Startseite und Einstellungen), Ersatz per WhatsApp-Link oder Kopieren.
+
 ## 1.16 – 26. Oktober 2026
 Einfach für alle (Paket 1). Rücksprungpunkt: Zweig `stand-v1.15`.
 - **Einstieg in 3 Schritten** (Haushalt, Haustiere, Bundesland) statt Beispieldaten beim ersten Öffnen.

@@ -235,6 +235,17 @@ footer .brand{display:block;margin-top:10px;font-family:var(--f-display);font-we
 .nrow{grid-template-columns:minmax(0,6.5em) minmax(0,1fr)!important}
 .nrow > span{min-width:0;overflow-wrap:break-word;hyphens:auto}
 @media (max-width:380px){.choice{gap:12px;padding:14px}.choice-ico{width:52px;height:52px}.choice-ico svg{width:28px;height:28px}}
+.goal{border-color:var(--olive)}
+.goal.cele{background:color-mix(in srgb,var(--ok) 12%,var(--paper))}
+.cheer{font-size:1.05rem}
+.miles{display:flex;align-items:flex-start;gap:6px}
+.mile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;flex:none;min-width:4.2rem}
+.mdot{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;border:2px solid var(--line);font-weight:800;font-variant-numeric:tabular-nums;background:var(--paper)}
+.mile.done .mdot{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.mline{flex:1;height:2px;background:var(--line);margin-top:1.3rem;min-width:8px}
+.primary svg{vertical-align:-4px}
+.secondary.btnlink{color:var(--ink)} .primary.btnlink{color:#fff}
+.hint{overflow-wrap:anywhere}
 footer{font-size:.8rem;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:no-preference){.bar i,.ring circle{transition:all .35s ease}}
 </style>
