@@ -47,7 +47,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 ## Offen
 
 - [x] **Domain bei GitHub bestätigen** *(erledigt 27.10.2026, TXT-Eintrag bei INWX nicht löschen)* (Profil → Settings → Pages → Add a domain, TXT-Eintrag bei INWX): schützt davor, dass jemand anderes hamsterplan.de bei GitHub einträgt
-- [ ] **Zwei-Faktor-Anmeldung bei INWX und GitHub**: Wer eines der Konten übernimmt, kann jedem Nutzer eine veränderte App ausliefern
+- [x] **Zwei-Faktor-Anmeldung bei INWX und GitHub** *(erledigt 27.10.2026: INWX mit Authenticator, GitHub mit Passkey und Authenticator)*: Wer eines der Konten übernimmt, kann jedem Nutzer eine veränderte App ausliefern
 - [ ] Optional: **DNSSEC** bei INWX einschalten und **CAA-Eintrag** (nur Let's Encrypt darf Zertifikate ausstellen)
 
 - [ ] **Baby-Mengen prüfen** (8 Windeln, Pulver-Packung je 5 Tage, 2 Beikost-Portionen, 1 l Wasser pro Tag), bisher eigene Richtwerte
