@@ -2,6 +2,15 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.19 – 27. Oktober 2026
+Medikamente, Pflege, Schutz vor Datenverlust. Rücksprungpunkt: Zweig `stand-v1.18`.
+- **Meine Medikamente** (für alle): Name, für wen, Menge pro Tag, pro Woche oder bei Bedarf, Vorrat, Kühlpflicht. Der Vorrat zieht sich täglich selbst ab. Anzeige „reicht X Tage, bis …“, Hinweis „Rezept rechtzeitig holen“, Eintrag in Einkaufsliste und Ausdruck. Keine Einnahme-Erinnerung, keine Dosierungsvorgaben.
+- Der Punkt „Persönliche Medikamente (Packung)“ in der Checkliste entfällt, die Medikamentenliste ersetzt ihn.
+- **Kästchen „Pflege oder Hilfe im Alltag“**: Bereich „Pflege & Hilfsmittel“ mit „Entfällt“ je Punkt, Inkontinenzmaterial 4 Stück pro Tag (eigener Richtwert), Hinweis zu Strom und Hausnotruf (Startseite einmalig, Karte „Stromausfall“), Pflegegrad-Bescheid und Medikationspläne in der Dokumentenmappe. Mengen für Essen und Wasser unverändert.
+- **Schutz vor Datenverlust**: erste Sicherungs-Erinnerung nach 5 Einträgen, Knopf „An mich selbst schicken“, Sicherungsstatus auf der Startseite, Sicherung hat Vorrang vor dem Kalender-Hinweis, „Sicherung einspielen“ im ersten Schritt des Einstiegs.
+- Sicherheit: Hinweistexte in der Einkaufsliste werden jetzt ebenfalls maskiert (Namen aus der Dokumentenmappe).
+- Datenschutzseite: Medikamente sind Gesundheitsdaten, bleiben auf dem Gerät und stehen in der Sicherungsdatei.
+
 ## 1.18 – 27. Oktober 2026
 Neuer Name und eigene Adresse. Rücksprungpunkt: Zweig `stand-v1.17`.
 - **Neuer Name „Hamsterplan“** statt „Vorratsplaner“ (bisheriger Projektname).

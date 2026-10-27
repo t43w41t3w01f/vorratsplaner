@@ -24,7 +24,7 @@ const FOOD_DAY = FOOD.reduce((s,g)=>s+g.d,0);
 // Checklisten: [Schlüssel, Name, Menge, pro Person?]
 const CHECK = {
   hilfe:   {n:'Erste Hilfe', items:[['verband','DIN-Verbandskasten',1],['pflaster','Pflaster-Set',1],['desinf','Wund- und Hautdesinfektion',1],['thermo','Fieberthermometer',1],['pinzette','Splitterpinzette',1]]},
-  medizin: {n:'Medikamente', items:[['eigene','Persönliche Medikamente (Packung)',1,true],['schmerz','Schmerzmittel',1],['durchfall','Mittel gegen Durchfall',1],['erkaelt','Mittel gegen Erkältung',1],['salbe','Salbe für Stiche und Sonnenbrand',1]]},
+  medizin: {n:'Medikamente', items:[['schmerz','Schmerzmittel',1],['durchfall','Mittel gegen Durchfall',1],['erkaelt','Mittel gegen Erkältung',1],['salbe','Salbe für Stiche und Sonnenbrand',1]]},
   hygiene: {n:'Hygiene', items:[['seife','Seife',1,true],['zahnb','Zahnbürste',1,true],['paste','Zahnpasta',1],['klo','Toilettenpapier (Rollen)',4,true],['muell','Müllbeutel (Rolle)',1],['handdes','Handdesinfektion',1]]},
   licht:   {n:'Licht & Strom', items:[['lampe','Taschenlampe',1],['batt','Ersatzbatterien (Pack)',2],['radio','Radio mit Kurbel oder Batterie',1],['kerzen','Kerzen',6],['feuer','Feuerzeug oder Streichhölzer',2],['powerbank','Powerbank',1]]},
   waerme:  {n:'Wärme & Kochen', items:[['decke','Warme Decke oder Schlafsack',1,true],['kocher','Campingkocher',1],['kartusche','Gaskartuschen',3]]},
@@ -36,6 +36,11 @@ const CHECK = {
   klein:   {n:'Kleinkind', only:'kids1', items:[['windeln','Windeln (Stück)',6,'k',true],['feucht','Feuchttücher (Packung, je 5 Tage)',0.2,'k',true],
     ['brei','Kleinkindnahrung: Gläschen oder Brei',1,'k',true],['mpulver','Milchpulver oder H-Milch für Kleinkinder (Packung)',1,'k'],
     ['becher','Trinkbecher oder Flasche',1,'k'],['kfieber','Fieber- und Schmerzmittel für Kinder',1],['wund','Wundschutzcreme',1],['spiel','Beschäftigung (Buch, Kuscheltier, Spiel)',1,'k']]},
+  // Pflege: nur mit Haken „Pflege oder Hilfe im Alltag“. optional = Punkte lassen sich mit „Entfällt“ abwählen. Inkontinenz 4 Stück pro Tag ist ein eigener Richtwert
+  pflege:  {n:'Pflege & Hilfsmittel', only:'care', optional:true, items:[['brille','Ersatzbrille',1],['hoerbatt','Hörgeräte-Batterien (Pack)',1],
+    ['prothese','Haftcreme und Reinigungstabletten für Zahnprothese',1],['inkont','Inkontinenzmaterial (Stück)',4,false,true],['einmalhs','Einmalhandschuhe (Packung)',1],
+    ['teststr','Blutzucker-Teststreifen und Lanzetten (Packung)',1],['messbatt','Ersatzbatterien für Messgeräte (Blutdruck, Zucker)',1],
+    ['gehhilfe','Gehhilfe oder Rollator griffbereit',1],['telliste','Zettel mit Telefonnummern: Hausarzt, Pflegedienst, Angehörige',1]]},
   doku:    {n:'Dokumente & Geld', items:[['mappe','Dokumentenmappe (Originale)',1],['kopien','Kopien wichtiger Dokumente',1],['bargeld','Bargeld in kleinen Scheinen',1]]},
 };
 // Dokumente nach BBK-Ratgeber. p = pro Person, h = einmal für den Haushalt
@@ -43,12 +48,15 @@ const DOCS = {
   orig:{n:'Dokumentenmappe', sub:'Originale oder beglaubigte Kopien', view:'docs-orig', items:[
     ['geburt','Geburtsurkunde','p'],['zeugnis','Zeugnisse und Qualifikationsnachweise','p'],['verfuegung','Patientenverfügung und Vollmacht','p'],
     ['familie','Familienstammbuch, Heirats- und Sterbeurkunden','h'],['konto','Sparbücher und Kontoverträge','h'],['wertpapier','Aktien und Wertpapiere','h'],
-    ['versich','Versicherungspolicen','h'],['einkommen','Renten-, Einkommens- und Steuerbescheide','h'],['vertrag','Verträge (Miete, Leasing, Kauf)','h'],['testament','Testament','h']]},
+    ['versich','Versicherungspolicen','h'],['pflegegrad','Pflegegrad-Bescheid und Pflegevertrag','h','care'],['einkommen','Renten-, Einkommens- und Steuerbescheide','h'],['vertrag','Verträge (Miete, Leasing, Kauf)','h'],['testament','Testament','h']]},
   copy:{n:'Kopien wichtiger Dokumente', sub:'Eine Kopie reicht', view:'docs-copy', items:[
     ['ausweis','Personalausweis','p'],['pass','Reisepass','p'],['fuehrer','Führerschein','p'],['impf','Impfpass','p'],
-    ['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
+    ['medplan','Medikationspläne aller, die Medikamente nehmen','h','meds'],['kfz','Fahrzeugpapiere','h'],['grundbuch','Grundbuchauszug','h'],['melde','Meldebescheinigung','h'],['beitrag','Belege über Versicherungs- und Rentenbeiträge','h']]},
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
+// 4. Feld: 'care' nur mit Pflege-Haken, 'meds' nur mit eingetragenen Medikamenten (oder Pflege)
+const docOn = i => !i[3] || (i[3]==='care'&&S.care) || (i[3]==='meds'&&(S.care||(S.meds||[]).length>0));
+const docItems = kind => DOCS[kind].items.filter(docOn);
 // Nahrung nach DGE-Richtwerten: Kinder 4–9 Jahre ca. 70 %, Kleinkinder 1–3 Jahre ca. 50 % eines Erwachsenen. Wasser und Checklisten zählen voll.
 const EAT_KIDS4 = 0.7, EAT_KIDS1 = 0.5;
 const kids4 = () => S.kids4||0, kids1 = () => S.kids1||0;
@@ -68,16 +76,18 @@ const dogCount = () => petN('dogS')+petN('dogM')+petN('dogL');
 const petWater = () => PETS.reduce((a,x)=>a+petN(x.k)*x.water,0);
 const petFood  = () => PETS.reduce((a,x)=>a+petN(x.k)*x.food,0);
 const petLitter= () => PETS.reduce((a,x)=>a+petN(x.k)*(x.litter||0),0);
-function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0) || (v.only==='pets' && petCount()>0)); }
+function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0) || (v.only==='pets' && petCount()>0) || (v.only==='care' && S.care)); }
 function needOf(item, p, T){ const [,, q, pp, perDay]=item;
+  if(S.checkNa && S.checkNa[item[0]]) return 0;
   if(pp==='pf') return Math.ceil(petFood()*T); if(pp==='pl') return Math.ceil(petLitter()*T);
   if(pp==='pn') return q*petCount(); if(pp==='pd') return q*dogCount();
   const mult = pp==='k' ? kids1() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
 function needText(item){ const [,, q, pp, perDay]=item;
   if(pp==='pf') return `${fmt(petFood(),2)} kg pro Tag für alle Tiere`; if(pp==='pl') return `${fmt(petLitter(),2)} kg pro Tag`;
   if(pp==='pn') return `${q} pro Tier`; if(pp==='pd') return `${q} pro Hund`;
+  if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.18';
+const APP_VERSION='1.19';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -101,6 +111,7 @@ const ICONS = {
   phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
   shelf:'<path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16"/><rect x="7" y="7" width="4" height="5"/><rect x="13" y="9" width="4" height="3"/><rect x="8" y="15" width="7" height="5"/>',
   print:'<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  pflege:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 9.5v5M9.5 12h5"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
 };
 const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
@@ -360,7 +371,7 @@ const WISSEN = [
 function demoState(){
   const it = (cat,group,name,size,unit,count,mhd)=>({id:uid(),cat,group,name,size,unit,count,mhd,demo:true});
   return {persons:2, days:10, demo:true, checks:{verband:1,thermo:1,schmerz:1,seife:2,zahnb:2,paste:1,klo:4,lampe:1,batt:1,kerzen:6,feuer:1,decke:2},
-    names:[], cash:{have:150,target:null},
+    names:[], cash:{have:150,target:null}, meds:[], checkNa:{}, care:false,
     docs:{'orig|h|versich':1,'orig|h|konto':1,'orig|p0|geburt':1,'orig|p1|geburt':1,'copy|p0|ausweis':1,'copy|p1|ausweis':1,'copy|p1|fuehrer':'na','copy|h|grundbuch':'na'},
     items:[
       it('wasser',null,'Mineralwasser 1,5 l',1.5,'l',12,'2027-08'),
@@ -378,7 +389,7 @@ function demoState(){
       it('nahrung','fett','Rapsöl',500,'ml',1,'2027-09'),
     ]};
 }
-function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, pets:S?S.pets||{}:{}, petsOn:S?!!S.petsOn:false, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}}; }
+function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, pets:S?S.pets||{}:{}, petsOn:S?!!S.petsOn:false, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}, meds:[], checkNa:{}, care:S?!!S.care:false}; }
 
 /* ---------- Helfer ---------- */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -411,7 +422,7 @@ function personName(i){ return (S.names&&S.names[i]||'').trim() || `Person ${i+1
 function cashTarget(){ return S.cash&&S.cash.target>0 ? S.cash.target : S.persons*CASH_PER_PERSON; }
 // Stand einer Dokumentenliste: offene Punkte über alle Personen und den Haushalt
 function docStatus(kind){
-  const d=DOCS[kind]; let total=0, done=0; const open=[];
+  const d={items:docItems(kind)}; let total=0, done=0; const open=[];
   const scopes=[...Array(S.persons).keys()].map(i=>'p'+i).concat('h');
   scopes.forEach(sc=>d.items.forEach(([k,n,t])=>{ if((t==='p')!==(sc!=='h')) return;
     total++; const v=(S.docs||{})[`${kind}|${sc}|${k}`]; if(v) done++; else open.push(sc==='h'?n:`${n} (${personName(+sc.slice(1))})`); }));
@@ -423,6 +434,17 @@ function have(key){
   if(key==='bargeld') return (S.cash?.have||0)>=cashTarget()?1:0;
   return S.checks[key]||0;
 }
+
+/* ---------- Meine Medikamente: Vorrat zieht sich täglich selbst ab ---------- */
+const MED_PER = {day:'pro Tag', week:'pro Woche', need:'nur bei Bedarf'};
+const dayNum = s => Math.floor(Date.parse(s+'T12:00:00')/864e5);
+function medNow(m){ if(m.per==='need') return m.stock;
+  const days=Math.max(0, dayNum(today())-dayNum(m.at)); const used=m.per==='day' ? m.dose*days : m.dose*Math.floor(days/7);
+  return Math.max(0, Math.round((m.stock-used)*100)/100); }
+function medDays(m){ if(m.per==='need'||!(m.dose>0)) return null; const n=medNow(m); return m.per==='day' ? Math.floor(n/m.dose+1e-9) : Math.floor(n/m.dose+1e-9)*7; }
+function medUntil(m){ const d=medDays(m); if(d===null) return ''; const x=new Date(); x.setDate(x.getDate()+d); return x.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+const medShort = T => (S.meds||[]).filter(m=>{ const d=medDays(m); return d!==null && d<T; });
+const medCold = () => (S.meds||[]).filter(m=>m.cold);
 
 /* ---------- Speicher: IndexedDB, sonst nur im Arbeitsspeicher ---------- */
 const DB = {
@@ -484,11 +506,20 @@ function calPrompt(){
 function calDue(){ return !S.demo && (META.cal==='ask' || (META.cal==='later' && !UI.calLaterShown)); }
 
 function daysSince(ts){ return ts ? Math.floor((Date.now()-ts)/864e5) : null; }
+// Einträge: Artikel, Medikamente und abgehakte Ausrüstung. Erste Erinnerung schon nach FIRST_BACKUP Einträgen
+const FIRST_BACKUP = 5;
+const entryCount = () => S.items.length + (S.meds||[]).length + Object.values(S.checks||{}).filter(v=>v>0).length;
 function backupDue(){
-  if(S.demo || !S.items.length) return false;
+  if(S.demo) return false; const n=entryCount(); if(!n) return false;
   if(Date.now() < (META.snoozeUntil||0)) return false;
   const d=daysSince(META.lastBackup);
-  return d===null || d>=BACKUP_DAYS || (META.changes||0)>=BACKUP_CHANGES;
+  return d===null ? n>=FIRST_BACKUP : (d>=BACKUP_DAYS || (META.changes||0)>=BACKUP_CHANGES);
+}
+function backupStatus(){
+  if(S.demo || !entryCount()) return '';
+  const d=daysSince(META.lastBackup), cls = d===null ? 'bad' : d<=BACKUP_DAYS ? 'ok' : d<=30 ? 'warn' : 'bad';
+  const txt = d===null ? 'Noch keine Sicherung gemacht' : `Letzte Sicherung: ${d===0?'heute':d===1?'gestern':`vor ${d} Tagen`}`;
+  return `<button class="bstat t-${cls}" data-act="go" data-v="settings"><span aria-hidden="true">${d===null||cls==='bad'?'⚠':'✓'}</span> ${txt} ›</button>`;
 }
 function backupData(){ return JSON.stringify({app:'hamsterplan', version:1, savedAt:new Date().toISOString(), ...S}, null, 1); }
 function backupName(){ return `hamsterplan-sicherung-${today()}.json`; }
@@ -497,7 +528,7 @@ function canShareFile(){ try{ return !!(navigator.canShare && navigator.canShare
 async function doBackup(mode){
   const text=backupData();
   if(mode==='share'){
-    try{ await navigator.share({files:[new File([text],backupName(),{type:'application/json'})], title:'Hamsterplan-Sicherung'}); markBackedUp(); UI.msg='Sicherung geteilt.'; }
+    try{ await navigator.share({files:[new File([text],backupName(),{type:'application/json'})], title:'Hamsterplan-Sicherung'}); markBackedUp(); UI.msg='Sicherung verschickt. Bewahre die Nachricht oder Mail gut auf.'; }
     catch(e){ if(e&&e.name==='AbortError') UI.msg='Teilen abgebrochen.'; else UI.msg='Teilen nicht möglich. Nutze „Als Datei speichern“.'; }
     return;
   }
@@ -524,6 +555,14 @@ function cleanItem(it){
   if(it.demo===true) out.demo=true;
   return out;
 }
+function cleanMed(m){
+  if(!m || typeof m!=='object') return null;
+  const name=str(m.name,60); if(!name) return null;
+  const per=['day','week','need'].includes(m.per) ? m.per : 'day';
+  const dose=num(m.dose,0.01,1000, per==='need'?1:null); if(dose===null) return null;
+  return {id: typeof m.id==='string' && /^[a-z0-9]{4,40}$/.test(m.id) ? m.id : uid(), name, who:str(m.who,40), dose, per,
+    stock:num(m.stock,0,1e6,0), cold:m.cold===true, at: typeof m.at==='string' && /^(19|20|21)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(m.at) ? m.at : today()};
+}
 function cleanState(d){
   if(!d || typeof d!=='object' || !Array.isArray(d.items)) throw new Error('ungültig');
   const persons=int(d.persons,1,20,2), kids4=int(d.kids4,0,19,0), kids1=int(d.kids1,0,19,0);
@@ -533,11 +572,13 @@ function cleanState(d){
   const docs={}; if(d.docs&&typeof d.docs==='object') for(const k of Object.keys(d.docs)) if(/^(orig|copy)\|(p\d{1,2}|h)\|[a-z]{2,20}$/.test(k) && (d.docs[k]===1||d.docs[k]==='na')) docs[k]=d.docs[k];
   const pets={}; if(d.pets&&typeof d.pets==='object') PETS.forEach(x=>{ const n=int(d.pets[x.k],0,20,0); if(n) pets[x.k]=n; });
   const items=d.items.slice(0,2000).map(cleanItem).filter(Boolean);
-  const seen=new Set(); items.forEach(it=>{ if(seen.has(it.id)) it.id=uid(); seen.add(it.id); });
+  const meds=Array.isArray(d.meds) ? d.meds.slice(0,100).map(cleanMed).filter(Boolean) : [];
+  const seen=new Set(); items.concat(meds).forEach(it=>{ if(seen.has(it.id)) it.id=uid(); seen.add(it.id); });
+  const checkNa={}; if(d.checkNa&&typeof d.checkNa==='object') for(const k of Object.keys(d.checkNa)) if(known.has(k) && d.checkNa[k]===true) checkNa[k]=true;
   return {land: LAENDER.includes(d.land) ? d.land : null, persons, kids4:k4, kids1:k1, pets, petsOn: d.petsOn===true || Object.keys(pets).length>0,
     days:int(d.days,1,90,10), demo: d.demo===true, checks, items, docs,
     names: Array.isArray(d.names) ? d.names.slice(0,20).map(n=>str(n,40)) : [],
-    cash: {have: num(d.cash?.have,0,1e6,0), target: num(d.cash?.target,1,1e6,null)}};
+    cash: {have: num(d.cash?.have,0,1e6,0), target: num(d.cash?.target,1,1e6,null)}, meds, checkNa, care: d.care===true};
 }
 function parseBackup(text){
   if(typeof text!=='string' || text.length>5e6) throw new Error('zu groß');
@@ -546,9 +587,9 @@ function parseBackup(text){
 }
 function restore(data, msg){
   if(!S.demo){ const d=today(); SNAPS=SNAPS.filter(x=>x.day!==d+'-vorher'); SNAPS.unshift({day:d+'-vorher', at:Date.now(), data:JSON.parse(JSON.stringify(S))}); SNAPS=SNAPS.slice(0,8); DB.put(SNAPS,'snaps'); }
-  S=data; save(); markBackedUp(); UI.pending=null; UI.msg=msg; UI.view='home';
+  S=data; save(); markBackedUp(); META.onboarded=true; DB.put(META,'meta'); UI.pending=null; UI.impErr=''; UI.msg=msg; UI.view='home'; UI.ob=1;
 }
-function summary(d){ const n=d.items.length; return `${n} ${n===1?'Artikel':'Artikel'}, ${d.persons} ${d.persons===1?'Person':'Personen'}`; }
+function summary(d){ const n=d.items.length, m=(d.meds||[]).length; return `${n} Artikel${m?`, ${m} ${m===1?'Medikament':'Medikamente'}`:''}, ${d.persons} ${d.persons===1?'Person':'Personen'}`; }
 
 /* ---------- Zustand ---------- */
 let S = null;
@@ -580,7 +621,7 @@ function calc(){
     checks[k]={need,have:got,ratio:need?got/need:1};
   }
   return {p,T,water,food,foodTotal,waterReach,foodReach,reach,
-    bottleneck: waterReach<=foodReach?'Wasser':'Nahrung', expired, soon, checks,
+    bottleneck: waterReach<=foodReach?'Wasser':'Nahrung', expired, soon, checks, medShort:medShort(T),
     waterNeed:wDay*T, petWaterNeed:petWater()*T, foodNeed:eat*FOOD_DAY*T, eat};
 }
 
@@ -649,10 +690,11 @@ function shareBox(){
 
 function viewHome(c){
   const nItems=S.items.length, nParts=Object.values(S.checks).reduce((a,b)=>a+b,0)+Object.values(S.docs||{}).filter(v=>v===1).length;
-  return `<div class="topbar"><div class="brand"><img src="icons/icon-192.png" alt="" width="52" height="52"><div><h1>Hamsterplan</h1><div class="tagline">Vorrat wie ein Hamster: Stück für Stück.</div></div></div><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
+  return `<div class="topbar"><div class="appbrand"><img src="icons/icon-192.png" alt="" width="52" height="52"><div><h1>Hamsterplan</h1><div class="tagline">Vorrat wie ein Hamster: Stück für Stück.</div></div></div><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
   ${S.demo?`<div class="band info"><div style="display:flex;flex-direction:column;gap:8px"><div><b>Das ist ein Beispiel.</b> <span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. Das sind nicht deine Sachen.</span></div><button class="primary big" data-act="startOwn" style="align-self:flex-start">Meinen eigenen Vorrat anlegen</button></div></div>`:''}
   ${expiryBand(c)}
-  ${calDue()?calPrompt():(backupDue()?backupBand():installBand())}
+  ${S.care&&!META.careSeen&&!S.demo?careBand():''}
+  ${backupDue()?backupBand():(calDue()?calPrompt():installBand())}
   ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
   ${goalPanel(c)||'<p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>'}
   <div class="choices">
@@ -666,6 +708,7 @@ function viewHome(c){
       <span class="choice-txt"><span class="ct">Notfall-Wissen</span><span class="small muted">Was tun bei Stromausfall, Hochwasser, Brand und anderen Krisen</span>
       <span class="small choice-fact">Funktioniert auch ohne Internet</span></span></button>
   </div>
+  ${backupStatus()}
   <a class="whatsnew" href="versionen.html" data-act="seenVersion">${META.seenVersion!==APP_VERSION?`<span class="newdot">Neu: Version ${APP_VERSION}</span> `:''}Was kann die App alles? Unter <b>„Was ist neu?“</b> stehen alle Funktionen und Änderungen der Versionen. ›</a>
   ${S.demo?'':shareBox()}`;
 }
@@ -686,7 +729,7 @@ function viewVorrat(c){
   <div class="grid">
     ${t('wasser','Wasser',`${fmt(c.water)} l in ${nW} ${nW===1?'Eintrag':'Einträgen'}`,warn('wasser'))}
     ${t('nahrung','Nahrung',`${fmt(c.foodTotal)} kg in ${nF} ${nF===1?'Eintrag':'Einträgen'}`,warn('nahrung'))}
-    ${activeChecks().map(([k,v])=>t(k,v.n,`${c.checks[k].have} von ${c.checks[k].need} Teilen`,bar(c.checks[k].ratio))).join('')}
+    ${activeChecks().map(([k,v])=>t(k,v.n,`${c.checks[k].have} von ${c.checks[k].need} Teilen`,bar(c.checks[k].ratio)+(k==='medizin'?medTileNote(c):''))).join('')}
   </div>
   <div class="row">${CAN_PRINT?`<button class="primary" data-act="printInv">${icon('print')} Vorrat drucken</button>`:''}<button class="secondary" data-act="go" data-v="calc">Zur Berechnung</button></div>
   ${CAN_PRINT?`<p class="hint" style="margin:0">Druckt den kompletten Vorrat mit Mengen, Haltbarkeit und Checklisten, auch als PDF. Tipp: ausgedruckt zum Vorrat legen, das funktioniert auch ohne Strom.</p>`:''}`;
@@ -696,7 +739,8 @@ function householdEditor(){
   return `${[['adults','Erwachsene und Kinder ab 10 Jahren',adults()],['kids4','Kinder 4–9 Jahre',kids4()],['kids1','Kleinkinder 1–3 Jahre',kids1()]].map(([k,n,v])=>`
     <div class="spread"><span>${n}</span>
       <div class="stepper"><button data-act="pers" data-k="${k}" data-d="-1" aria-label="${n}: eins weniger">−</button><span class="num">${v}</span><button data-act="pers" data-k="${k}" data-d="1" aria-label="${n}: eins mehr">+</button></div></div>`).join('')}
-    <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll (Richtwerte der Deutschen Gesellschaft für Ernährung).${kids1()?' Für Kleinkinder gibt es einen eigenen Bereich „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>`;
+    <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll (Richtwerte der Deutschen Gesellschaft für Ernährung).${kids1()?' Für Kleinkinder gibt es einen eigenen Bereich „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>
+    <label class="check"><input type="checkbox" id="care-on" ${S.care?'checked':''}> <span><b>Pflege oder Hilfe im Alltag</b><br><span class="hint">Jemand im Haushalt ist pflegebedürftig oder braucht Hilfsmittel, z. B. Rollator, Hörgerät, Inkontinenzmaterial oder Geräte, die Strom brauchen. Dann gibt es einen eigenen Bereich „Pflege &amp; Hilfsmittel“ und Hinweise für den Stromausfall. Die Mengen für Essen und Wasser ändern sich nicht.</span></span></label>`;
 }
 function petEditor(){
   return `<label class="check petcheck"><input type="checkbox" id="pets-on" ${S.petsOn||petCount()?'checked':''}> <span><b>Haustiere im Haushalt</b>${petCount()?` <span class="num">(${petCount()})</span>`:''}<br><span class="hint">Haken setzen, um Hund, Katze oder Kleintier einzutragen.</span></span></label>
@@ -709,6 +753,7 @@ function householdText(){
   if(kids4()) parts.push(`${kids4()} ${kids4()===1?'Kind':'Kinder'} (4–9)`);
   if(kids1()) parts.push(`${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'}`);
   if(petCount()) parts.push(`${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`);
+  if(S.care) parts.push('mit Pflege- oder Hilfsbedarf');
   return parts.join(', ');
 }
 function viewStart(){
@@ -717,6 +762,8 @@ function viewStart(){
   let body='';
   if(st===1) body=`<img src="icons/icon-192.png" alt="" width="96" height="96" style="border-radius:20px"><h1>Willkommen beim Hamsterplan</h1>
     <p class="lead" style="margin:0">Vorrat wie ein Hamster: Stück für Stück, nicht im Panikkauf. Der Hamsterplan hilft dir, für Notfälle wie einen langen Stromausfall vorzusorgen. Drei kurze Fragen, dann geht es los.</p>
+    <details class="panel restorebox" ${UI.pending||UI.impErr?'open':''}><summary><b>Du hattest die App schon?</b> Hier deine Sicherung einspielen</summary>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px"><p class="small muted" style="margin:0">Wähle die Sicherungsdatei, z. B. aus WhatsApp, deinen Mails oder dem Ordner „Downloads“.</p>${restoreUI()}</div></details>
     <label class="check"><input type="checkbox" id="big-font" ${META.big?'checked':''}> <span><b>Große Schrift</b><br><span class="hint">Alles wird größer und leichter lesbar. Lässt sich jederzeit in den Einstellungen ändern.</span></span></label>
     <section class="panel"><h2 style="font-size:1.2rem">Wer lebt in deinem Haushalt?</h2>${householdEditor()}</section>`;
   else if(st===2) body=`<h1>Haustiere</h1><p class="lead" style="margin:0">Haben Tiere bei dir ein Zuhause? Dann rechnet die App ihr Wasser und Futter mit.</p>
@@ -785,7 +832,7 @@ function wissenCard(w, forPrint){
   if(forPrint) return `<section class="pw"><h3>${w.t}</h3>${steps}${more}</section>`;
   return `<details class="wcard" id="w-${w.id}" data-search="${esc((w.t+' '+(w.tags||'')+' '+w.now.join(' ')).toLowerCase().replace(/<[^>]+>/g,''))}">
     <summary><span>${w.t}</span><span class="chev" aria-hidden="true">›</span></summary>
-    <div class="wbody"><div class="label">Sofort tun</div>${steps}${gearChips(w.gear)}${more}</div></details>`;
+    <div class="wbody"><div class="label">Sofort tun</div>${steps}${w.id==='strom'?stromExtra():''}${gearChips(w.gear)}${more}</div></details>`;
 }
 function notrufBar(){
   const g=S.land?giftFor(S.land):null;
@@ -847,6 +894,8 @@ function printInventory(){
     ${c.expired.length||c.soon.length?`<p class="exp">Abgelaufen: ${c.expired.map(i=>esc(i.name)).join(', ')||'–'} · Läuft bald ab: ${c.soon.map(i=>esc(i.name)).join(', ')||'–'}</p>`:''}
     <section><h2>Wasser</h2>${table(water)}</section>
     <h2>Nahrung</h2>${food}
+    ${(S.meds||[]).length?`<section><h2>Meine Medikamente</h2><table class="t6"><thead><tr><th></th><th>Medikament</th><th>Für</th><th class="n">Einnahme</th><th class="n">Vorrat heute</th><th class="n">Reicht bis</th></tr></thead><tbody>
+      ${S.meds.map(m=>`<tr><td><span class="box"></span></td><td>${esc(m.name)}${m.cold?' (kühlen)':''}</td><td>${esc(m.who||'')}</td><td class="n">${m.per==='need'?'bei Bedarf':`${fmt(m.dose,2)} ${MED_PER[m.per]}`}</td><td class="n">${fmt(medNow(m),2)} Stück</td><td class="n${medDays(m)!==null&&medDays(m)<c.T?' exp':''}">${m.per==='need'?'–':medUntil(m)}</td></tr>`).join('')}</tbody></table></section>`:''}
     <h2>Ausrüstung und Dokumente</h2>${checks}${docs}
     <p class="meta" style="margin-top:12pt">Richtwerte nach BBK: 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Abgelaufene Artikel sind in den Summen nicht enthalten. Kästchen zum Abhaken bei der Kontrolle.</p>`;
   document.body.classList.add('pinv');
@@ -906,11 +955,12 @@ function buyLines(c){
       const miss=needOf(it,c.p,T)-(S.checks[key]||0); return miss>0?[name,`${miss} ×`]:null; }).filter(Boolean);
     if(rows.length) checks.push([v.n,rows]);
   }
+  if(c.medShort&&c.medShort.length) checks.push(['Eigene Medikamente (Rezept holen)', c.medShort.map(m=>[m.name, `reicht ${medDays(m)} ${medDays(m)===1?'Tag':'Tage'}`, `Arzt nach Vorrat für ${T} Tage fragen`])]);
   return {water,food,checks};
 }
 function viewBuy(c){
   const L=buyLines(c);
-  const sec=(title,rows)=>`<div class="shop"><h2 style="font-size:1.15rem;margin-bottom:4px">${title}</h2>${rows.length?rows.map(r=>`<div class="line"><span>${esc(r[0])}${r[2]?`<br><span class="small muted">${r[2]}</span>`:''}</span><span class="num">${r[1]}</span></div>`).join(''):`<div class="done">Vollständig</div>`}</div>`;
+  const sec=(title,rows)=>`<div class="shop"><h2 style="font-size:1.15rem;margin-bottom:4px">${title}</h2>${rows.length?rows.map(r=>`<div class="line"><span>${esc(r[0])}${r[2]?`<br><span class="small muted">${esc(r[2])}</span>`:''}</span><span class="num">${r[1]}</span></div>`).join(''):`<div class="done">Vollständig</div>`}</div>`;
   const empty=!L.water.length&&!L.food.length&&!L.checks.length;
   return `<section class="panel print-area">
     <div class="spread"><div><h2 class="print-only">Einkaufsliste Notvorrat</h2><div class="label">Einkaufsliste für ${c.T} Tage, ${c.p} ${c.p===1?'Person':'Personen'}</div></div></div>
@@ -976,7 +1026,7 @@ function viewDocs(kind){
     return `<div class="item"><div style="min-width:0;font-weight:700">${n}</div><div class="actions">
       <button class="tick" data-act="doc" data-k="${key}" data-val="1" aria-pressed="${v===1}">${v===1?'✓ Vorhanden':'Vorhanden'}</button>
       <button class="na" data-act="doc" data-k="${key}" data-val="na" aria-pressed="${v==='na'}">Entfällt</button></div></div>`; };
-  const section=(sc,title,extra)=>{ const items=d.items.filter(i=>(i[2]==='h')===(sc==='h'));
+  const section=(sc,title,extra)=>{ const items=docItems(kind).filter(i=>(i[2]==='h')===(sc==='h'));
     const done=items.filter(i=>(S.docs||{})[`${kind}|${sc}|${i[0]}`]).length;
     return `<section class="panel"><div class="spread">${extra||`<h2 style="font-size:1.15rem">${title}</h2>`}<span class="num small"><b>${done}</b> von ${items.length}</span></div>${bar(done/items.length)}
       <div class="list">${items.map(i=>row(sc,i)).join('')}</div></section>`; };
@@ -1004,13 +1054,16 @@ function viewCheck(c){
   const k=UI.view, v=CHECK[k];
   const rows=v.items.map(it=>{ const [key,name]=it;
     if(DERIVED[key]||key==='bargeld') return subRow(key,name);
-    const need=needOf(it,c.p,c.T), have=S.checks[key]||0, nt=needText(it);
+    const need=needOf(it,c.p,c.T), have=S.checks[key]||0, nt=needText(it), na=!!(S.checkNa&&S.checkNa[key]);
     return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${name}</div>
-      <div class="meta"><span class="num">Soll: ${need}${nt?` (${nt})`:''}</span>${have>=need?'<span class="pill" style="border-color:var(--ok);color:var(--ok)">vorhanden</span>':''}</div></div>
-      <div class="stepper"><button data-act="check" data-k="${key}" data-d="-1" aria-label="Eins weniger">−</button><span class="num">${have}</span><button data-act="check" data-k="${key}" data-d="1" aria-label="Eins mehr">+</button></div></div>`; }).join('');
+      <div class="meta">${na?'<span class="pill">entfällt</span>':`<span class="num">Soll: ${need}${nt?` (${nt})`:''}</span>${have>=need?'<span class="pill" style="border-color:var(--ok);color:var(--ok)">vorhanden</span>':''}`}</div></div>
+      <div class="actions">${na?'':`<div class="stepper"><button data-act="check" data-k="${key}" data-d="-1" aria-label="${esc(name)}: eins weniger">−</button><span class="num">${have}</span><button data-act="check" data-k="${key}" data-d="1" aria-label="${esc(name)}: eins mehr">+</button></div>`}
+      ${v.optional?`<button class="na" data-act="checkNa" data-k="${key}" aria-pressed="${na}">Entfällt</button>`:''}</div></div>`; }).join('');
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${v.n}</h1></div>
-    <section class="panel"><div class="spread"><span class="label">Vollständigkeit</span><span class="num"><b>${c.checks[k].have}</b> von ${c.checks[k].need}</span></div>${bar(c.checks[k].ratio)}
-    <p class="small muted" style="margin:0">${k==='tiere'?`Für ${petCount()} ${petCount()===1?'Tier':'Tiere'} und ${c.T} Tage. Futter und Streu richten sich nach den Tagen, Wasser für die Tiere zählt beim Wasser mit. Richtwerte, passe sie an dein Tier an.`:k==='klein'?`Für ${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'} und ${c.T} Tage. Windeln, Feuchttücher und Gläschen richten sich nach den Tagen. Die Mengen sind Richtwerte, passe sie an dein Kind an.`:'Diese Dinge brauchst du unabhängig von der Anzahl der Tage.'}</p></section>
+    ${k==='medizin'?medSection(c):''}
+    <section class="panel">${k==='medizin'?'<h2 style="font-size:1.15rem">Hausapotheke</h2>':''}<div class="spread"><span class="label">Vollständigkeit</span><span class="num"><b>${c.checks[k].have}</b> von ${c.checks[k].need}</span></div>${bar(c.checks[k].ratio)}
+    <p class="small muted" style="margin:0">${k==='tiere'?`Für ${petCount()} ${petCount()===1?'Tier':'Tiere'} und ${c.T} Tage. Futter und Streu richten sich nach den Tagen, Wasser für die Tiere zählt beim Wasser mit. Richtwerte, passe sie an dein Tier an.`:k==='klein'?`Für ${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'} und ${c.T} Tage. Windeln, Feuchttücher und Gläschen richten sich nach den Tagen. Die Mengen sind Richtwerte, passe sie an dein Kind an.`:k==='pflege'?`Für ${c.T} Tage. Was bei euch nicht gebraucht wird, markierst du mit „Entfällt“. Inkontinenzmaterial: eigener Richtwert 4 Stück pro Tag, passe ihn an.`:k==='medizin'?'Für alle im Haushalt, unabhängig von der Anzahl der Tage.':'Diese Dinge brauchst du unabhängig von der Anzahl der Tage.'}</p></section>
+    ${k==='pflege'?careWarn():''}
     <section class="panel"><div class="list">${rows}</div></section>`;
 }
 
@@ -1019,10 +1072,66 @@ function backupBand(){
   const d=daysSince(META.lastBackup);
   const why = d===null ? 'Du hast noch keine Sicherung gemacht.' : `Letzte Sicherung vor ${d} ${d===1?'Tag':'Tagen'}, seitdem ${META.changes||0} Änderungen.`;
   return `<div class="band info backup"><div style="display:flex;flex-direction:column;gap:8px">
-    <div><b>Vorrat sichern</b><div class="small">${why} Wenn Browserdaten gelöscht werden oder du das Handy wechselst, ist sonst alles weg.</div></div>
-    <div class="row">${canShareFile()?`<button class="primary small" data-act="backup" data-mode="share">Sichern (Drive, Mail …)</button>`:''}
+    <div><b>Vorrat sichern</b><div class="small">${why} Werden Browserdaten gelöscht oder geht das Handy kaputt, ist sonst alles weg. Schick dir die Sicherung am besten selbst, z. B. per WhatsApp an dich oder per Mail.</div></div>
+    <div class="row">${canShareFile()?`<button class="primary small" data-act="backup" data-mode="share">An mich selbst schicken</button>`:''}
       <button class="${canShareFile()?'secondary':'primary'} small" data-act="backup" data-mode="file">Als Datei speichern</button>
       <button class="linkbtn small" data-act="snooze">Morgen erinnern</button></div></div></div>`;
+}
+
+function restoreUI(){
+  return `${UI.pending?`<div class="band warn"><div style="display:flex;flex-direction:column;gap:8px"><div><b>${esc(UI.pending.label)}</b><div class="small">${esc(summary(UI.pending.data))}. ${UI.view==='start'?'Danach geht es direkt mit deinem gesicherten Vorrat weiter.':'Dein aktueller Stand wird dabei ersetzt. Er bleibt als Zwischenstand „vorher“ erhalten.'}</div></div>
+      <div class="row"><button class="danger small" data-act="restoreYes">Wiederherstellen</button><button class="secondary small" data-act="restoreNo">Abbrechen</button></div></div></div>`:''}
+    <label class="secondary filebtn" for="restore-file">Sicherungsdatei auswählen</label>
+    <input type="file" id="restore-file" accept=".json,application/json" hidden>
+    ${UI.impErr?`<div class="err">${UI.impErr}</div>`:''}`;
+}
+// Pflege: Strom und Hausnotruf
+const CARE_TEXT = 'Sauerstoffgerät, Pflegebett, Treppenlift oder Absauggerät brauchen Strom. Ein Hausnotruf funktioniert ohne Strom oder Telefonnetz oft nicht. Sprich jetzt mit Pflegedienst oder Arzt: Gibt es Akkus, Ersatzgeräte oder einen Plan für den Stromausfall? Vereinbare mit Nachbarn oder Angehörigen, dass im Notfall täglich jemand vorbeischaut.';
+function careWarn(){ return `<div class="band warn"><div class="small"><b>Strom und Hausnotruf vorher klären.</b> ${CARE_TEXT}</div></div>`; }
+function careBand(){ return `<div class="band warn"><div style="display:flex;flex-direction:column;gap:8px"><div class="small"><b>Pflege im Notfall: Strom und Hausnotruf vorher klären.</b> ${CARE_TEXT}</div>
+  <button class="secondary small" data-act="careOk" style="align-self:flex-start">Verstanden</button></div></div>`; }
+function stromExtra(){
+  const parts=[];
+  if(S.care) parts.push(`<b>Pflege:</b> ${CARE_TEXT}`);
+  if(medCold().length) parts.push(`<b>Kühlpflichtige Medikamente</b> (${medCold().map(m=>esc(m.name)).join(', ')}): Kühlschrank geschlossen halten, Kühltasche mit Kühlakkus nutzen. Frag vorher in der Apotheke, wie lange das Mittel ohne Kühlung hält.`);
+  return parts.length?`<div class="band warn"><div style="display:flex;flex-direction:column;gap:6px">${parts.map(x=>`<div class="small">${x}</div>`).join('')}</div></div>`:'';
+}
+// Medikamente
+function medTileNote(c){ const n=c.medShort.length, all=(S.meds||[]).length;
+  if(!all) return '<span class="small muted">Eigene Medikamente eintragen</span>';
+  return n?`<span class="small t-bad" style="font-weight:700">${n} ${n===1?'Medikament reicht':'Medikamente reichen'} keine ${c.T} Tage</span>`:`<span class="small t-ok" style="font-weight:700">Eigene Medikamente reichen</span>`; }
+function medRow(m,T){
+  const d=medDays(m), st = d===null ? '' : status(d/T);
+  const reach = d===null ? `<span class="pill">bei Bedarf</span>` : `<span class="pill" style="border-color:var(--${st==='ok'?'ok':st==='warn'?'warn':'bad'});color:var(--${st==='ok'?'ok':st==='warn'?'warn-t':'bad'})">reicht ${d} ${d===1?'Tag':'Tage'}, bis ${medUntil(m)}</span>`;
+  return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${esc(m.name)}</div>
+    <div class="meta">${m.who?`<span>${esc(m.who)}</span>`:''}<span class="num">${m.per==='need'?'nur bei Bedarf':`${fmt(m.dose,2)} ${MED_PER[m.per]}`}</span><span class="num">Vorrat heute: ${fmt(medNow(m),2)} Stück</span>${reach}${m.cold?'<span class="pill">❄ kühlen</span>':''}</div></div>
+    <div class="actions"><button class="secondary small" data-act="medEdit" data-id="${m.id}" aria-label="${esc(m.name)} ändern">Ändern</button><button class="del" data-act="medDel" data-id="${m.id}" aria-label="${esc(m.name)} löschen">${icon('trash')}</button></div></div>`;
+}
+function medSection(c){
+  const meds=S.meds||[], short=c.medShort;
+  return `<section class="panel"><h2 style="font-size:1.15rem">Meine Medikamente</h2>
+    <p class="small muted" style="margin:0">Was du oder jemand im Haushalt regelmäßig nimmt. Die App zieht den Vorrat jeden Tag selbst ab und zeigt, wie lange er reicht. Nach dem Kauf einfach „Ändern“ tippen und den neuen Vorrat eintragen.</p>
+    ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+    ${meds.length?`<div class="list">${meds.map(m=>medRow(m,c.T)).join('')}</div>`:''}
+    ${short.length?`<div class="band warn"><div class="small"><b>Rezept rechtzeitig holen.</b> ${short.length===1?'Ein Medikament reicht':'Einige Medikamente reichen'} keine ${c.T} Tage. Frag deine Ärztin oder deinen Arzt nach einem Vorrat für ${c.T} Tage.</div></div>`:''}
+    ${medCold().length?`<div class="band info"><div class="small"><b>Kühlpflichtig:</b> Bei Stromausfall wird der Kühlschrank warm. Halte eine Kühltasche mit Kühlakkus bereit und frag in der Apotheke, wie lange dein Mittel ohne Kühlung hält.</div></div>`:''}
+    <button class="primary" data-act="medAdd">${icon('plus')} Medikament eintragen</button>
+    <p class="hint" style="margin:0">Die App erinnert nicht an die Einnahme und gibt keine Dosierung vor. Sie rechnet nur mit deinen Angaben. Alles bleibt auf diesem Gerät.</p></section>`;
+}
+function medForm(f){
+  const opts=[...Array(S.persons).keys()].map(i=>personName(i));
+  if(f.who && !opts.includes(f.who)) opts.push(f.who);
+  return `<div class="overlay" data-act="closeBg"><form class="sheet" id="medForm" role="dialog" aria-modal="true" aria-labelledby="sh">
+    <h2 id="sh">${f.id?'Medikament ändern':'Medikament eintragen'}</h2>
+    <div class="field"><label for="m-name">Name und Stärke</label><input id="m-name" value="${esc(f.name||'')}" placeholder="z. B. Ramipril 5 mg" autocomplete="off" maxlength="60"><span class="hint">Steht auf der Packung.</span></div>
+    <div class="field"><label for="m-who">Für wen? <span class="muted" style="font-weight:400">(kann leer bleiben)</span></label><select id="m-who"><option value="">–</option>${opts.map(n=>`<option ${n===f.who?'selected':''}>${esc(n)}</option>`).join('')}</select></div>
+    <div class="two"><div class="field"><label for="m-dose">Wie viele Stück?</label><input id="m-dose" inputmode="decimal" value="${esc(f.dose??'1')}" placeholder="1"><span class="hint">Halbe Tablette: 0,5</span></div>
+      <div class="field"><label for="m-per">Wie oft?</label><select id="m-per">${Object.entries(MED_PER).map(([k,n])=>`<option value="${k}" ${k===(f.per||'day')?'selected':''}>${n}</option>`).join('')}</select></div></div>
+    <div class="field"><label for="m-stock">Wie viele Stück hast du heute noch?</label><input id="m-stock" inputmode="decimal" value="${esc(f.stock??'')}" placeholder="z. B. 50"><span class="hint">Alle Packungen zusammen. Bei Tropfen, Spray oder Insulin: Einnahmen, z. B. Hübe oder Einheiten.</span></div>
+    <label class="check"><input type="checkbox" id="m-cold" ${f.cold?'checked':''}> <span><b>Muss im Kühlschrank liegen</b><br><span class="hint">z. B. Insulin. Dann gibt es einen Hinweis für den Stromausfall.</span></span></label>
+    ${f.err?`<div class="err" role="alert">${f.err}</div>`:''}
+    <div class="row"><button type="submit" class="primary">Speichern</button><button type="button" class="secondary" data-act="closeSheet">Abbrechen</button></div>
+  </form></div>`;
 }
 
 function viewSettings(){
@@ -1036,18 +1145,14 @@ function viewSettings(){
     ${calChooser('settings')}
   </section>
   <section class="panel"><h2>Sicherung</h2>
-    <p class="small muted" style="margin:0">Dein Vorrat liegt nur auf diesem Gerät. Sichere ihn regelmäßig als Datei, am besten in Google Drive oder per Mail an dich selbst. ${META.lastBackup?`Letzte Sicherung: ${new Date(META.lastBackup).toLocaleDateString('de-DE')}.`:'<b>Noch keine Sicherung.</b>'}</p>
-    <div class="row">${canShareFile()?`<button class="primary" data-act="backup" data-mode="share">Sichern (Drive, Mail …)</button>`:''}
+    <p class="small muted" style="margin:0">Dein Vorrat liegt nur in diesem Browser. Werden Browserdaten gelöscht oder geht das Handy kaputt, ist er weg. Die Sicherungsdatei bringt alles zurück. ${META.lastBackup?`Letzte Sicherung: ${new Date(META.lastBackup).toLocaleDateString('de-DE')}.`:'<b>Noch keine Sicherung.</b>'}</p>
+    <div class="row">${canShareFile()?`<button class="primary" data-act="backup" data-mode="share">An mich selbst schicken</button>`:''}
       <button class="${canShareFile()?'secondary':'primary'}" data-act="backup" data-mode="file">Als Datei speichern</button></div>
     ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
-    <p class="hint" style="margin:0">Die App erinnert dich nach ${BACKUP_DAYS} Tagen oder ${BACKUP_CHANGES} Änderungen an eine neue Sicherung.</p>
+    <p class="hint" style="margin:0">${canShareFile()?'„An mich selbst schicken“: im nächsten Schritt z. B. WhatsApp wählen und dann den Chat mit dir selbst (dein eigener Name), oder eine Mail an dich. ':''}Die App erinnert dich nach ${BACKUP_DAYS} Tagen oder ${BACKUP_CHANGES} Änderungen an eine neue Sicherung.${(S.meds||[]).length?' Die Sicherung enthält auch deine Medikamente. Schick sie nur an dich selbst.':''}</p>
   </section>
   <section class="panel"><h2>Wiederherstellen</h2>
-    ${UI.pending?`<div class="band warn"><div style="display:flex;flex-direction:column;gap:8px"><div><b>${esc(UI.pending.label)}</b><div class="small">${esc(summary(UI.pending.data))}. Dein aktueller Stand wird dabei ersetzt. Er bleibt als Zwischenstand „vorher“ erhalten.</div></div>
-      <div class="row"><button class="danger small" data-act="restoreYes">Wiederherstellen</button><button class="secondary small" data-act="restoreNo">Abbrechen</button></div></div></div>`:''}
-    <label class="secondary filebtn" for="restore-file">Sicherungsdatei auswählen</label>
-    <input type="file" id="restore-file" accept=".json,application/json" hidden>
-    ${UI.impErr?`<div class="err">${UI.impErr}</div>`:''}
+    ${restoreUI()}
     <div><div class="label" style="margin-bottom:4px">Automatische Zwischenstände</div>
       <p class="hint" style="margin:0 0 6px">Die App merkt sich den Stand der letzten 7 Tage, z. B. falls du aus Versehen etwas löschst. Sie liegen auf diesem Gerät und ersetzen keine Sicherungsdatei.</p>
       ${SNAPS.length?`<div class="list">${SNAPS.map((x,i)=>`<div class="item"><div style="min-width:0"><div style="font-weight:700">${new Date(x.at).toLocaleString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} Uhr${x.day.endsWith('-vorher')?' (vor Wiederherstellung)':''}</div><div class="small muted">${esc(summary(x.data))}</div></div>
@@ -1087,7 +1192,8 @@ function viewQuick(f){
 }
 function dryHint(g){ return `Zählt ${fmt(g.form.f)}-fach, weil es zubereitet mehr wiegt.${g.k==='gemuese'||g.k==='milch'||g.k==='fleisch'?' Braucht zusätzlich Wasser zum Zubereiten.':''}`; }
 function viewSheet(){
-  const f=UI.sheet; const isW=f.cat==='wasser';
+  const f=UI.sheet; if(f.mode==='med') return medForm(f);
+  const isW=f.cat==='wasser';
   const years=[]; for(let y=NOW.getFullYear()-1;y<=NOW.getFullYear()+10;y++) years.push(y);
   const units=isW?['l','ml']:['g','kg','ml','l'];
   if(f.mode!=='form') return `<div class="overlay" data-act="closeBg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh">${viewQuick(f)}</div></div>`;
@@ -1140,6 +1246,11 @@ root.addEventListener('click', async e=>{
     case 'count': { const it=S.items.find(i=>i.id===b.dataset.id); if(it){ it.count=Math.max(0,it.count+ +b.dataset.d); } save(); break; }
     case 'del': S.items=S.items.filter(i=>i.id!==b.dataset.id); save(); break;
     case 'doc': { S.docs=S.docs||{}; const k=b.dataset.k, v=b.dataset.val==='na'?'na':1; if(S.docs[k]===v) delete S.docs[k]; else S.docs[k]=v; save(); break; }
+    case 'checkNa': { S.checkNa=S.checkNa||{}; const k=b.dataset.k; if(S.checkNa[k]) delete S.checkNa[k]; else S.checkNa[k]=true; save(); break; }
+    case 'careOk': META.careSeen=true; DB.put(META,'meta'); break;
+    case 'medAdd': UI.sheet={mode:'med', per:'day', dose:'1', stock:'', cold:false, who:''}; render(); setTimeout(()=>document.getElementById('m-name')?.focus(),30); return;
+    case 'medEdit': { const m=(S.meds||[]).find(x=>x.id===b.dataset.id); if(m) UI.sheet={mode:'med', id:m.id, name:m.name, who:m.who, dose:fmt(m.dose,2), per:m.per, stock:fmt(medNow(m),2).replace(/\./g,''), cold:m.cold}; break; }
+    case 'medDel': { const m=(S.meds||[]).find(x=>x.id===b.dataset.id); S.meds=(S.meds||[]).filter(x=>x.id!==b.dataset.id); if(m) UI.msg=`${m.name} gelöscht.`; save(); break; }
     case 'check': { const k=b.dataset.k; S.checks[k]=Math.max(0,(S.checks[k]||0)+ +b.dataset.d); save(); break; }
     case 'add': UI.sheet={cat:b.dataset.cat||'any', group:b.dataset.group||null, mode:'quick', count:1}; break;
     case 'toForm': { const f=UI.sheet; f.mode='form'; if(f.cat==='any') f.cat='nahrung'; f.group=f.group||'getreide'; f.count=undefined; render(); setTimeout(()=>document.getElementById('f-name')?.focus(),30); return; }
@@ -1196,6 +1307,7 @@ root.addEventListener('change', e=>{
   if(t.id==='big-font'){ META.big=t.checked; DB.put(META,'meta'); render(); return; }
   if((t.id==='f-month'||t.id==='f-year') && UI.sheet && UI.sheet.mode!=='form'){ UI.sheet[t.id==='f-month'?'m':'y']=t.value; UI.sheet.short=null; return; }
   if(t.id==='pets-on'){ if(t.checked){ S.petsOn=true; } else { S.petsOn=false; S.pets={}; } save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
+  if(t.id==='care-on'){ S.care=t.checked; if(t.checked) META.careSeen=false, DB.put(META,'meta'); save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='land'){ S.land=t.value||null; save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='f-group'){ const g=FOOD.find(x=>x.k===t.value); if(!g) return;
     document.getElementById('f-ex').textContent=`Lange haltbar, z. B. ${g.ex}. Mischgerichte zählst du bei der Hauptzutat.`;
@@ -1224,6 +1336,21 @@ root.addEventListener('input', e=>{
 root.addEventListener('submit', e=>{
   e.preventDefault();
   const f=UI.sheet; const g=id=>document.getElementById(id)?.value;
+  if(e.target.id==='medForm'){
+    const name=(g('m-name')||'').trim(), per=g('m-per'), doseRaw=(g('m-dose')||'').trim(), stockRaw=(g('m-stock')||'').trim();
+    const dose=doseRaw?parseNum(doseRaw):(per==='need'?1:NaN), stock=stockRaw?parseNum(stockRaw):NaN, cold=!!document.getElementById('m-cold')?.checked;
+    Object.assign(f,{name, who:g('m-who')||'', dose:doseRaw, per, stock:stockRaw, cold}); f.err='';
+    if(!name) f.err='Bitte den Namen des Medikaments eingeben.';
+    else if(!(dose>0 && dose<=1000)) f.err='Bitte eingeben, wie viele Stück auf einmal, z. B. 1 oder 0,5.';
+    else if(!(stock>=0 && stock<=1e6)) f.err='Bitte eingeben, wie viele Stück du heute noch hast, z. B. 50.';
+    else {
+      const m=cleanMed({id:f.id, name, who:f.who, dose, per, stock, cold, at:today()});
+      S.meds=S.meds||[]; const i=S.meds.findIndex(x=>x.id===f.id);
+      if(i>=0) S.meds[i]=m; else S.meds.push(m);
+      UI.msg=`${m.name} gespeichert.`; UI.sheet=null; save();
+    }
+    render(); return;
+  }
   const name=(g('f-name')||'').trim(), size=parseNum(g('f-size')), count=parseInt(g('f-count'),10), m=g('f-month'), y=g('f-year');
   const dryEl=document.getElementById('f-dry');
   const grp=g('f-group')||f.group, gObj=FOOD.find(x=>x.k===grp);
@@ -1269,7 +1396,7 @@ function installBand(){
   const saved=ok?await DB.get():null;
   let first=false;
   try{ if(saved) S=cleanState(saved); else { first=true; S=cleanState({items:[],persons:1}); } }catch(e){ first=true; S=cleanState({items:[],persons:1}); }
-  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0; S.pets=S.pets||{};
+  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0; S.pets=S.pets||{}; S.meds=S.meds||[]; S.checkNa=S.checkNa||{};
   if(ok){ META=Object.assign(META, await DB.get('meta')||{}); SNAPS=(await DB.get('snaps')||[]).map(x=>{ try{ return {day:String(x.day).slice(0,20), at:Number(x.at)||Date.now(), data:cleanState(x.data)}; }catch(e){ return null; } }).filter(Boolean); }
   snapshot();
   if(first){ UI.view='start'; UI.ob=1; }

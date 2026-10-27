@@ -6,7 +6,7 @@
 
 👉 **App öffnen:** [hamsterplan.de](https://hamsterplan.de)
 
-Aktuelle Version: **1.18** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.19** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -20,6 +20,7 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 - **Zielmarken:** 3 Tage, 10 Tage, eigenes Ziel – mit Angabe, was bis zum nächsten Ziel fehlt.
 - **App weiterempfehlen** per WhatsApp oder Link.
 - **Hamster-Maskottchen** als App-Symbol und auf der Startseite.
+- **Schutz vor Datenverlust:** Sicherungsstatus auf der Startseite, erste Erinnerung nach 5 Einträgen, „An mich selbst schicken“, Sicherung einspielen direkt im Einstieg.
 
 ### Berechnung
 - Personen im Haushalt und Ziel-Tage (1–90) einstellen, Standard sind 10 Tage nach BBK.
@@ -33,7 +34,9 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 - Nur lange Haltbares: Jede Gruppe zeigt, was gemeint ist (Dose, Glas, getrocknet), mit passenden Beispielen.
 - **Trockenware und Pulver** werden umgerechnet, z. B. getrocknete Linsen ×2,5, Milchpulver ×8.
 - **Hinweis bei kurzem Haltbarkeitsdatum** (unter 3 Monaten) beim Eintragen.
-- **Checklisten** für Erste Hilfe, Medikamente, Hygiene, Licht & Strom, Wärme & Kochen.
+- **Meine Medikamente:** Name, Menge pro Tag oder Woche, Vorrat. Die App zieht täglich ab, zeigt „reicht bis …“, erinnert ans Rezept und warnt bei kühlpflichtigen Mitteln vor Stromausfall.
+- **Checklisten** für Erste Hilfe, Hausapotheke, Hygiene, Licht & Strom, Wärme & Kochen.
+- **Bereich Pflege & Hilfsmittel** (mit Kästchen „Pflege oder Hilfe im Alltag“): Ersatzbrille, Hörgeräte-Batterien, Inkontinenzmaterial, Teststreifen, Gehhilfe, „Entfällt“ je Punkt, Hinweis zu Strom und Hausnotruf.
 - **Bereich Kleinkind** mit Windeln, Feuchttüchern, Kleinkindnahrung und Zubehör, erscheint nur mit Kleinkindern im Haushalt.
 - **Bereich Haustiere** mit Futter, Katzenstreu, Transportbox, Kotbeuteln und Medikamenten, erscheint nur mit Haustieren.
 - **Dokumentenmappe** und Kopien als Checkliste pro Person, **Bargeld-Richtwert** 100 € pro Person.

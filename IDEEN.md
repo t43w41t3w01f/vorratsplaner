@@ -23,12 +23,16 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Einfach für alle (Paket 1)**: Einstieg in 3 Schritten, Schnellauswahl beim Eintragen, Installationshilfe, große Schrift, Alltagssprache, aufgeräumte Berechnung *(Version 1.16)*
 - [x] **Einfach für alle (Paket 2)**: Zielmarken mit „Was fehlt bis zum nächsten Ziel“, Glückwunsch, „App weiterempfehlen“ *(Version 1.17)*
 - [x] **Eigene Domain, neuer Name, Maskottchen**: hamsterplan.de, Name „Hamsterplan“, Hamster-Symbol (Entwurf A „Volle Backen“) *(Version 1.18)*
+- [x] **Medikamentenliste für alle**: Menge pro Tag/Woche/Bedarf, Vorrat zieht sich selbst ab, Rezept-Hinweis, Kühlhinweis *(Version 1.19)*
+- [x] **Haushaltsprofil Teil 3a: Pflege- oder Hilfsbedarf** (Kästchen, Bereich Pflege & Hilfsmittel, Strom und Hausnotruf) *(Version 1.19)*
+- [x] **Schutz vor Datenverlust**: erste Sicherung nach 5 Einträgen, „An mich selbst schicken“, Status auf der Startseite, Wiederherstellen im Einstieg *(Version 1.19)*
 
 ## Priorität hoch
 
 - [ ] **Praxistest mit 2–3 Senioren** aus dem Dorf vor der Verteilung
 - [ ] **Notfall-Modus „Es ist so weit“**: Umschalten auf Tageszähler, Wasserverbrauch pro Tag und Ess-Reihenfolge (erst Kühlschrank, dann Frisches, dann Konserven)
-- [ ] **Haushaltsprofil Teil 3**: Senioren, Säuglinge unter 1 Jahr
+- [ ] **Haushaltsprofil Teil 3b: Säuglinge unter 1 Jahr** (Stillen, Pulvermilch mit Extra-Wasser, trinkfertige Nahrung, Babytrage, Checkliste)
+- [ ] **Play-Store-App mit eigenem Speicher**: einziger echter Schutz, wenn Browserdaten gelöscht werden
 
 ## Weitere Ideen
 
@@ -40,6 +44,8 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
 
 ## Offen
+
+- [ ] **Inkontinenz-Menge prüfen** (4 Stück pro Tag), bisher eigener Richtwert
 
 - [ ] **Maskottchen an weiteren Stellen**: z. B. Glückwunsch bei erreichten Zielen, Teilen-Bild, leere Listen. Ganzkörper-Hamster mit Vorratsglas (Entwurf B) als Figur möglich
 
