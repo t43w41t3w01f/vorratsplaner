@@ -1,7 +1,7 @@
 {
-  "name": "Vorratsplaner",
-  "short_name": "Vorrat",
-  "description": "Notvorrat planen nach BBK-Empfehlung: Reichweite in Tagen, Einkaufsliste, MHD-Warnungen. Offline, ohne Konto.",
+  "name": "Hamsterplan",
+  "short_name": "Hamsterplan",
+  "description": "Vorrat wie ein Hamster: Stück für Stück. Notvorrat planen nach BBK-Empfehlung: Reichweite in Tagen, Einkaufsliste, MHD-Warnungen. Offline, ohne Konto.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",

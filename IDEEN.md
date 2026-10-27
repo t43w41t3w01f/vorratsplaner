@@ -1,4 +1,4 @@
-# Ideen für den Vorratsplaner
+# Ideen für den Hamsterplan
 
 Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version, in der sie umgesetzt wurden.
 
@@ -22,6 +22,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Sicherheits- und Qualitätsprüfung**: Datenprüfung beim Import, Content Security Policy, robuster Offline-Cache, Kontraste *(Version 1.15)*
 - [x] **Einfach für alle (Paket 1)**: Einstieg in 3 Schritten, Schnellauswahl beim Eintragen, Installationshilfe, große Schrift, Alltagssprache, aufgeräumte Berechnung *(Version 1.16)*
 - [x] **Einfach für alle (Paket 2)**: Zielmarken mit „Was fehlt bis zum nächsten Ziel“, Glückwunsch, „App weiterempfehlen“ *(Version 1.17)*
+- [x] **Eigene Domain, neuer Name, Maskottchen**: hamsterplan.de, Name „Hamsterplan“, Hamster-Symbol (Entwurf A „Volle Backen“) *(Version 1.18)*
 
 ## Priorität hoch
 
@@ -39,6 +40,8 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
 
 ## Offen
+
+- [ ] **Maskottchen an weiteren Stellen**: z. B. Glückwunsch bei erreichten Zielen, Teilen-Bild, leere Listen. Ganzkörper-Hamster mit Vorratsglas (Entwurf B) als Figur möglich
 
 - [ ] **Impressum und Verantwortlicher im Datenschutz**, sobald die App öffentlich im Dorf verteilt wird. *Bewusst verschoben.*
 - [ ] **Haustier-Mengen prüfen** (Wasser und Futter pro Tier und Tag), bisher eigene Richtwerte

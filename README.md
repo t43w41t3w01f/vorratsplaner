@@ -1,12 +1,14 @@
-# Vorratsplaner
+# Hamsterplan
 
-**Notvorrat planen nach BBK-Empfehlung – offline, ohne Konto, ohne Werbung.**
+<img src="icons/icon-192.png" alt="Hamster-Symbol" width="96">
 
-👉 **App öffnen:** https://t43w41t3w01f.github.io/vorratsplaner/
+**Vorrat wie ein Hamster: Stück für Stück.** Notvorrat planen nach BBK-Empfehlung – offline, ohne Konto, ohne Werbung.
 
-Aktuelle Version: **1.17** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+👉 **App öffnen:** [hamsterplan.de](https://hamsterplan.de)
 
-Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
+Aktuelle Version: **1.18** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+
+Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
 ## Funktionen
 
@@ -17,12 +19,13 @@ Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reich
 - **Installationshilfe** direkt in der App.
 - **Zielmarken:** 3 Tage, 10 Tage, eigenes Ziel – mit Angabe, was bis zum nächsten Ziel fehlt.
 - **App weiterempfehlen** per WhatsApp oder Link.
+- **Hamster-Maskottchen** als App-Symbol und auf der Startseite.
 
 ### Berechnung
 - Personen im Haushalt und Ziel-Tage (1–90) einstellen, Standard sind 10 Tage nach BBK.
 - **Haushalt mit Kindern:** Erwachsene und Kinder ab 10, Kinder 4–9 Jahre (Nahrung ca. 70 %) und Kleinkinder 1–3 Jahre (ca. 50 %) nach DGE-Richtwerten. Wasser und Checklisten zählen für alle voll.
-- **Haustiere:** Kästchen „Haustiere im Haushalt“ anhaken, dann Hunde (klein, mittel, groß), Katzen und Kleintiere eintragen. Ihr Wasser zählt beim Wasser mit, Futter und Zubehör stehen in einer eigenen Kachel.
-- **Reicht für:** Reichweite in Tagen und der Engpass, z. B. „Engpass: Wasser“.
+- **Haustiere:** Kästchen „Haustiere im Haushalt“ anhaken, dann Hunde (klein, mittel, groß), Katzen und Kleintiere eintragen. Ihr Wasser zählt beim Wasser mit, Futter und Zubehör stehen in einem eigenen Bereich.
+- **Reicht für:** Reichweite in Tagen und was am meisten fehlt, z. B. „Am meisten fehlt: Wasser“.
 - **Noch kaufen:** Einkaufsliste mit allen Fehlmengen. Wasser wird in Kisten umgerechnet, zu jeder Lebensmittelgruppe gibt es lange haltbare Beispiele. Drucken, als PDF speichern oder kopieren.
 
 ### Mein Vorrat
@@ -31,8 +34,8 @@ Der Vorratsplaner zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reich
 - **Trockenware und Pulver** werden umgerechnet, z. B. getrocknete Linsen ×2,5, Milchpulver ×8.
 - **Hinweis bei kurzem Haltbarkeitsdatum** (unter 3 Monaten) beim Eintragen.
 - **Checklisten** für Erste Hilfe, Medikamente, Hygiene, Licht & Strom, Wärme & Kochen.
-- **Kleinkind-Kachel** mit Windeln, Feuchttüchern, Kleinkindnahrung und Zubehör, erscheint nur mit Kleinkindern im Haushalt.
-- **Haustier-Kachel** mit Futter, Katzenstreu, Transportbox, Kotbeuteln und Medikamenten, erscheint nur mit Haustieren.
+- **Bereich Kleinkind** mit Windeln, Feuchttüchern, Kleinkindnahrung und Zubehör, erscheint nur mit Kleinkindern im Haushalt.
+- **Bereich Haustiere** mit Futter, Katzenstreu, Transportbox, Kotbeuteln und Medikamenten, erscheint nur mit Haustieren.
 - **Dokumentenmappe** und Kopien als Checkliste pro Person, **Bargeld-Richtwert** 100 € pro Person.
 - **Vorrat drucken:** kompletter Bestand als Ausdruck oder PDF, mit Kästchen zum Abhaken.
 
@@ -78,7 +81,7 @@ Entwickelt von Sascha L. · © 2026
 
 ## Technik
 
-HTML, CSS und JavaScript ohne Build-Schritt. Speicherung in IndexedDB, Offline-Betrieb über einen Service Worker, Hosting über GitHub Pages. Content Security Policy ohne fremde Quellen, alle importierten Daten werden geprüft.
+HTML, CSS und JavaScript ohne Build-Schritt. Speicherung in IndexedDB, Offline-Betrieb über einen Service Worker, Hosting über GitHub Pages mit eigener Domain (`CNAME`, DNS bei INWX). Content Security Policy ohne fremde Quellen, alle importierten Daten werden geprüft.
 
 | Datei | Inhalt |
 |---|---|
@@ -89,3 +92,4 @@ HTML, CSS und JavaScript ohne Build-Schritt. Speicherung in IndexedDB, Offline-B
 | `sw.js` | Offline-Cache |
 | `CHANGELOG.md` | Versionsgeschichte |
 | `IDEEN.md` | Ideen-Liste zum Abhaken |
+| `CNAME` | Eigene Adresse hamsterplan.de |

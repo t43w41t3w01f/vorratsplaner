@@ -77,7 +77,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(pp==='pf') return `${fmt(petFood(),2)} kg pro Tag für alle Tiere`; if(pp==='pl') return `${fmt(petLitter(),2)} kg pro Tag`;
   if(pp==='pn') return `${q} pro Tier`; if(pp==='pd') return `${q} pro Hund`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION = '1.17';
+const APP_VERSION='1.18';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -427,7 +427,7 @@ function have(key){
 /* ---------- Speicher: IndexedDB, sonst nur im Arbeitsspeicher ---------- */
 const DB = {
   db:null,
-  open(){ return new Promise(res=>{ try{ const r=indexedDB.open('vorratsplaner',1);
+  open(){ return new Promise(res=>{ try{ const r=indexedDB.open('vorratsplaner',1) /* Name bleibt, sonst sind gespeicherte Vorräte weg */;
     r.onupgradeneeded=()=>r.result.createObjectStore('kv');
     r.onsuccess=()=>{this.db=r.result;res(true)}; r.onerror=()=>res(false);}catch(e){res(false)} }); },
   get(key='state'){ return new Promise(res=>{ if(!this.db) return res(null); try{ const r=this.db.transaction('kv').objectStore('kv').get(key);
@@ -449,10 +449,10 @@ let saveT; function save(){ clearTimeout(saveT);
   saveT=setTimeout(()=>{ DB.put(JSON.parse(JSON.stringify(S))); snapshot(); },250); }
 /* ---------- Kalender-Erinnerung (Serientermin „Vorratscheck“) ---------- */
 const CAL_FREQ = {weekly:{n:'Wöchentlich', adj:'Wöchentlicher', rule:'FREQ=WEEKLY'}, monthly:{n:'Monatlich', adj:'Monatlicher', rule:'FREQ=MONTHLY'}, quarterly:{n:'Alle 3 Monate', adj:'Vierteljährlicher', rule:'FREQ=MONTHLY;INTERVAL=3'}};
-const APP_URL = 'https://t43w41t3w01f.github.io/vorratsplaner/';
+const APP_URL = 'https://hamsterplan.de/';
 function nextSaturday10(){ const d=new Date(); d.setHours(10,0,0,0); const add=(6-d.getDay()+7)%7||7; d.setDate(d.getDate()+add); return d; }
 function calStamp(d){ const z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}T${z(d.getHours())}${z(d.getMinutes())}00`; }
-function calTexts(freq){ return {title:'Vorratscheck', details:`${CAL_FREQ[freq].adj} Vorratscheck: Vorratsplaner öffnen, Verbrauchsliste ansehen, fehlende Dinge einkaufen, Sicherung machen.\n${APP_URL}`}; }
+function calTexts(freq){ return {title:'Vorratscheck', details:`${CAL_FREQ[freq].adj} Vorratscheck: Hamsterplan öffnen, Verbrauchsliste ansehen, fehlende Dinge einkaufen, Sicherung machen.\n${APP_URL}`}; }
 function googleCalUrl(freq){
   const st=nextSaturday10(), en=new Date(st.getTime()+15*60000), t=calTexts(freq);
   const q=new URLSearchParams({action:'TEMPLATE', text:t.title, details:t.details, dates:`${calStamp(st)}/${calStamp(en)}`, ctz:'Europe/Berlin', recur:'RRULE:'+CAL_FREQ[freq].rule});
@@ -461,8 +461,8 @@ function googleCalUrl(freq){
 function icsDownload(freq){
   const st=nextSaturday10(), en=new Date(st.getTime()+15*60000), t=calTexts(freq);
   const esc2=x=>x.replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Vorratsplaner//DE','CALSCALE:GREGORIAN','BEGIN:VEVENT',
-    `UID:vorratscheck-${Date.now()}@vorratsplaner`, `DTSTAMP:${calStamp(new Date())}`, `DTSTART:${calStamp(st)}`, `DTEND:${calStamp(en)}`,
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Hamsterplan//DE','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    `UID:vorratscheck-${Date.now()}@hamsterplan.de`, `DTSTAMP:${calStamp(new Date())}`, `DTSTART:${calStamp(st)}`, `DTEND:${calStamp(en)}`,
     `RRULE:${CAL_FREQ[freq].rule}`, `SUMMARY:${esc2(t.title)}`, `DESCRIPTION:${esc2(t.details)}`, `URL:${APP_URL}`,
     'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Vorratscheck','TRIGGER:-PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
   try{ const url=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); const a=document.createElement('a'); a.href=url; a.download='vorratscheck.ics';
@@ -490,14 +490,14 @@ function backupDue(){
   const d=daysSince(META.lastBackup);
   return d===null || d>=BACKUP_DAYS || (META.changes||0)>=BACKUP_CHANGES;
 }
-function backupData(){ return JSON.stringify({app:'vorratsplaner', version:1, savedAt:new Date().toISOString(), ...S}, null, 1); }
-function backupName(){ return `vorratsplaner-sicherung-${today()}.json`; }
+function backupData(){ return JSON.stringify({app:'hamsterplan', version:1, savedAt:new Date().toISOString(), ...S}, null, 1); }
+function backupName(){ return `hamsterplan-sicherung-${today()}.json`; }
 function markBackedUp(){ META.lastBackup=Date.now(); META.changes=0; META.snoozeUntil=0; DB.put(META,'meta'); }
 function canShareFile(){ try{ return !!(navigator.canShare && navigator.canShare({files:[new File(['x'],'t.json',{type:'application/json'})]})); }catch(e){ return false; } }
 async function doBackup(mode){
   const text=backupData();
   if(mode==='share'){
-    try{ await navigator.share({files:[new File([text],backupName(),{type:'application/json'})], title:'Vorratsplaner-Sicherung'}); markBackedUp(); UI.msg='Sicherung geteilt.'; }
+    try{ await navigator.share({files:[new File([text],backupName(),{type:'application/json'})], title:'Hamsterplan-Sicherung'}); markBackedUp(); UI.msg='Sicherung geteilt.'; }
     catch(e){ if(e&&e.name==='AbortError') UI.msg='Teilen abgebrochen.'; else UI.msg='Teilen nicht möglich. Nutze „Als Datei speichern“.'; }
     return;
   }
@@ -630,10 +630,10 @@ function goalPanel(c){
   </section>`;
 }
 /* ---------- Weiterempfehlen ---------- */
-const SHARE_TEXT = 'Ich sorge mit dem Vorratsplaner für Notfälle vor: Er zeigt, wie lange der Vorrat reicht, was noch fehlt und was bei Stromausfall, Hochwasser & Co. zu tun ist. Kostenlos, ohne Anmeldung, funktioniert auch ohne Internet:';
+const SHARE_TEXT = 'Ich sorge mit dem Hamsterplan für Notfälle vor: Er zeigt, wie lange der Vorrat reicht, was noch fehlt und was bei Stromausfall, Hochwasser & Co. zu tun ist. Kostenlos, ohne Anmeldung, funktioniert auch ohne Internet:';
 async function shareApp(){
   const url=APP_URL;
-  try{ if(navigator.share){ await navigator.share({title:'Vorratsplaner', text:SHARE_TEXT, url}); UI.msg='Danke fürs Weiterempfehlen!'; return; } }
+  try{ if(navigator.share){ await navigator.share({title:'Hamsterplan', text:SHARE_TEXT, url}); UI.msg='Danke fürs Weiterempfehlen!'; return; } }
   catch(e){ if(e&&e.name==='AbortError'){ UI.msg=''; return; } }
   UI.shareOpen=true;
 }
@@ -649,7 +649,7 @@ function shareBox(){
 
 function viewHome(c){
   const nItems=S.items.length, nParts=Object.values(S.checks).reduce((a,b)=>a+b,0)+Object.values(S.docs||{}).filter(v=>v===1).length;
-  return `<div class="topbar"><h1>Vorratsplaner</h1><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
+  return `<div class="topbar"><div class="brand"><img src="icons/icon-192.png" alt="" width="52" height="52"><div><h1>Hamsterplan</h1><div class="tagline">Vorrat wie ein Hamster: Stück für Stück.</div></div></div><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
   ${S.demo?`<div class="band info"><div style="display:flex;flex-direction:column;gap:8px"><div><b>Das ist ein Beispiel.</b> <span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. Das sind nicht deine Sachen.</span></div><button class="primary big" data-act="startOwn" style="align-self:flex-start">Meinen eigenen Vorrat anlegen</button></div></div>`:''}
   ${expiryBand(c)}
   ${calDue()?calPrompt():(backupDue()?backupBand():installBand())}
@@ -715,8 +715,8 @@ function viewStart(){
   const st=UI.ob||1;
   const dots=`<div class="obdots" aria-label="Schritt ${st} von 3">${[1,2,3].map(i=>`<span class="${i<=st?'on':''}"></span>`).join('')}</div>`;
   let body='';
-  if(st===1) body=`<h1>Willkommen</h1>
-    <p class="lead" style="margin:0">Der Vorratsplaner hilft dir, für Notfälle wie einen langen Stromausfall vorzusorgen. Drei kurze Fragen, dann geht es los.</p>
+  if(st===1) body=`<img src="icons/icon-192.png" alt="" width="96" height="96" style="border-radius:20px"><h1>Willkommen beim Hamsterplan</h1>
+    <p class="lead" style="margin:0">Vorrat wie ein Hamster: Stück für Stück, nicht im Panikkauf. Der Hamsterplan hilft dir, für Notfälle wie einen langen Stromausfall vorzusorgen. Drei kurze Fragen, dann geht es los.</p>
     <label class="check"><input type="checkbox" id="big-font" ${META.big?'checked':''}> <span><b>Große Schrift</b><br><span class="hint">Alles wird größer und leichter lesbar. Lässt sich jederzeit in den Einstellungen ändern.</span></span></label>
     <section class="panel"><h2 style="font-size:1.2rem">Wer lebt in deinem Haushalt?</h2>${householdEditor()}</section>`;
   else if(st===2) body=`<h1>Haustiere</h1><p class="lead" style="margin:0">Haben Tiere bei dir ein Zuhause? Dann rechnet die App ihr Wasser und Futter mit.</p>
@@ -810,7 +810,7 @@ function viewWissen(){
 function printWissen(){
   const g=S.land?giftFor(S.land):null;
   document.getElementById('printout').innerHTML=`<h1>Notfall-Wissen</h1>
-    <div class="meta">Vorratsplaner ${APP_VERSION} · Stand Oktober 2026 · Im Ernstfall gelten zuerst die Anweisungen der Behörden.</div>
+    <div class="meta">Hamsterplan ${APP_VERSION} · Stand Oktober 2026 · Im Ernstfall gelten zuerst die Anweisungen der Behörden.</div>
     <div class="sum" style="grid-template-columns:repeat(3,1fr)">${NUMMERN.slice(0,3).map(([n,name])=>`<div>${name}<b>${n}</b></div>`).join('')}</div>
     <p class="meta">${g?`<b>Giftnotruf ${g.ort}: ${g.tel}</b> · `:''}Telefonseelsorge: 0800 111 0 111 · Notfall-Infopunkt in meiner Nähe: ______________________________</p>
     ${WISSEN.map(w=>w.sec?`<h2>${w.sec}</h2>`:wissenCard(w,true)).join('')}
@@ -841,7 +841,7 @@ function printInventory(){
   const L=buyLines(c); const buyN=L.water.length+L.food.length+L.checks.reduce((a,[,r])=>a+r.length,0);
   document.getElementById('printout').innerHTML=`
     <h1>Notvorrat – Bestandsliste</h1>
-    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):''].filter(Boolean).join(', ')})`:''}${petCount()?` · ${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`:''} · Ziel ${c.T} Tage · Vorratsplaner ${APP_VERSION}</div>
+    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):''].filter(Boolean).join(', ')})`:''}${petCount()?` · ${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`:''} · Ziel ${c.T} Tage · Hamsterplan ${APP_VERSION}</div>
     <div class="sum"><div>Reicht für<b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b></div><div>Wasser<b>${fmt(c.water)} / ${fmt(c.waterNeed)} l</b></div>
       <div>Nahrung<b>${fmt(c.foodTotal)} / ${fmt(c.foodNeed)} kg</b></div><div>Noch kaufen<b>${buyN} Posten</b></div></div>
     ${c.expired.length||c.soon.length?`<p class="exp">Abgelaufen: ${c.expired.map(i=>esc(i.name)).join(', ')||'–'} · Läuft bald ab: ${c.soon.map(i=>esc(i.name)).join(', ')||'–'}</p>`:''}
@@ -1204,9 +1204,9 @@ root.addEventListener('change', e=>{
     else document.getElementById('f-dry').checked=false;
     return; }
   if(t.id==='restore-file' && t.files && t.files[0]){ const f=t.files[0]; UI.impErr='';
-    if(f.size>5e6){ UI.impErr='Die Datei ist zu groß für eine Vorratsplaner-Sicherung.'; render(); return; }
+    if(f.size>5e6){ UI.impErr='Die Datei ist zu groß für eine Hamsterplan-Sicherung.'; render(); return; }
     f.text().then(txt=>{ try{ UI.pending={label:`Sicherung „${f.name}“ wiederherstellen?`, data:parseBackup(txt)}; }
-      catch(err){ UI.impErr='Diese Datei ist keine Vorratsplaner-Sicherung.'; } render(); });
+      catch(err){ UI.impErr='Diese Datei ist keine Hamsterplan-Sicherung.'; } render(); });
     return; }
   if(t.dataset.name!==undefined){ S.names=S.names||[]; S.names[+t.dataset.name]=t.value; save(); }
   if(t.dataset.cash){ S.cash=S.cash||{have:0,target:null}; const n=parseNum(t.value); S.cash[t.dataset.cash]= n>0?n:(t.dataset.cash==='have'?0:null); save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); }
@@ -1258,7 +1258,7 @@ function installBand(){
     : IS_IOS ? `<ol class="steps small"><li>Unten in Safari auf das Teilen-Zeichen tippen (Quadrat mit Pfeil nach oben).</li><li>Nach unten wischen und <b>„Zum Home-Bildschirm“</b> wählen.</li><li>Oben rechts auf <b>„Hinzufügen“</b> tippen.</li></ol>`
     : `<ol class="steps small"><li>Oben rechts auf die drei Punkte <b>⋮</b> tippen.</li><li><b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b> wählen.</li></ol>`;
   return `<div class="band info"><div style="display:flex;flex-direction:column;gap:8px">
-    <div><b>Als App auf dein Handy legen</b><div class="small">Dann findest du den Vorratsplaner mit eigenem Symbol neben deinen anderen Apps, und er funktioniert ohne Internet.</div></div>
+    <div><b>Als App auf dein Handy legen</b><div class="small">Dann findest du den Hamsterplan mit eigenem Symbol neben deinen anderen Apps, und er funktioniert ohne Internet.</div></div>
     ${how}<button class="linkbtn small" data-act="installHide" style="align-self:flex-start">Schon erledigt, ausblenden</button></div></div>`;
 }
 

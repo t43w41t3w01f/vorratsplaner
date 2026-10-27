@@ -1,6 +1,14 @@
 # Versionen
 
-Alle Änderungen am Vorratsplaner, neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
+Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
+
+## 1.18 – 27. Oktober 2026
+Neuer Name und eigene Adresse. Rücksprungpunkt: Zweig `stand-v1.17`.
+- **Neuer Name „Hamsterplan“** statt „Vorratsplaner“ (bisheriger Projektname).
+- **Eigene Adresse hamsterplan.de** (bei INWX, zeigt auf GitHub Pages). Die alte github.io-Adresse leitet weiter.
+- **Hamster-Maskottchen** als App-Symbol (alle Größen, auch für Android-Formen) und auf Startseite und Einstieg, Motto „Vorrat wie ein Hamster: Stück für Stück“.
+- Umzug von der alten Adresse: Flugmodus an, alte App öffnen (läuft aus dem Gerätespeicher), Sicherung als Datei speichern, in hamsterplan.de wiederherstellen.
+- Sicherungsdateien heißen jetzt `hamsterplan-sicherung-….json`, alte Sicherungen lassen sich weiter einspielen.
 
 ## 1.17 – 26. Oktober 2026
 Einfach für alle (Paket 2). Rücksprungpunkt: Zweig `stand-v1.16`.
