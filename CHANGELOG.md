@@ -2,6 +2,15 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.20 – 27. Oktober 2026
+Babys unter 1 Jahr. Rücksprungpunkt: Zweig `stand-v1.19`.
+- **Zähler „Babys unter 1 Jahr“**: zählen als Person, essen aber nichts aus dem Vorrat. Wasser 1 l pro Baby und Tag (Zubereitung, eigener Richtwert).
+- **Bereich „Baby“** mit „Entfällt“ je Punkt: Säuglingsmilch-Pulver (Packung je ca. 5 Tage), trinkfertige Notreserve, Fläschchen, Sauger, Flaschenbürste, Thermoskanne, Beikost (2 Portionen pro Tag), Windeln (8 pro Tag), Feuchttücher, Wundschutzcreme, Wechselkleidung, Schlafsack/Mütze/Decke, Babytrage, Nasentropfen, Elektrolytlösung, Schnuller. Alle Mengen eigene Richtwerte.
+- Hinweise: Stillen, Pulvermilch nur mit abgekochtem oder geeignetem Wasser, trinkfertige Säuglingsmilch, Wärme. Zusätzlich in der Karte „Stromausfall“.
+- U-Hefte in der Dokumentenmappe (bei Kindern im Haushalt).
+- Kästchen „Pflege oder Hilfe im Alltag“ grün umrandet wie die Haustiere.
+- Zähler (+/−) werden bei großer Schrift auf schmalen Bildschirmen nicht mehr abgeschnitten.
+
 ## 1.19 – 27. Oktober 2026
 Medikamente, Pflege, Schutz vor Datenverlust. Rücksprungpunkt: Zweig `stand-v1.18`.
 - **Meine Medikamente** (für alle): Name, für wen, Menge pro Tag, pro Woche oder bei Bedarf, Vorrat, Kühlpflicht. Der Vorrat zieht sich täglich selbst ab. Anzeige „reicht X Tage, bis …“, Hinweis „Rezept rechtzeitig holen“, Eintrag in Einkaufsliste und Ausdruck. Keine Einnahme-Erinnerung, keine Dosierungsvorgaben.

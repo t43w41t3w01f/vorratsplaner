@@ -26,12 +26,12 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Medikamentenliste für alle**: Menge pro Tag/Woche/Bedarf, Vorrat zieht sich selbst ab, Rezept-Hinweis, Kühlhinweis *(Version 1.19)*
 - [x] **Haushaltsprofil Teil 3a: Pflege- oder Hilfsbedarf** (Kästchen, Bereich Pflege & Hilfsmittel, Strom und Hausnotruf) *(Version 1.19)*
 - [x] **Schutz vor Datenverlust**: erste Sicherung nach 5 Einträgen, „An mich selbst schicken“, Status auf der Startseite, Wiederherstellen im Einstieg *(Version 1.19)*
+- [x] **Haushaltsprofil Teil 3b: Babys unter 1 Jahr**: eigener Bereich, Hinweise zu Stillen und sicherem Wasser, 1 l Wasser pro Baby *(Version 1.20)*
 
 ## Priorität hoch
 
 - [ ] **Praxistest mit 2–3 Senioren** aus dem Dorf vor der Verteilung
 - [ ] **Notfall-Modus „Es ist so weit“**: Umschalten auf Tageszähler, Wasserverbrauch pro Tag und Ess-Reihenfolge (erst Kühlschrank, dann Frisches, dann Konserven)
-- [ ] **Haushaltsprofil Teil 3b: Säuglinge unter 1 Jahr** (Stillen, Pulvermilch mit Extra-Wasser, trinkfertige Nahrung, Babytrage, Checkliste)
 - [ ] **Play-Store-App mit eigenem Speicher**: einziger echter Schutz, wenn Browserdaten gelöscht werden
 
 ## Weitere Ideen
@@ -44,6 +44,8 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
 
 ## Offen
+
+- [ ] **Baby-Mengen prüfen** (8 Windeln, Pulver-Packung je 5 Tage, 2 Beikost-Portionen, 1 l Wasser pro Tag), bisher eigene Richtwerte
 
 - [ ] **Inkontinenz-Menge prüfen** (4 Stück pro Tag), bisher eigener Richtwert
 

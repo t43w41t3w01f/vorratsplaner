@@ -33,6 +33,14 @@ const CHECK = {
   tiere:   {n:'Haustiere', only:'pets', items:[['tfutter','Tierfutter, trocken oder Dose (kg)',1,'pf'],['streu','Katzenstreu (kg)',1,'pl'],
     ['napf','Ersatznapf und Wasser für unterwegs',1,'pn'],['tbox','Transportbox, Leine oder Geschirr',1,'pn'],['kotb','Kotbeutel (Rolle)',1,'pd'],
     ['tmed','Medikamente und Heimtierausweis des Tiers',1,'pn']]},
+  // pp:'b' = pro Baby (unter 1 Jahr), Mengen sind eigene Richtwerte
+  baby:    {n:'Baby', only:'baby', optional:true, items:[['bpulver','Säuglingsmilch Pre oder 1er, Pulver (Packung, reicht ca. 5 Tage)',0.2,'b',true],
+    ['bfluessig','Trinkfertige Säuglingsmilch als Notreserve, ohne Wasser und Kochen (Packung für 1 Tag)',1,'b'],
+    ['flaschen','Fläschchen',4,'b'],['sauger','Ersatzsauger',2,'b'],['bbuerste','Flaschenbürste',1],['thermos','Thermoskanne für abgekochtes Wasser',1],
+    ['bbrei','Beikost ab ca. 5–7 Monaten: Gläschen oder Breiflocken (Portion)',2,'b',true],
+    ['bwindeln','Windeln (Stück)',8,'b',true],['bfeucht','Feuchttücher (Packung, je 5 Tage)',0.2,'b',true],['bwund','Wundschutzcreme',1],
+    ['bkleid','Wechselkleidung (Sets)',3,'b'],['bwaerme','Schlafsack, Mütze und warme Decke',1,'b'],['trage','Babytrage oder Tragetuch',1,'b'],
+    ['bnase','Kochsalz-Nasentropfen',1],['belektro','Elektrolytlösung für Säuglinge (vorher Kinderarzt fragen)',1],['schnuller','Schnuller und Ersatzschnuller',2,'b']]},
   klein:   {n:'Kleinkind', only:'kids1', items:[['windeln','Windeln (Stück)',6,'k',true],['feucht','Feuchttücher (Packung, je 5 Tage)',0.2,'k',true],
     ['brei','Kleinkindnahrung: Gläschen oder Brei',1,'k',true],['mpulver','Milchpulver oder H-Milch für Kleinkinder (Packung)',1,'k'],
     ['becher','Trinkbecher oder Flasche',1,'k'],['kfieber','Fieber- und Schmerzmittel für Kinder',1],['wund','Wundschutzcreme',1],['spiel','Beschäftigung (Buch, Kuscheltier, Spiel)',1,'k']]},
@@ -47,7 +55,7 @@ const CHECK = {
 const DOCS = {
   orig:{n:'Dokumentenmappe', sub:'Originale oder beglaubigte Kopien', view:'docs-orig', items:[
     ['geburt','Geburtsurkunde','p'],['zeugnis','Zeugnisse und Qualifikationsnachweise','p'],['verfuegung','Patientenverfügung und Vollmacht','p'],
-    ['familie','Familienstammbuch, Heirats- und Sterbeurkunden','h'],['konto','Sparbücher und Kontoverträge','h'],['wertpapier','Aktien und Wertpapiere','h'],
+    ['familie','Familienstammbuch, Heirats- und Sterbeurkunden','h'],['uheft','Kinder-Untersuchungshefte (U-Hefte)','h','kids'],['konto','Sparbücher und Kontoverträge','h'],['wertpapier','Aktien und Wertpapiere','h'],
     ['versich','Versicherungspolicen','h'],['pflegegrad','Pflegegrad-Bescheid und Pflegevertrag','h','care'],['einkommen','Renten-, Einkommens- und Steuerbescheide','h'],['vertrag','Verträge (Miete, Leasing, Kauf)','h'],['testament','Testament','h']]},
   copy:{n:'Kopien wichtiger Dokumente', sub:'Eine Kopie reicht', view:'docs-copy', items:[
     ['ausweis','Personalausweis','p'],['pass','Reisepass','p'],['fuehrer','Führerschein','p'],['impf','Impfpass','p'],
@@ -55,12 +63,15 @@ const DOCS = {
 };
 const DERIVED = {mappe:'orig', kopien:'copy'};
 // 4. Feld: 'care' nur mit Pflege-Haken, 'meds' nur mit eingetragenen Medikamenten (oder Pflege)
-const docOn = i => !i[3] || (i[3]==='care'&&S.care) || (i[3]==='meds'&&(S.care||(S.meds||[]).length>0));
+const docOn = i => !i[3] || (i[3]==='care'&&S.care) || (i[3]==='meds'&&(S.care||(S.meds||[]).length>0)) || (i[3]==='kids'&&(babies()+kids1()+kids4())>0);
 const docItems = kind => DOCS[kind].items.filter(docOn);
 // Nahrung nach DGE-Richtwerten: Kinder 4–9 Jahre ca. 70 %, Kleinkinder 1–3 Jahre ca. 50 % eines Erwachsenen. Wasser und Checklisten zählen voll.
 const EAT_KIDS4 = 0.7, EAT_KIDS1 = 0.5;
-const kids4 = () => S.kids4||0, kids1 = () => S.kids1||0;
-const adults = () => S.persons - kids4() - kids1();
+// Babys unter 1 Jahr essen nichts aus dem Vorrat (Stillen oder Säuglingsmilch, eigener Bereich „Baby“).
+// Wasser: 1 l pro Baby und Tag für die Zubereitung von Säuglingsmilch bzw. als Extra-Trinkmenge der Stillenden (eigener Richtwert)
+const BABY_WATER = 1;
+const kids4 = () => S.kids4||0, kids1 = () => S.kids1||0, babies = () => S.baby||0;
+const adults = () => S.persons - kids4() - kids1() - babies();
 const eatUnits = () => adults() + kids4()*EAT_KIDS4 + kids1()*EAT_KIDS1;
 // Haustiere: Richtwerte pro Tier und Tag (eigene Annahmen, keine amtlichen Werte)
 const PETS = [
@@ -76,18 +87,19 @@ const dogCount = () => petN('dogS')+petN('dogM')+petN('dogL');
 const petWater = () => PETS.reduce((a,x)=>a+petN(x.k)*x.water,0);
 const petFood  = () => PETS.reduce((a,x)=>a+petN(x.k)*x.food,0);
 const petLitter= () => PETS.reduce((a,x)=>a+petN(x.k)*(x.litter||0),0);
-function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0) || (v.only==='pets' && petCount()>0) || (v.only==='care' && S.care)); }
+function activeChecks(){ return Object.entries(CHECK).filter(([k,v])=>!v.only || (v.only==='kids1' && kids1()>0) || (v.only==='pets' && petCount()>0) || (v.only==='care' && S.care) || (v.only==='baby' && babies()>0)); }
 function needOf(item, p, T){ const [,, q, pp, perDay]=item;
   if(S.checkNa && S.checkNa[item[0]]) return 0;
   if(pp==='pf') return Math.ceil(petFood()*T); if(pp==='pl') return Math.ceil(petLitter()*T);
   if(pp==='pn') return q*petCount(); if(pp==='pd') return q*dogCount();
-  const mult = pp==='k' ? kids1() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
+  const mult = pp==='k' ? kids1() : pp==='b' ? babies() : (pp ? p : 1); return Math.ceil(q*mult*(perDay?T:1)); }
 function needText(item){ const [,, q, pp, perDay]=item;
   if(pp==='pf') return `${fmt(petFood(),2)} kg pro Tag für alle Tiere`; if(pp==='pl') return `${fmt(petLitter(),2)} kg pro Tag`;
   if(pp==='pn') return `${q} pro Tier`; if(pp==='pd') return `${q} pro Hund`;
   if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
+  if(pp==='b') return `${fmt(q,2)} pro Baby${perDay?' und Tag':''}`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.19';
+const APP_VERSION='1.20';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -111,6 +123,7 @@ const ICONS = {
   phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
   shelf:'<path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16"/><rect x="7" y="7" width="4" height="5"/><rect x="13" y="9" width="4" height="3"/><rect x="8" y="15" width="7" height="5"/>',
   print:'<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  baby:'<circle cx="12" cy="8.5" r="4.5"/><path d="M10.3 8h.01M13.7 8h.01M10.8 10.3c.7.5 1.7.5 2.4 0"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/>',
   pflege:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 9.5v5M9.5 12h5"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
 };
@@ -389,7 +402,7 @@ function demoState(){
       it('nahrung','fett','Rapsöl',500,'ml',1,'2027-09'),
     ]};
 }
-function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, pets:S?S.pets||{}:{}, petsOn:S?!!S.petsOn:false, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}, meds:[], checkNa:{}, care:S?!!S.care:false}; }
+function emptyState(){ return {land:S?S.land||null:null, persons:S?S.persons:2, kids4:S?S.kids4||0:0, kids1:S?S.kids1||0:0, baby:S?S.baby||0:0, pets:S?S.pets||{}:{}, petsOn:S?!!S.petsOn:false, days:S?S.days:10, demo:false, checks:{}, items:[], docs:{}, names:S?S.names:[], cash:{have:0,target:null}, meds:[], checkNa:{}, care:S?!!S.care:false}; }
 
 /* ---------- Helfer ---------- */
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -565,8 +578,8 @@ function cleanMed(m){
 }
 function cleanState(d){
   if(!d || typeof d!=='object' || !Array.isArray(d.items)) throw new Error('ungültig');
-  const persons=int(d.persons,1,20,2), kids4=int(d.kids4,0,19,0), kids1=int(d.kids1,0,19,0);
-  const k4=Math.min(kids4,persons-1), k1=Math.min(kids1,persons-1-k4);
+  const persons=int(d.persons,1,20,2), kids4=int(d.kids4,0,19,0), kids1=int(d.kids1,0,19,0), baby=int(d.baby,0,19,0);
+  const k4=Math.min(kids4,persons-1), k1=Math.min(kids1,persons-1-k4), bb=Math.min(baby,persons-1-k4-k1);
   const known=new Set(); Object.values(CHECK).forEach(v=>v.items.forEach(it=>known.add(it[0])));
   const checks={}; if(d.checks&&typeof d.checks==='object') for(const k of Object.keys(d.checks)) if(known.has(k)) checks[k]=int(d.checks[k],0,9999,0);
   const docs={}; if(d.docs&&typeof d.docs==='object') for(const k of Object.keys(d.docs)) if(/^(orig|copy)\|(p\d{1,2}|h)\|[a-z]{2,20}$/.test(k) && (d.docs[k]===1||d.docs[k]==='na')) docs[k]=d.docs[k];
@@ -575,7 +588,7 @@ function cleanState(d){
   const meds=Array.isArray(d.meds) ? d.meds.slice(0,100).map(cleanMed).filter(Boolean) : [];
   const seen=new Set(); items.concat(meds).forEach(it=>{ if(seen.has(it.id)) it.id=uid(); seen.add(it.id); });
   const checkNa={}; if(d.checkNa&&typeof d.checkNa==='object') for(const k of Object.keys(d.checkNa)) if(known.has(k) && d.checkNa[k]===true) checkNa[k]=true;
-  return {land: LAENDER.includes(d.land) ? d.land : null, persons, kids4:k4, kids1:k1, pets, petsOn: d.petsOn===true || Object.keys(pets).length>0,
+  return {land: LAENDER.includes(d.land) ? d.land : null, persons, kids4:k4, kids1:k1, baby:bb, pets, petsOn: d.petsOn===true || Object.keys(pets).length>0,
     days:int(d.days,1,90,10), demo: d.demo===true, checks, items, docs,
     names: Array.isArray(d.names) ? d.names.slice(0,20).map(n=>str(n,40)) : [],
     cash: {have: num(d.cash?.have,0,1e6,0), target: num(d.cash?.target,1,1e6,null)}, meds, checkNa, care: d.care===true};
@@ -611,7 +624,7 @@ function calc(){
   });
   const foodTotal=Object.values(food).reduce((a,b)=>a+b,0);
   const eat=eatUnits();
-  const wDay=p*WATER_DAY+petWater();
+  const wDay=(p-babies())*WATER_DAY+babies()*BABY_WATER+petWater();
   const waterReach=water/wDay, foodReach=foodTotal/(eat*FOOD_DAY);
   const reach=Math.floor(Math.min(waterReach,foodReach)+1e-9);
   const checks={};
@@ -622,7 +635,7 @@ function calc(){
   }
   return {p,T,water,food,foodTotal,waterReach,foodReach,reach,
     bottleneck: waterReach<=foodReach?'Wasser':'Nahrung', expired, soon, checks, medShort:medShort(T),
-    waterNeed:wDay*T, petWaterNeed:petWater()*T, foodNeed:eat*FOOD_DAY*T, eat};
+    waterNeed:wDay*T, petWaterNeed:petWater()*T, babyWaterNeed:babies()*BABY_WATER*T, foodNeed:eat*FOOD_DAY*T, eat};
 }
 
 /* ---------- Ansichten ---------- */
@@ -736,11 +749,11 @@ function viewVorrat(c){
 }
 
 function householdEditor(){
-  return `${[['adults','Erwachsene und Kinder ab 10 Jahren',adults()],['kids4','Kinder 4–9 Jahre',kids4()],['kids1','Kleinkinder 1–3 Jahre',kids1()]].map(([k,n,v])=>`
+  return `${[['adults','Erwachsene und Kinder ab 10 Jahren',adults()],['kids4','Kinder 4–9 Jahre',kids4()],['kids1','Kleinkinder 1–3 Jahre',kids1()],['baby','Babys unter 1 Jahr',babies()]].map(([k,n,v])=>`
     <div class="spread"><span>${n}</span>
       <div class="stepper"><button data-act="pers" data-k="${k}" data-d="-1" aria-label="${n}: eins weniger">−</button><span class="num">${v}</span><button data-act="pers" data-k="${k}" data-d="1" aria-label="${n}: eins mehr">+</button></div></div>`).join('')}
-    <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll (Richtwerte der Deutschen Gesellschaft für Ernährung).${kids1()?' Für Kleinkinder gibt es einen eigenen Bereich „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Säuglingsnahrung für Babys unter 1 Jahr bitte gesondert planen.</p>
-    <label class="check"><input type="checkbox" id="care-on" ${S.care?'checked':''}> <span><b>Pflege oder Hilfe im Alltag</b><br><span class="hint">Jemand im Haushalt ist pflegebedürftig oder braucht Hilfsmittel, z. B. Rollator, Hörgerät, Inkontinenzmaterial oder Geräte, die Strom brauchen. Dann gibt es einen eigenen Bereich „Pflege &amp; Hilfsmittel“ und Hinweise für den Stromausfall. Die Mengen für Essen und Wasser ändern sich nicht.</span></span></label>`;
+    <p class="hint" style="margin:0">Kinder essen weniger: 1–3 Jahre zählen etwa halb, 4–9 Jahre etwa 70 %. Ab 10 Jahren rechnet die App wie bei Erwachsenen. Wasser, Hygiene und Dokumente zählen für alle voll, bei Babys rechnet die App 1 l Wasser pro Tag (Richtwerte der Deutschen Gesellschaft für Ernährung, Baby-Wasser eigener Richtwert).${kids1()?' Für Kleinkinder gibt es einen eigenen Bereich „Kleinkind“ mit Windeln und Kleinkindnahrung.':''} Babys unter 1 Jahr bekommen keine Vorrats-Lebensmittel, sondern einen eigenen Bereich „Baby“ mit Säuglingsmilch, Fläschchen und Windeln.</p>
+    <label class="check petcheck"><input type="checkbox" id="care-on" ${S.care?'checked':''}> <span><b>Pflege oder Hilfe im Alltag</b><br><span class="hint">Jemand im Haushalt ist pflegebedürftig oder braucht Hilfsmittel, z. B. Rollator, Hörgerät, Inkontinenzmaterial oder Geräte, die Strom brauchen. Dann gibt es einen eigenen Bereich „Pflege &amp; Hilfsmittel“ und Hinweise für den Stromausfall. Die Mengen für Essen und Wasser ändern sich nicht.</span></span></label>`;
 }
 function petEditor(){
   return `<label class="check petcheck"><input type="checkbox" id="pets-on" ${S.petsOn||petCount()?'checked':''}> <span><b>Haustiere im Haushalt</b>${petCount()?` <span class="num">(${petCount()})</span>`:''}<br><span class="hint">Haken setzen, um Hund, Katze oder Kleintier einzutragen.</span></span></label>
@@ -752,6 +765,7 @@ function householdText(){
   const parts=[`${adults()} ${adults()===1?'Erwachsener':'Erwachsene'}`];
   if(kids4()) parts.push(`${kids4()} ${kids4()===1?'Kind':'Kinder'} (4–9)`);
   if(kids1()) parts.push(`${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'}`);
+  if(babies()) parts.push(`${babies()} ${babies()===1?'Baby':'Babys'}`);
   if(petCount()) parts.push(`${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`);
   if(S.care) parts.push('mit Pflege- oder Hilfsbedarf');
   return parts.join(', ');
@@ -888,7 +902,7 @@ function printInventory(){
   const L=buyLines(c); const buyN=L.water.length+L.food.length+L.checks.reduce((a,[,r])=>a+r.length,0);
   document.getElementById('printout').innerHTML=`
     <h1>Notvorrat – Bestandsliste</h1>
-    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):''].filter(Boolean).join(', ')})`:''}${petCount()?` · ${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`:''} · Ziel ${c.T} Tage · Hamsterplan ${APP_VERSION}</div>
+    <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()||babies()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):'',babies()?babies()+' '+(babies()>1?'Babys':'Baby'):''].filter(Boolean).join(', ')})`:''}${petCount()?` · ${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`:''} · Ziel ${c.T} Tage · Hamsterplan ${APP_VERSION}</div>
     <div class="sum"><div>Reicht für<b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b></div><div>Wasser<b>${fmt(c.water)} / ${fmt(c.waterNeed)} l</b></div>
       <div>Nahrung<b>${fmt(c.foodTotal)} / ${fmt(c.foodNeed)} kg</b></div><div>Noch kaufen<b>${buyN} Posten</b></div></div>
     ${c.expired.length||c.soon.length?`<p class="exp">Abgelaufen: ${c.expired.map(i=>esc(i.name)).join(', ')||'–'} · Läuft bald ab: ${c.soon.map(i=>esc(i.name)).join(', ')||'–'}</p>`:''}
@@ -995,7 +1009,7 @@ function viewStock(c){
   if(isW){
     const items=S.items.filter(i=>i.cat==='wasser');
     return `${head}<section class="panel"><div class="spread"><span class="label">Bestand</span><span class="num"><b>${fmt(c.water)}</b> von ${fmt(c.waterNeed)} l</span></div>${bar(c.water/c.waterNeed)}
-      <p class="small muted" style="margin:0">BBK: 2 Liter pro Person und Tag zum Trinken und Kochen.${petCount()?` Darin enthalten: ${fmt(c.petWaterNeed)} l für deine Haustiere.`:''}</p></section>
+      <p class="small muted" style="margin:0">BBK: 2 Liter pro Person und Tag zum Trinken und Kochen.${babies()?` Für Babys rechnet die App 1 l pro Tag (Zubereitung von Säuglingsmilch, eigener Richtwert), zusammen ${fmt(c.babyWaterNeed)} l.`:''}${petCount()?` Darin enthalten: ${fmt(c.petWaterNeed)} l für deine Haustiere.`:''}</p></section>
       <section class="panel"><div class="list">${items.length?items.map(itemRow).join(''):'<p class="muted">Noch kein Wasser eingetragen. Füge zum Beispiel eine Kiste Mineralwasser hinzu.</p>'}</div>
       <button class="primary" data-act="add" data-cat="wasser">Wasser eintragen</button></section>`;
   }
@@ -1062,8 +1076,9 @@ function viewCheck(c){
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${v.n}</h1></div>
     ${k==='medizin'?medSection(c):''}
     <section class="panel">${k==='medizin'?'<h2 style="font-size:1.15rem">Hausapotheke</h2>':''}<div class="spread"><span class="label">Vollständigkeit</span><span class="num"><b>${c.checks[k].have}</b> von ${c.checks[k].need}</span></div>${bar(c.checks[k].ratio)}
-    <p class="small muted" style="margin:0">${k==='tiere'?`Für ${petCount()} ${petCount()===1?'Tier':'Tiere'} und ${c.T} Tage. Futter und Streu richten sich nach den Tagen, Wasser für die Tiere zählt beim Wasser mit. Richtwerte, passe sie an dein Tier an.`:k==='klein'?`Für ${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'} und ${c.T} Tage. Windeln, Feuchttücher und Gläschen richten sich nach den Tagen. Die Mengen sind Richtwerte, passe sie an dein Kind an.`:k==='pflege'?`Für ${c.T} Tage. Was bei euch nicht gebraucht wird, markierst du mit „Entfällt“. Inkontinenzmaterial: eigener Richtwert 4 Stück pro Tag, passe ihn an.`:k==='medizin'?'Für alle im Haushalt, unabhängig von der Anzahl der Tage.':'Diese Dinge brauchst du unabhängig von der Anzahl der Tage.'}</p></section>
+    <p class="small muted" style="margin:0">${k==='tiere'?`Für ${petCount()} ${petCount()===1?'Tier':'Tiere'} und ${c.T} Tage. Futter und Streu richten sich nach den Tagen, Wasser für die Tiere zählt beim Wasser mit. Richtwerte, passe sie an dein Tier an.`:k==='klein'?`Für ${kids1()} ${kids1()===1?'Kleinkind':'Kleinkinder'} und ${c.T} Tage. Windeln, Feuchttücher und Gläschen richten sich nach den Tagen. Die Mengen sind Richtwerte, passe sie an dein Kind an.`:k==='baby'?`Für ${babies()} ${babies()===1?'Baby':'Babys'} und ${c.T} Tage. Was nicht passt, z. B. Pulvermilch beim Stillen oder Beikost bei ganz Kleinen, markierst du mit „Entfällt“. Die Mengen sind eigene Richtwerte, im Zweifel Hebamme oder Kinderarzt fragen.`:k==='pflege'?`Für ${c.T} Tage. Was bei euch nicht gebraucht wird, markierst du mit „Entfällt“. Inkontinenzmaterial: eigener Richtwert 4 Stück pro Tag, passe ihn an.`:k==='medizin'?'Für alle im Haushalt, unabhängig von der Anzahl der Tage.':'Diese Dinge brauchst du unabhängig von der Anzahl der Tage.'}</p></section>
     ${k==='pflege'?careWarn():''}
+    ${k==='baby'?babyInfo():''}
     <section class="panel"><div class="list">${rows}</div></section>`;
 }
 
@@ -1085,6 +1100,12 @@ function restoreUI(){
     <input type="file" id="restore-file" accept=".json,application/json" hidden>
     ${UI.impErr?`<div class="err">${UI.impErr}</div>`:''}`;
 }
+// Baby: Ernährung im Notfall (nach Empfehlungen zur Säuglingsernährung; Mengen eigene Richtwerte)
+function babyInfo(){ return `<div class="band info"><div style="display:flex;flex-direction:column;gap:6px">
+  <div class="small"><b>Stillen ist im Notfall am sichersten:</b> kein Wasser, keine Wärme, kein Einkauf. Wer stillt, sollte selbst genug trinken und essen.</div>
+  <div class="small"><b>Pulvermilch</b> nur mit abgekochtem Wasser anrühren oder mit Mineralwasser mit der Aufschrift „geeignet für die Zubereitung von Säuglingsnahrung“. Dafür braucht es eine Kochmöglichkeit ohne Strom, z. B. einen Campingkocher (nur bei offenem Fenster). Fläschchen gründlich reinigen, Reste nicht aufheben.</div>
+  <div class="small"><b>Trinkfertige Säuglingsmilch</b> braucht weder Wasser noch Kochen. Als Reserve für die ersten Tage ideal.</div>
+  <div class="small"><b>Wärme:</b> Babys kühlen schnell aus. Bei Heizungsausfall Mütze, Schlafsack und Körperkontakt.</div></div></div>`; }
 // Pflege: Strom und Hausnotruf
 const CARE_TEXT = 'Sauerstoffgerät, Pflegebett, Treppenlift oder Absauggerät brauchen Strom. Ein Hausnotruf funktioniert ohne Strom oder Telefonnetz oft nicht. Sprich jetzt mit Pflegedienst oder Arzt: Gibt es Akkus, Ersatzgeräte oder einen Plan für den Stromausfall? Vereinbare mit Nachbarn oder Angehörigen, dass im Notfall täglich jemand vorbeischaut.';
 function careWarn(){ return `<div class="band warn"><div class="small"><b>Strom und Hausnotruf vorher klären.</b> ${CARE_TEXT}</div></div>`; }
@@ -1093,6 +1114,7 @@ function careBand(){ return `<div class="band warn"><div style="display:flex;fle
 function stromExtra(){
   const parts=[];
   if(S.care) parts.push(`<b>Pflege:</b> ${CARE_TEXT}`);
+  if(babies()) parts.push('<b>Baby:</b> warm halten (Mütze, Schlafsack, Körperkontakt). Wasser für Säuglingsmilch auf dem Campingkocher abkochen, nur bei offenem Fenster. Trinkfertige Säuglingsmilch braucht keinen Strom.');
   if(medCold().length) parts.push(`<b>Kühlpflichtige Medikamente</b> (${medCold().map(m=>esc(m.name)).join(', ')}): Kühlschrank geschlossen halten, Kühltasche mit Kühlakkus nutzen. Frag vorher in der Apotheke, wie lange das Mittel ohne Kühlung hält.`);
   return parts.length?`<div class="band warn"><div style="display:flex;flex-direction:column;gap:6px">${parts.map(x=>`<div class="small">${x}</div>`).join('')}</div></div>`:'';
 }
@@ -1235,7 +1257,7 @@ root.addEventListener('click', async e=>{
       if(k==='adults'){ if(adults()+d>=1 && S.persons+d<=20) S.persons+=d; }
       else { const cur=S[k]||0; if(cur+d>=0 && S.persons+d<=20 && (d>0 || cur>0)){ S[k]=cur+d; S.persons+=d; } }
       save(); break; }
-    case 'startOwn': S=emptyState(); S.persons=1; S.kids4=0; S.kids1=0; S.pets={}; S.petsOn=false; UI.view='start'; UI.ob=1; window.scrollTo(0,0); break;
+    case 'startOwn': S=emptyState(); S.persons=1; S.kids4=0; S.kids1=0; S.baby=0; S.pets={}; S.petsOn=false; UI.view='start'; UI.ob=1; window.scrollTo(0,0); break;
     case 'mileOk': META.mile=Math.max(META.mile||0,+b.dataset.v); DB.put(META,'meta'); break;
     case 'share': await shareApp(); break;
     case 'shareCopy': await copy(`${SHARE_TEXT} ${APP_URL}`, 'Text mit Link kopiert. Jetzt z. B. in WhatsApp einfügen.', null); break;
@@ -1281,7 +1303,7 @@ root.addEventListener('click', async e=>{
     case 'import': doImport(); break;
     case 'reset': UI.confirmReset=true; break;
     case 'resetNo': UI.confirmReset=false; break;
-    case 'resetYes': { const wasDemo=S.demo; S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; if(wasDemo){ S.persons=1; S.kids4=0; S.kids1=0; UI.view='start'; UI.ob=1; UI.msg=''; } break; }
+    case 'resetYes': { const wasDemo=S.demo; S=emptyState(); UI.confirmReset=false; save(); UI.msg='Alle Artikel gelöscht.'; if(wasDemo){ S.persons=1; S.kids4=0; S.kids1=0; S.baby=0; UI.view='start'; UI.ob=1; UI.msg=''; } break; }
     case 'rotEdit': UI.rotEdit=b.dataset.id; break;
     case 'rotCancel': UI.rotEdit=null; break;
     case 'rotSave': { const it=S.items.find(i=>i.id===b.dataset.id); const m=document.getElementById('rot-m').value, y=document.getElementById('rot-y').value;
@@ -1396,7 +1418,7 @@ function installBand(){
   const saved=ok?await DB.get():null;
   let first=false;
   try{ if(saved) S=cleanState(saved); else { first=true; S=cleanState({items:[],persons:1}); } }catch(e){ first=true; S=cleanState({items:[],persons:1}); }
-  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0; S.pets=S.pets||{}; S.meds=S.meds||[]; S.checkNa=S.checkNa||{};
+  S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0; S.baby=S.baby||0; S.pets=S.pets||{}; S.meds=S.meds||[]; S.checkNa=S.checkNa||{};
   if(ok){ META=Object.assign(META, await DB.get('meta')||{}); SNAPS=(await DB.get('snaps')||[]).map(x=>{ try{ return {day:String(x.day).slice(0,20), at:Number(x.at)||Date.now(), data:cleanState(x.data)}; }catch(e){ return null; } }).filter(Boolean); }
   snapshot();
   if(first){ UI.view='start'; UI.ob=1; }

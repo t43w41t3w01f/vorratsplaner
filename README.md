@@ -6,7 +6,7 @@
 
 👉 **App öffnen:** [hamsterplan.de](https://hamsterplan.de)
 
-Aktuelle Version: **1.19** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.20** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -24,7 +24,7 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 
 ### Berechnung
 - Personen im Haushalt und Ziel-Tage (1–90) einstellen, Standard sind 10 Tage nach BBK.
-- **Haushalt mit Kindern:** Erwachsene und Kinder ab 10, Kinder 4–9 Jahre (Nahrung ca. 70 %) und Kleinkinder 1–3 Jahre (ca. 50 %) nach DGE-Richtwerten. Wasser und Checklisten zählen für alle voll.
+- **Haushalt mit Kindern:** Erwachsene und Kinder ab 10, Kinder 4–9 Jahre (Nahrung ca. 70 %) und Kleinkinder 1–3 Jahre (ca. 50 %) nach DGE-Richtwerten, Babys unter 1 Jahr mit eigenem Bereich. Wasser und Checklisten zählen für alle voll.
 - **Haustiere:** Kästchen „Haustiere im Haushalt“ anhaken, dann Hunde (klein, mittel, groß), Katzen und Kleintiere eintragen. Ihr Wasser zählt beim Wasser mit, Futter und Zubehör stehen in einem eigenen Bereich.
 - **Reicht für:** Reichweite in Tagen und was am meisten fehlt, z. B. „Am meisten fehlt: Wasser“.
 - **Noch kaufen:** Einkaufsliste mit allen Fehlmengen. Wasser wird in Kisten umgerechnet, zu jeder Lebensmittelgruppe gibt es lange haltbare Beispiele. Drucken, als PDF speichern oder kopieren.
@@ -37,6 +37,7 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 - **Meine Medikamente:** Name, Menge pro Tag oder Woche, Vorrat. Die App zieht täglich ab, zeigt „reicht bis …“, erinnert ans Rezept und warnt bei kühlpflichtigen Mitteln vor Stromausfall.
 - **Checklisten** für Erste Hilfe, Hausapotheke, Hygiene, Licht & Strom, Wärme & Kochen.
 - **Bereich Pflege & Hilfsmittel** (mit Kästchen „Pflege oder Hilfe im Alltag“): Ersatzbrille, Hörgeräte-Batterien, Inkontinenzmaterial, Teststreifen, Gehhilfe, „Entfällt“ je Punkt, Hinweis zu Strom und Hausnotruf.
+- **Bereich Baby** (unter 1 Jahr): Säuglingsmilch, Fläschchen, Windeln, Babytrage und mehr, mit Hinweisen zu Stillen und sicherem Wasser. Babys essen nichts aus dem Vorrat, bekommen aber 1 l Wasser pro Tag.
 - **Bereich Kleinkind** mit Windeln, Feuchttüchern, Kleinkindnahrung und Zubehör, erscheint nur mit Kleinkindern im Haushalt.
 - **Bereich Haustiere** mit Futter, Katzenstreu, Transportbox, Kotbeuteln und Medikamenten, erscheint nur mit Haustieren.
 - **Dokumentenmappe** und Kopien als Checkliste pro Person, **Bargeld-Richtwert** 100 € pro Person.
