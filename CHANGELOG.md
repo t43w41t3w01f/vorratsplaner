@@ -2,6 +2,15 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.21 – 27. Oktober 2026
+Sicherheitsprüfung in 5 Durchläufen. Rücksprungpunkt: Zweig `stand-v1.20`.
+- **Behoben (mittel):** Statusmeldungen (`UI.msg`) wurden ungefiltert angezeigt. Ein Artikel- oder Medikamentenname aus einer manipulierten Sicherungsdatei konnte so HTML einschleusen, z. B. einen gefälschten Link. Skripte hat die CSP schon vorher blockiert. Jetzt werden alle Meldungen und Fehlertexte maskiert.
+- **Behoben (gering):** Formularwerte (Menge, Anzahl) maskiert; Eingaben werden beim Speichern geprüft und gekürzt (Name 80, Person 40, Medikament 60 Zeichen); unsichtbare Steuer- und Richtungszeichen (z. B. U+202E) werden entfernt.
+- **Behoben (gering):** Geräte-Einstellungen (META) aus dem Speicher werden beim Start geprüft; `__proto__` als Kalender-Rhythmus abgefangen.
+- **Behoben (gering):** Unbekannte Ansicht führt zur Startseite statt zu einem Absturz.
+- **Gehärtet:** CSP ohne `data:`/`blob:` für Bilder, zusätzlich `frame-src 'none'` und `media-src 'none'`.
+- Geprüft ohne Befund: Import (Größe, Verschachtelung, 2000-Einträge-Grenze), Prototype Pollution, externe Links (`noopener`), Service Worker (nur eigene, gültige Antworten), Repository (keine Geheimnisse, keine privaten E-Mail-Adressen).
+
 ## 1.20 – 27. Oktober 2026
 Babys unter 1 Jahr. Rücksprungpunkt: Zweig `stand-v1.19`.
 - **Zähler „Babys unter 1 Jahr“**: zählen als Person, essen aber nichts aus dem Vorrat. Wasser 1 l pro Baby und Tag (Zubereitung, eigener Richtwert).

@@ -27,6 +27,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Haushaltsprofil Teil 3a: Pflege- oder Hilfsbedarf** (Kästchen, Bereich Pflege & Hilfsmittel, Strom und Hausnotruf) *(Version 1.19)*
 - [x] **Schutz vor Datenverlust**: erste Sicherung nach 5 Einträgen, „An mich selbst schicken“, Status auf der Startseite, Wiederherstellen im Einstieg *(Version 1.19)*
 - [x] **Haushaltsprofil Teil 3b: Babys unter 1 Jahr**: eigener Bereich, Hinweise zu Stillen und sicherem Wasser, 1 l Wasser pro Baby *(Version 1.20)*
+- [x] **Sicherheitsprüfung in 5 Durchläufen** (Angreifer-Sicht): HTML-Einschleusung über Meldungen behoben, Eingaben und Einstellungen geprüft, CSP verschärft *(Version 1.21)*
 
 ## Priorität hoch
 
@@ -45,6 +46,10 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 ## Offen
 
+- [ ] **Domain bei GitHub bestätigen** (Profil → Settings → Pages → Add a domain, TXT-Eintrag bei INWX): schützt davor, dass jemand anderes hamsterplan.de bei GitHub einträgt
+- [ ] **Zwei-Faktor-Anmeldung bei INWX und GitHub**: Wer eines der Konten übernimmt, kann jedem Nutzer eine veränderte App ausliefern
+- [ ] Optional: **DNSSEC** bei INWX einschalten und **CAA-Eintrag** (nur Let's Encrypt darf Zertifikate ausstellen)
+
 - [ ] **Baby-Mengen prüfen** (8 Windeln, Pulver-Packung je 5 Tage, 2 Beikost-Portionen, 1 l Wasser pro Tag), bisher eigene Richtwerte
 
 - [ ] **Inkontinenz-Menge prüfen** (4 Stück pro Tag), bisher eigener Richtwert
@@ -62,6 +67,8 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Soll-Mengen der Checklisten festlegen** (Kerzen, Toilettenpapier, Batterien usw.), bisher Schätzwerte
 
 ## Bewusst verworfen
+
+- Schutz gegen Einbetten in fremde Seiten (Clickjacking): per Meta-Tag nicht möglich, GitHub Pages erlaubt keine eigenen Header. Risiko gering, weil eine eingebettete App in modernen Browsern einen getrennten Speicher hat und keine echten Vorratsdaten sieht
 
 - Like-Knopf mit IP-Sperre: Die App kennt die IP nicht, ein Server müsste sie speichern. Außerdem unzuverlässig (gemeinsames WLAN, wechselnde Handy-IPs)
 - Kalorienzählung und Nährwerte: viel Pflegeaufwand, kaum Mehrwert gegenüber den BBK-Gruppen

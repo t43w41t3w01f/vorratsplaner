@@ -6,7 +6,7 @@
 
 👉 **App öffnen:** [hamsterplan.de](https://hamsterplan.de)
 
-Aktuelle Version: **1.20** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.21** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -85,7 +85,7 @@ Entwickelt von Sascha L. · © 2026
 
 ## Technik
 
-HTML, CSS und JavaScript ohne Build-Schritt. Speicherung in IndexedDB, Offline-Betrieb über einen Service Worker, Hosting über GitHub Pages mit eigener Domain (`CNAME`, DNS bei INWX). Content Security Policy ohne fremde Quellen, alle importierten Daten werden geprüft.
+HTML, CSS und JavaScript ohne Build-Schritt. Speicherung in IndexedDB, Offline-Betrieb über einen Service Worker, Hosting über GitHub Pages mit eigener Domain (`CNAME`, DNS bei INWX). Content Security Policy ohne fremde Quellen, alle importierten und eingegebenen Daten werden geprüft, alle Ausgaben maskiert. Sicherheitsprüfung in 5 Durchläufen mit Version 1.21.
 
 | Datei | Inhalt |
 |---|---|

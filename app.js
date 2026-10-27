@@ -99,7 +99,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
   if(pp==='b') return `${fmt(q,2)} pro Baby${perDay?' und Tag':''}`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.20';
+const APP_VERSION='1.21';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -553,7 +553,7 @@ async function doBackup(mode){
 /* ---------- Datenprüfung: nur bekannte Felder, nur gültige Werte (Schutz vor manipulierten Sicherungen) ---------- */
 const int = (v,min,max,def) => { const n=Math.round(Number(v)); return Number.isFinite(n) ? Math.min(max,Math.max(min,n)) : def; };
 const num = (v,min,max,def) => { const n=Number(v); return Number.isFinite(n) && n>=min && n<=max ? n : def; };
-const str = (v,max) => typeof v==='string' ? v.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max) : '';
+const str = (v,max) => typeof v==='string' ? v.replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g,' ').trim().slice(0,max) : '';
 function cleanItem(it){
   if(!it || typeof it!=='object') return null;
   const cat = it.cat==='wasser'||it.cat==='nahrung' ? it.cat : null; if(!cat) return null;
@@ -592,6 +592,16 @@ function cleanState(d){
     days:int(d.days,1,90,10), demo: d.demo===true, checks, items, docs,
     names: Array.isArray(d.names) ? d.names.slice(0,20).map(n=>str(n,40)) : [],
     cash: {have: num(d.cash?.have,0,1e6,0), target: num(d.cash?.target,1,1e6,null)}, meds, checkNa, care: d.care===true};
+}
+function cleanMeta(m){
+  const o={lastBackup:null, changes:0, snoozeUntil:0, cal:null, calFreq:'monthly'};
+  if(!m || typeof m!=='object') return o;
+  const ts=v=>num(v,0,8.64e15,null);
+  o.lastBackup=ts(m.lastBackup); o.changes=int(m.changes,0,1e6,0); o.snoozeUntil=ts(m.snoozeUntil)||0;
+  o.cal=['ask','later','done','never'].includes(m.cal)?m.cal:null; o.calFreq=Object.prototype.hasOwnProperty.call(CAL_FREQ,m.calFreq)?m.calFreq:'monthly';
+  o.mile=int(m.mile,0,90,0); o.seenVersion=str(m.seenVersion,10);
+  ['big','onboarded','installHidden','careSeen'].forEach(k=>{ if(m[k]===true) o[k]=true; });
+  return o;
 }
 function parseBackup(text){
   if(typeof text!=='string' || text.length>5e6) throw new Error('zu groß');
@@ -654,7 +664,8 @@ function render(){
   else if(UI.view==='docs-orig') root.innerHTML=viewDocs('orig');
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
-  else root.innerHTML=viewCheck(c);
+  else if(CHECK[UI.view] && c.checks[UI.view]) root.innerHTML=viewCheck(c);
+  else { UI.view='home'; root.innerHTML=viewHome(c); }
   root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
@@ -708,7 +719,7 @@ function viewHome(c){
   ${expiryBand(c)}
   ${S.care&&!META.careSeen&&!S.demo?careBand():''}
   ${backupDue()?backupBand():(calDue()?calPrompt():installBand())}
-  ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+  ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
   ${goalPanel(c)||'<p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>'}
   <div class="choices">
     <button class="choice" data-act="go" data-v="vorrat"><span class="choice-ico">${icon('shelf')}</span>
@@ -732,7 +743,7 @@ function viewVorrat(c){
   const t=(k,name,val,extra)=>`<button class="tile" data-act="go" data-v="${k}"><div class="head">${icon(k)}<span class="name">${name}</span></div><span class="val num">${val}</span>${extra}</button>`;
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Mein Vorrat</h1></div>
   <button class="primary big addbig" data-act="add">${icon('plus')} Lebensmittel oder Wasser eintragen</button>
-  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
   ${expiryBand(c)}
   <button class="choice rot-entry" data-act="go" data-v="rotation"><span class="choice-ico">${icon('rotate')}</span>
     <span class="choice-txt"><span class="ct" style="font-size:1.35rem">Verbrauchsliste</span>
@@ -942,7 +953,7 @@ function viewRotation(c){
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="${back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Verbrauchsliste</h1></div>
   <section class="panel"><p style="margin:0">So bleibt dein Vorrat frisch: Iss diese Artikel im Alltag auf und kauf sie neu. Trag danach das neue Haltbarkeitsdatum ein.</p>
     <p class="small muted" style="margin:0">„Aufgebraucht“ entfernt den Artikel. Er erscheint dann in der Einkaufsliste.</p></section>
-  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
   <section class="panel">${items.length?`<div class="rotlist">${items.map(row).join('')}</div>`
     :`<p class="done" style="margin:0">Nichts zu tun. In den nächsten 2 Monaten läuft nichts ab.</p>`}</section>`;
 }
@@ -980,7 +991,7 @@ function viewBuy(c){
     <div class="spread"><div><h2 class="print-only">Einkaufsliste Notvorrat</h2><div class="label">Einkaufsliste für ${c.T} Tage, ${c.p} ${c.p===1?'Person':'Personen'}</div></div></div>
     ${empty?'':`<div class="row no-print">${CAN_PRINT?`<button class="primary small" data-act="print">Drucken oder als PDF speichern</button>`:''}<button class="secondary small" data-act="copyList">Liste kopieren</button></div>
     ${CAN_PRINT?'':`<p class="hint no-print" style="margin:0">Drucken und PDF gibt es in der installierten App. In dieser Vorschau kannst du die Liste kopieren.</p>`}`}
-    ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+    ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
     ${empty?`<p class="done">Alles da. Dein Vorrat erfüllt das Ziel.</p>`:
       sec('Wasser',L.water)+sec('Nahrung',L.food)+L.checks.map(([n,r])=>sec(n,r)).join('')}
     <p class="small muted" style="margin:0">Abgelaufene Artikel sind schon herausgerechnet. Richtwerte nach BBK.</p>
@@ -1005,7 +1016,7 @@ function itemRow(it){
 
 function viewStock(c){
   const isW=UI.view==='wasser';
-  const head=`<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${isW?'Wasser':'Nahrung'}</h1></div>${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}`;
+  const head=`<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${isW?'Wasser':'Nahrung'}</h1></div>${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}`;
   if(isW){
     const items=S.items.filter(i=>i.cat==='wasser');
     return `${head}<section class="panel"><div class="spread"><span class="label">Bestand</span><span class="num"><b>${fmt(c.water)}</b> von ${fmt(c.waterNeed)} l</span></div>${bar(c.water/c.waterNeed)}
@@ -1044,7 +1055,7 @@ function viewDocs(kind){
     const done=items.filter(i=>(S.docs||{})[`${kind}|${sc}|${i[0]}`]).length;
     return `<section class="panel"><div class="spread">${extra||`<h2 style="font-size:1.15rem">${title}</h2>`}<span class="num small"><b>${done}</b> von ${items.length}</span></div>${bar(done/items.length)}
       <div class="list">${items.map(i=>row(sc,i)).join('')}</div></section>`; };
-  const persons=[...Array(S.persons).keys()].map(i=>section('p'+i,'',`<div class="field" style="flex:1;max-width:240px"><label for="name-${i}" class="label">Person ${i+1}</label><input id="name-${i}" data-name="${i}" value="${esc((S.names||[])[i]||'')}" placeholder="Name (optional)"></div>`)).join('');
+  const persons=[...Array(S.persons).keys()].map(i=>section('p'+i,'',`<div class="field" style="flex:1;max-width:240px"><label for="name-${i}" class="label">Person ${i+1}</label><input id="name-${i}" data-name="${i}" value="${esc((S.names||[])[i]||'')}" placeholder="Name (optional)" maxlength="40"></div>`)).join('');
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="doku" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${d.n}</h1></div>
     <section class="panel"><div class="spread"><span class="label">${d.sub}</span><span class="num"><b>${st.done}</b> von ${st.total}</span></div>${bar(st.total?st.done/st.total:1)}
     <p class="small muted" style="margin:0">Hake ab, was in der Mappe liegt. „Entfällt“ für Dokumente, die es bei euch nicht gibt, z. B. Führerschein bei Kindern. Erst wenn alles erledigt ist, zählt die Mappe als vorhanden.</p></section>
@@ -1098,7 +1109,7 @@ function restoreUI(){
       <div class="row"><button class="danger small" data-act="restoreYes">Wiederherstellen</button><button class="secondary small" data-act="restoreNo">Abbrechen</button></div></div></div>`:''}
     <label class="secondary filebtn" for="restore-file">Sicherungsdatei auswählen</label>
     <input type="file" id="restore-file" accept=".json,application/json" hidden>
-    ${UI.impErr?`<div class="err">${UI.impErr}</div>`:''}`;
+    ${UI.impErr?`<div class="err">${esc(UI.impErr)}</div>`:''}`;
 }
 // Baby: Ernährung im Notfall (nach Empfehlungen zur Säuglingsernährung; Mengen eigene Richtwerte)
 function babyInfo(){ return `<div class="band info"><div style="display:flex;flex-direction:column;gap:6px">
@@ -1133,7 +1144,7 @@ function medSection(c){
   const meds=S.meds||[], short=c.medShort;
   return `<section class="panel"><h2 style="font-size:1.15rem">Meine Medikamente</h2>
     <p class="small muted" style="margin:0">Was du oder jemand im Haushalt regelmäßig nimmt. Die App zieht den Vorrat jeden Tag selbst ab und zeigt, wie lange er reicht. Nach dem Kauf einfach „Ändern“ tippen und den neuen Vorrat eintragen.</p>
-    ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+    ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
     ${meds.length?`<div class="list">${meds.map(m=>medRow(m,c.T)).join('')}</div>`:''}
     ${short.length?`<div class="band warn"><div class="small"><b>Rezept rechtzeitig holen.</b> ${short.length===1?'Ein Medikament reicht':'Einige Medikamente reichen'} keine ${c.T} Tage. Frag deine Ärztin oder deinen Arzt nach einem Vorrat für ${c.T} Tage.</div></div>`:''}
     ${medCold().length?`<div class="band info"><div class="small"><b>Kühlpflichtig:</b> Bei Stromausfall wird der Kühlschrank warm. Halte eine Kühltasche mit Kühlakkus bereit und frag in der Apotheke, wie lange dein Mittel ohne Kühlung hält.</div></div>`:''}
@@ -1170,7 +1181,7 @@ function viewSettings(){
     <p class="small muted" style="margin:0">Dein Vorrat liegt nur in diesem Browser. Werden Browserdaten gelöscht oder geht das Handy kaputt, ist er weg. Die Sicherungsdatei bringt alles zurück. ${META.lastBackup?`Letzte Sicherung: ${new Date(META.lastBackup).toLocaleDateString('de-DE')}.`:'<b>Noch keine Sicherung.</b>'}</p>
     <div class="row">${canShareFile()?`<button class="primary" data-act="backup" data-mode="share">An mich selbst schicken</button>`:''}
       <button class="${canShareFile()?'secondary':'primary'}" data-act="backup" data-mode="file">Als Datei speichern</button></div>
-    ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${UI.msg}</div>`:''}
+    ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
     <p class="hint" style="margin:0">${canShareFile()?'„An mich selbst schicken“: im nächsten Schritt z. B. WhatsApp wählen und dann den Chat mit dir selbst (dein eigener Name), oder eine Mail an dich. ':''}Die App erinnert dich nach ${BACKUP_DAYS} Tagen oder ${BACKUP_CHANGES} Änderungen an eine neue Sicherung.${(S.meds||[]).length?' Die Sicherung enthält auch deine Medikamente. Schick sie nur an dich selbst.':''}</p>
   </section>
   <section class="panel"><h2>Wiederherstellen</h2>
@@ -1221,13 +1232,13 @@ function viewSheet(){
   if(f.mode!=='form') return `<div class="overlay" data-act="closeBg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh">${viewQuick(f)}</div></div>`;
   return `<div class="overlay" data-act="closeBg"><form class="sheet" id="itemForm" role="dialog" aria-modal="true" aria-labelledby="sh">
     <h2 id="sh">${isW?'Wasser eintragen':'Lebensmittel eintragen'}</h2>
-    <div class="field"><label for="f-name">Was ist es?</label><input id="f-name" value="${esc(f.name||'')}" placeholder="${isW?'z. B. Mineralwasser 1,5 l':'z. B. Ravioli Dose'}" autocomplete="off"></div>
+    <div class="field"><label for="f-name">Was ist es?</label><input id="f-name" maxlength="80" value="${esc(f.name||'')}" placeholder="${isW?'z. B. Mineralwasser 1,5 l':'z. B. Ravioli Dose'}" autocomplete="off"></div>
     ${isW?'':(()=>{ const g=FOOD.find(x=>x.k===f.group)||FOOD[0]; return `<div class="field"><label for="f-group">Art des Lebensmittels</label><select id="f-group">${FOOD.map(x=>`<option value="${x.k}" ${x.k===g.k?'selected':''}>${x.n}</option>`).join('')}</select>
       <span class="hint" id="f-ex">Lange haltbar, z. B. ${g.ex}. Mischgerichte zählst du bei der Hauptzutat.</span></div>
       <label class="check" id="f-dry-wrap" ${g.form?'':'hidden'}><input type="checkbox" id="f-dry" ${f.dry?'checked':''}> <span><b id="f-dry-label">${g.form?g.form.label:''}</b><br><span class="hint" id="f-dry-hint">${g.form?dryHint(g):''}</span></span></label>`; })()}
-    <div class="two"><div class="field"><label for="f-size">Menge pro Stück</label><input id="f-size" inputmode="decimal" value="${f.size??(isW?'1,5':'')}" placeholder="${isW?'1,5':'400'}"></div>
+    <div class="two"><div class="field"><label for="f-size">Menge pro Stück</label><input id="f-size" inputmode="decimal" value="${esc(f.size??(isW?'1,5':''))}" placeholder="${isW?'1,5':'400'}"></div>
       <div class="field"><label for="f-unit">Einheit</label><select id="f-unit">${units.map(u=>`<option ${u===(f.unit||(isW?'l':'g'))?'selected':''}>${u}</option>`).join('')}</select></div></div>
-    <div class="field"><label for="f-count">Anzahl</label><input id="f-count" inputmode="numeric" value="${f.count??(isW?'6':'1')}"></div>
+    <div class="field"><label for="f-count">Anzahl</label><input id="f-count" inputmode="numeric" value="${esc(f.count??(isW?'6':'1'))}"></div>
     <div class="field"><span style="font-weight:700;font-size:.95rem">Haltbar bis</span><div class="two">
       <select id="f-month" aria-label="Monat"><option value="">Monat</option>${MONTHS.map((m,i)=>`<option value="${i+1}" ${String(i+1)===String(f.m)?'selected':''}>${m}</option>`).join('')}</select>
       <select id="f-year" aria-label="Jahr"><option value="">Jahr</option>${years.map(y=>`<option ${String(y)===String(f.y)?'selected':''}>${y}</option>`).join('')}</select></div>
@@ -1291,7 +1302,7 @@ root.addEventListener('click', async e=>{
     case 'copyExport': { await copy(document.getElementById('exp').value, 'Sicherung kopiert. Füge sie z. B. in eine Notiz ein.', 'exp'); if(UI.msg.startsWith('Sicherung kopiert')) markBackedUp(); break; }
     case 'backup': await doBackup(b.dataset.mode); break;
     case 'seenVersion': META.seenVersion=APP_VERSION; DB.put(META,'meta'); return;
-    case 'calFreq': META.calFreq=b.dataset.f; DB.put(META,'meta'); break;
+    case 'calFreq': if(Object.prototype.hasOwnProperty.call(CAL_FREQ,b.dataset.f)) META.calFreq=b.dataset.f; DB.put(META,'meta'); break;
     case 'calGoogle': META.cal='done'; DB.put(META,'meta'); UI.msg='Google Kalender geöffnet: dort „Speichern“ tippen.'; setTimeout(render,50); return;
     case 'calIcs': if(icsDownload(META.calFreq||'monthly')){ META.cal='done'; DB.put(META,'meta'); UI.msg='Termindatei „vorratscheck.ics“ geladen: öffnen und im Kalender speichern.'; } else UI.msg='Termindatei konnte nicht erstellt werden.'; break;
     case 'calLater': META.cal='later'; UI.calLaterShown=true; DB.put(META,'meta'); break;
@@ -1342,7 +1353,7 @@ root.addEventListener('change', e=>{
     f.text().then(txt=>{ try{ UI.pending={label:`Sicherung „${f.name}“ wiederherstellen?`, data:parseBackup(txt)}; }
       catch(err){ UI.impErr='Diese Datei ist keine Hamsterplan-Sicherung.'; } render(); });
     return; }
-  if(t.dataset.name!==undefined){ S.names=S.names||[]; S.names[+t.dataset.name]=t.value; save(); }
+  if(t.dataset.name!==undefined){ S.names=S.names||[]; const i=+t.dataset.name; if(i>=0&&i<20){ S.names[i]=str(t.value,40); save(); } }
   if(t.dataset.cash){ S.cash=S.cash||{have:0,target:null}; const n=parseNum(t.value); S.cash[t.dataset.cash]= n>0?n:(t.dataset.cash==='have'?0:null); save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); }
 });
 root.addEventListener('input', e=>{
@@ -1359,7 +1370,7 @@ root.addEventListener('submit', e=>{
   e.preventDefault();
   const f=UI.sheet; const g=id=>document.getElementById(id)?.value;
   if(e.target.id==='medForm'){
-    const name=(g('m-name')||'').trim(), per=g('m-per'), doseRaw=(g('m-dose')||'').trim(), stockRaw=(g('m-stock')||'').trim();
+    const name=str(g('m-name')||'',60), per=g('m-per'), doseRaw=(g('m-dose')||'').trim(), stockRaw=(g('m-stock')||'').trim();
     const dose=doseRaw?parseNum(doseRaw):(per==='need'?1:NaN), stock=stockRaw?parseNum(stockRaw):NaN, cold=!!document.getElementById('m-cold')?.checked;
     Object.assign(f,{name, who:g('m-who')||'', dose:doseRaw, per, stock:stockRaw, cold}); f.err='';
     if(!name) f.err='Bitte den Namen des Medikaments eingeben.';
@@ -1373,7 +1384,7 @@ root.addEventListener('submit', e=>{
     }
     render(); return;
   }
-  const name=(g('f-name')||'').trim(), size=parseNum(g('f-size')), count=parseInt(g('f-count'),10), m=g('f-month'), y=g('f-year');
+  const name=str(g('f-name')||'',80), size=parseNum(g('f-size')), count=parseInt(g('f-count'),10), m=g('f-month'), y=g('f-year');
   const dryEl=document.getElementById('f-dry');
   const grp=g('f-group')||f.group, gObj=FOOD.find(x=>x.k===grp);
   const dry=!!(dryEl&&dryEl.checked&&gObj&&gObj.form);
@@ -1388,8 +1399,8 @@ root.addEventListener('submit', e=>{
   else if((m&&!y)||(!m&&y)) f.err='Bitte bei „Haltbar bis“ Monat und Jahr wählen oder beides leer lassen.';
   else if(left!==null && left<SHORT_MONTHS && !f.short){ f.short = left<0?'expired':'soon'; }
   else {
-    S.items.push({id:uid(),cat:f.cat,group:f.cat==='nahrung'?f.group:null,name,size,unit:f.unit,count,mhd,...(dry?{dry:true}:{})});
-    UI.sheet=null; save();
+    const it=cleanItem({id:uid(),cat:f.cat,group:f.cat==='nahrung'?f.group:null,name,size:Math.min(size,100000),unit:f.unit,count:Math.min(count,9999),mhd,dry});
+    if(it){ S.items.push(it); UI.sheet=null; save(); } else f.err='Die Angaben sind ungültig. Bitte prüfen.';
   }
   render();
 });
@@ -1419,7 +1430,7 @@ function installBand(){
   let first=false;
   try{ if(saved) S=cleanState(saved); else { first=true; S=cleanState({items:[],persons:1}); } }catch(e){ first=true; S=cleanState({items:[],persons:1}); }
   S.docs=S.docs||{}; S.names=S.names||[]; S.cash=S.cash||{have:0,target:null}; S.kids4=S.kids4||0; S.kids1=S.kids1||0; S.baby=S.baby||0; S.pets=S.pets||{}; S.meds=S.meds||[]; S.checkNa=S.checkNa||{};
-  if(ok){ META=Object.assign(META, await DB.get('meta')||{}); SNAPS=(await DB.get('snaps')||[]).map(x=>{ try{ return {day:String(x.day).slice(0,20), at:Number(x.at)||Date.now(), data:cleanState(x.data)}; }catch(e){ return null; } }).filter(Boolean); }
+  if(ok){ META=cleanMeta(await DB.get('meta')); SNAPS=(await DB.get('snaps')||[]).map(x=>{ try{ return {day:String(x.day).slice(0,20), at:Number(x.at)||Date.now(), data:cleanState(x.data)}; }catch(e){ return null; } }).filter(Boolean); }
   snapshot();
   if(first){ UI.view='start'; UI.ob=1; }
   render();
