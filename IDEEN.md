@@ -28,6 +28,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Schutz vor Datenverlust**: erste Sicherung nach 5 Einträgen, „An mich selbst schicken“, Status auf der Startseite, Wiederherstellen im Einstieg *(Version 1.19)*
 - [x] **Haushaltsprofil Teil 3b: Babys unter 1 Jahr**: eigener Bereich, Hinweise zu Stillen und sicherem Wasser, 1 l Wasser pro Baby *(Version 1.20)*
 - [x] **Sicherheitsprüfung in 5 Durchläufen** (Angreifer-Sicht): HTML-Einschleusung über Meldungen behoben, Eingaben und Einstellungen geprüft, CSP verschärft *(Version 1.21)*
+- [x] **Reichweite nach Kalorien** statt Gewicht, Richtwerte je Produkt, Auswahl trocken oder Dose/Glas *(Version 1.22)*
 
 ## Priorität hoch
 
@@ -45,6 +46,8 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
 
 ## Offen
+
+- [ ] **kcal-Richtwerte prüfen** (Schnellauswahl und Gruppenwerte trocken / Dose-Glas), bisher übliche Packungswerte
 
 - [x] **Domain bei GitHub bestätigen** *(erledigt 27.10.2026, TXT-Eintrag bei INWX nicht löschen)* (Profil → Settings → Pages → Add a domain, TXT-Eintrag bei INWX): schützt davor, dass jemand anderes hamsterplan.de bei GitHub einträgt
 - [x] **Zwei-Faktor-Anmeldung bei INWX und GitHub** *(erledigt 27.10.2026: INWX mit Authenticator, GitHub mit Passkey und Authenticator)*: Wer eines der Konten übernimmt, kann jedem Nutzer eine veränderte App ausliefern
@@ -71,7 +74,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - Schutz gegen Einbetten in fremde Seiten (Clickjacking): per Meta-Tag nicht möglich, GitHub Pages erlaubt keine eigenen Header. Risiko gering, weil eine eingebettete App in modernen Browsern einen getrennten Speicher hat und keine echten Vorratsdaten sieht
 
 - Like-Knopf mit IP-Sperre: Die App kennt die IP nicht, ein Server müsste sie speichern. Außerdem unzuverlässig (gemeinsames WLAN, wechselnde Handy-IPs)
-- Kalorienzählung und Nährwerte: viel Pflegeaufwand, kaum Mehrwert gegenüber den BBK-Gruppen
+- Kalorien oder Nährwerte selbst eintippen: zu viel Aufwand. Seit 1.22 rechnet die App intern mit Richtwerten je Produkt
 - Online-Funktionen (Sync, Konto): brechen das Offline-Prinzip, brauchen einen Server
 - Amtliche Warnungen (NINA-Daten): getestet, der Warndienst blockiert den Abruf aus der App. Für Warnungen die Warn-App NINA nutzen
 - Barcode-Scanner: braucht Kamera und Online-Datenbank, Eintippen ist fast genauso schnell

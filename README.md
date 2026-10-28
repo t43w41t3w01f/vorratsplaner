@@ -6,7 +6,7 @@
 
 👉 **App öffnen:** [hamsterplan.de](https://hamsterplan.de)
 
-Aktuelle Version: **1.21** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.22** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -26,13 +26,14 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 - Personen im Haushalt und Ziel-Tage (1–90) einstellen, Standard sind 10 Tage nach BBK.
 - **Haushalt mit Kindern:** Erwachsene und Kinder ab 10, Kinder 4–9 Jahre (Nahrung ca. 70 %) und Kleinkinder 1–3 Jahre (ca. 50 %) nach DGE-Richtwerten, Babys unter 1 Jahr mit eigenem Bereich. Wasser und Checklisten zählen für alle voll.
 - **Haustiere:** Kästchen „Haustiere im Haushalt“ anhaken, dann Hunde (klein, mittel, groß), Katzen und Kleintiere eintragen. Ihr Wasser zählt beim Wasser mit, Futter und Zubehör stehen in einem eigenen Bereich.
-- **Reicht für:** Reichweite in Tagen und was am meisten fehlt, z. B. „Am meisten fehlt: Wasser“.
+- **Reicht für:** Nahrung nach Kalorien (ca. 2.200 kcal pro Person und Tag), Wasser nach Litern. Reichweite in Tagen und was am meisten fehlt, z. B. „Am meisten fehlt: Wasser“.
 - **Noch kaufen:** Einkaufsliste mit allen Fehlmengen. Wasser wird in Kisten umgerechnet, zu jeder Lebensmittelgruppe gibt es lange haltbare Beispiele. Drucken, als PDF speichern oder kopieren.
 
 ### Mein Vorrat
 - **Wasser** in Litern, **Lebensmittel** nach den sechs BBK-Gruppen.
 - Nur lange Haltbares: Jede Gruppe zeigt, was gemeint ist (Dose, Glas, getrocknet), mit passenden Beispielen.
-- **Trockenware und Pulver** werden umgerechnet, z. B. getrocknete Linsen ×2,5, Milchpulver ×8.
+- **Trocken oder Dose/Glas:** Kalorien-Richtwerte je Produkt, bei eigenen Einträgen nur „trocken“ oder „Dose/Glas“ wählen.
+- **Trockenware und Pulver** werden für die Ausgewogenheit umgerechnet, z. B. getrocknete Linsen ×2,5, Milchpulver ×8.
 - **Hinweis bei kurzem Haltbarkeitsdatum** (unter 3 Monaten) beim Eintragen.
 - **Meine Medikamente:** Name, Menge pro Tag oder Woche, Vorrat. Die App zieht täglich ab, zeigt „reicht bis …“, erinnert ans Rezept und warnt bei kühlpflichtigen Mitteln vor Stromausfall.
 - **Checklisten** für Erste Hilfe, Hausapotheke, Hygiene, Licht & Strom, Wärme & Kochen.

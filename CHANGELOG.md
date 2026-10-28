@@ -2,6 +2,14 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.22 – 28. Oktober 2026
+Reichweite nach Kalorien. Rücksprungpunkt: Zweig `stand-v1.21`.
+- **Reichweite Nahrung nach Energie** statt Gewicht: Summe kcal / (2.200 kcal × Esser), Kinder 4–9 ×0,7, 1–3 ×0,5, Babys 0. Wasser unverändert.
+- **kcal-Richtwerte** (pro kg bzw. l, wie gekauft) für alle 28 Produkte der Schnellauswahl, z. B. Nudeln 3.550, Dosengemüse 250, H-Milch 640, Rapsöl 8.200.
+- **Eigene Einträge:** Auswahl „Trocken oder als Pulver“ / „Dose, Glas oder Tetrapack“ für alle Gruppen außer Fette, Richtwert je Gruppe (z. B. Getreide 3.500 / 850). Bestehende Einträge: bekannte Produkte über den Namen, sonst Gruppe; Getreide gilt als trocken, außer Dose, Glas, Ravioli, Eintopf.
+- BBK-Gruppen nach Gewicht bleiben für Ausgewogenheit und Einkaufsliste. Zielmarken nennen fehlende Mengen als „ca. X kg gemischte Lebensmittel“.
+- Anzeige „knapp 1 Tag“ / „unter 1 Tag“ statt „0 Tage“, wenn etwas vorhanden ist. Artikel zeigen ca. kcal je Stück.
+
 ## 1.21 – 27. Oktober 2026
 Sicherheitsprüfung in 5 Durchläufen. Rücksprungpunkt: Zweig `stand-v1.20`.
 - **Behoben (mittel):** Statusmeldungen (`UI.msg`) wurden ungefiltert angezeigt. Ein Artikel- oder Medikamentenname aus einer manipulierten Sicherungsdatei konnte so HTML einschleusen, z. B. einen gefälschten Link. Skripte hat die CSP schon vorher blockiert. Jetzt werden alle Meldungen und Fehlertexte maskiert.

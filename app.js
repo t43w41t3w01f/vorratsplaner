@@ -3,24 +3,27 @@
 const WATER_DAY = 2; // Liter
 const FOOD = [
   // form: Trockenware/Pulver zählt mit Faktor (Gewicht im zubereiteten Zustand, Richtwerte)
-  {k:'getreide', n:'Getreide, Brot, Nudeln, Reis, Kartoffeln', d:0.35, how:'trocken verpackt',
+  {k:'getreide', n:'Getreide, Brot, Nudeln, Reis, Kartoffeln', d:0.35, how:'trocken verpackt', kcal:[3500,850], dryEx:'Nudeln, Reis, Mehl, Haferflocken, Knäckebrot', wetEx:'Ravioli, Eintopf, Kartoffeln im Glas',
    ex:'Nudeln, Reis, Haferflocken, Knäckebrot, Zwieback, Kartoffelpüree-Pulver'},
-  {k:'gemuese',  n:'Gemüse, Hülsenfrüchte', d:0.40, how:'Dose, Glas oder getrocknet',
+  {k:'gemuese',  n:'Gemüse, Hülsenfrüchte', d:0.40, how:'Dose, Glas oder getrocknet', kcal:[3300,400], dryEx:'getrocknete Linsen, Bohnen, Erbsen', wetEx:'Dosengemüse, Bohnen aus der Dose, Rotkohl',
    ex:'Dosengemüse, Rotkohl oder Gurken im Glas, Bohnen und Linsen (Dose oder getrocknet), Tomatenmark',
    form:{label:'getrocknet (Linsen, Bohnen, Erbsen)', f:2.5}},
-  {k:'obst',     n:'Obst, Nüsse', d:0.25, how:'Dose, Glas oder getrocknet',
+  {k:'obst',     n:'Obst, Nüsse', d:0.25, how:'Dose, Glas oder getrocknet', kcal:[2800,700], dryEx:'Trockenobst', wetEx:'Dosenobst, Apfelmus',
    ex:'Dosenobst, Apfelmus im Glas, Trockenobst, Nüsse',
    form:{label:'getrocknet (Trockenobst)', f:3}},
-  {k:'milch',    n:'Milch, Milchprodukte', d:0.26, how:'haltbar oder als Pulver',
+  {k:'milch',    n:'Milch, Milchprodukte', d:0.26, how:'haltbar oder als Pulver', kcal:[4900,1000], dryEx:'Milchpulver', wetEx:'H-Milch, Kondensmilch, Hartkäse',
    ex:'H-Milch, Milchpulver, Kondensmilch, Hartkäse am Stück',
    form:{label:'Pulver (Milchpulver)', f:8}},
-  {k:'fleisch',  n:'Fisch, Fleisch, Eier', d:0.15, how:'Dose oder Pulver',
+  {k:'fleisch',  n:'Fisch, Fleisch, Eier', d:0.15, how:'Dose oder Pulver', kcal:[5700,1800], dryEx:'Volleipulver', wetEx:'Thunfisch, Fleisch oder Wurst in der Dose',
    ex:'Thunfisch und Fleisch in der Dose, Dauerwurst, Volleipulver',
    form:{label:'Pulver (Volleipulver)', f:4}},
-  {k:'fett',     n:'Fette, Öle', d:0.0357, how:'',
+  {k:'fett',     n:'Fette, Öle', d:0.0357, how:'', kcal:[8200,8200],
    ex:'Rapsöl, Olivenöl, Ghee'},
 ];
 const FOOD_DAY = FOOD.reduce((s,g)=>s+g.d,0);
+// Reichweite nach Energie: BBK rechnet mit ca. 2.200 kcal pro Person und Tag. Die kcal-Werte je Produkt sind Richtwerte (übliche Packungsangaben).
+const KCAL_DAY = 2200;
+const MIX_KCAL = KCAL_DAY/FOOD_DAY; // ca. 1.520 kcal pro kg im gemischten BBK-Vorrat (für „fehlen noch … kg“)
 // Checklisten: [Schlüssel, Name, Menge, pro Person?]
 const CHECK = {
   hilfe:   {n:'Erste Hilfe', items:[['verband','DIN-Verbandskasten',1],['pflaster','Pflaster-Set',1],['desinf','Wund- und Hautdesinfektion',1],['thermo','Fieberthermometer',1],['pinzette','Splitterpinzette',1]]},
@@ -99,7 +102,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
   if(pp==='b') return `${fmt(q,2)} pro Baby${perDay?' und Tag':''}`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.21';
+const APP_VERSION='1.22';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -388,7 +391,7 @@ function demoState(){
     docs:{'orig|h|versich':1,'orig|h|konto':1,'orig|p0|geburt':1,'orig|p1|geburt':1,'copy|p0|ausweis':1,'copy|p1|ausweis':1,'copy|p1|fuehrer':'na','copy|h|grundbuch':'na'},
     items:[
       it('wasser',null,'Mineralwasser 1,5 l',1.5,'l',12,'2027-08'),
-      it('nahrung','getreide','Ravioli Dose',800,'g',4,'2028-03'),
+      Object.assign(it('nahrung','getreide','Ravioli Dose',800,'g',4,'2028-03'),{dry:false}),
       it('nahrung','getreide','Nudeln',500,'g',4,'2027-11'),
       it('nahrung','getreide','Reis',1,'kg',2,'2028-01'),
       it('nahrung','getreide','Knäckebrot',250,'g',2, ym(1)),
@@ -417,16 +420,26 @@ const base = it => (it.unit==='g'||it.unit==='ml') ? it.size/1000 : it.size;
 // Faktor für Trockenware/Pulver (nur Nahrung, nur Gruppen mit form)
 const factor = it => { if(it.cat!=='nahrung'||!it.dry) return 1; const g=FOOD.find(x=>x.k===it.group); return g&&g.form?g.form.f:1; };
 const amount = it => base(it)*it.count*factor(it);
-// Schnellauswahl beim Eintragen: [Name, Gruppe (oder 'wasser'), Menge, Einheit, getrocknet/Pulver]
+// Schnellauswahl beim Eintragen: [Name, Gruppe (oder 'wasser'), Menge, Einheit, kcal pro kg bzw. l (Richtwert), trocken/Pulver]
 const PRESETS = [
-  ['Wasserflasche 1,5 l','wasser',1.5,'l'],['Kiste Wasser (6 × 1,5 l)','wasser',9,'l'],['Wasserflasche 0,5 l','wasser',0.5,'l'],['Wasserkanister 5 l','wasser',5,'l'],
-  ['Nudeln','getreide',500,'g'],['Reis','getreide',1,'kg'],['Haferflocken','getreide',500,'g'],['Knäckebrot','getreide',250,'g'],['Zwieback','getreide',225,'g'],['Ravioli oder Eintopf (Dose)','getreide',800,'g'],
-  ['Gemüse (Dose)','gemuese',400,'g'],['Bohnen oder Erbsen (Dose)','gemuese',400,'g'],['Rotkohl (Glas)','gemuese',720,'g'],['Tomaten (Dose)','gemuese',400,'g'],['Linsen, getrocknet','gemuese',500,'g',true],
-  ['Obst (Dose)','obst',820,'g'],['Apfelmus (Glas)','obst',720,'g'],['Trockenobst','obst',200,'g',true],['Nüsse','obst',200,'g'],
-  ['H-Milch','milch',1,'l'],['Milchpulver','milch',500,'g',true],['Kondensmilch (Dose)','milch',340,'g'],['Hartkäse','milch',400,'g'],
-  ['Thunfisch (Dose)','fleisch',150,'g'],['Fleisch oder Wurst (Dose)','fleisch',400,'g'],['Volleipulver','fleisch',250,'g',true],
-  ['Rapsöl','fett',1,'l'],['Olivenöl','fett',500,'ml'],
+  ['Wasserflasche 1,5 l','wasser',1.5,'l',0],['Kiste Wasser (6 × 1,5 l)','wasser',9,'l',0],['Wasserflasche 0,5 l','wasser',0.5,'l',0],['Wasserkanister 5 l','wasser',5,'l',0],
+  ['Nudeln','getreide',500,'g',3550,true],['Reis','getreide',1,'kg',3500,true],['Haferflocken','getreide',500,'g',3700,true],['Knäckebrot','getreide',250,'g',3600,true],['Zwieback','getreide',225,'g',4000,true],['Ravioli oder Eintopf (Dose)','getreide',800,'g',850,false],
+  ['Gemüse (Dose)','gemuese',400,'g',250,false],['Bohnen oder Erbsen (Dose)','gemuese',400,'g',700,false],['Rotkohl (Glas)','gemuese',720,'g',700,false],['Tomaten (Dose)','gemuese',400,'g',200,false],['Linsen, getrocknet','gemuese',500,'g',3300,true],
+  ['Obst (Dose)','obst',820,'g',700,false],['Apfelmus (Glas)','obst',720,'g',800,false],['Trockenobst','obst',200,'g',2800,true],['Nüsse','obst',200,'g',6200,false],
+  ['H-Milch','milch',1,'l',640,false],['Milchpulver','milch',500,'g',4900,true],['Kondensmilch (Dose)','milch',340,'g',1300,false],['Hartkäse','milch',400,'g',3800,false],
+  ['Thunfisch (Dose)','fleisch',150,'g',1500,false],['Fleisch oder Wurst (Dose)','fleisch',400,'g',2200,false],['Volleipulver','fleisch',250,'g',5700,true],
+  ['Rapsöl','fett',1,'l',8200,false],['Olivenöl','fett',500,'ml',8200,false],
 ];
+// kcal pro kg/l eines Artikels: eigener Wert (Schnellauswahl) > bekanntes Produkt > Richtwert der Gruppe (trocken oder Dose/Glas)
+function kcalPerKg(it){
+  if(it.cat!=='nahrung') return 0;
+  if(Number.isFinite(it.kcal)) return it.kcal;
+  const pr=PRESETS.find(x=>x[0]===it.name && x[1]===it.group); if(pr) return pr[4];
+  const g=FOOD.find(x=>x.k===it.group); if(!g) return 0;
+  const dry = it.dry===true || (it.dry!==false && g.k==='getreide' && !/dose|glas|ravioli|eintopf|konserve/i.test(it.name||''));
+  return g.kcal[dry?0:1];
+}
+const kcalOf = it => base(it)*it.count*kcalPerKg(it);
 const SHORT_MONTHS = 3; // MHD unter 3 Monaten: Hinweis beim Eintragen
 const sizeText = it => `${fmt(it.size,2)} ${it.unit}`;
 const status = r => r>=1 ? 'ok' : r>=.5 ? 'warn' : 'bad';
@@ -564,7 +577,8 @@ function cleanItem(it){
   const size = num(it.size,0.001,100000,null); if(size===null) return null;
   const mhd = typeof it.mhd==='string' && /^(19|20|21)\d\d-(0[1-9]|1[0-2])$/.test(it.mhd) ? it.mhd : null;
   const out = {id: typeof it.id==='string' && /^[a-z0-9]{4,40}$/.test(it.id) ? it.id : uid(), cat, group, name, size, unit, count:int(it.count,0,9999,1), mhd};
-  if(it.dry===true && FOOD.find(g=>g.k===group)?.form) out.dry=true;
+  if(cat==='nahrung' && group!=='fett' && typeof it.dry==='boolean') out.dry=it.dry;
+  const kc=num(it.kcal,0,9500,null); if(cat==='nahrung' && kc!==null) out.kcal=kc;
   if(it.demo===true) out.demo=true;
   return out;
 }
@@ -625,25 +639,27 @@ function calc(){
   const p=S.persons, T=S.days;
   let water=0; const food={}; FOOD.forEach(g=>food[g.k]=0);
   const expired=[], soon=[];
+  let kcal=0;
   S.items.forEach(it=>{
     const st=mhdState(it.mhd);
     if(st==='expired'){ expired.push(it); return; }
     if(st==='soon') soon.push(it);
     const a=amount(it);
-    if(it.cat==='wasser') water+=a; else if(food[it.group]!==undefined) food[it.group]+=a;
+    if(it.cat==='wasser') water+=a; else if(food[it.group]!==undefined){ food[it.group]+=a; kcal+=kcalOf(it); }
   });
   const foodTotal=Object.values(food).reduce((a,b)=>a+b,0);
   const eat=eatUnits();
   const wDay=(p-babies())*WATER_DAY+babies()*BABY_WATER+petWater();
-  const waterReach=water/wDay, foodReach=foodTotal/(eat*FOOD_DAY);
-  const reach=Math.floor(Math.min(waterReach,foodReach)+1e-9);
+  const kcalDay=eat*KCAL_DAY;
+  const waterReach=water/wDay, foodReach=kcalDay>0?kcal/kcalDay:Infinity;
+  const reachRaw=Math.min(waterReach,foodReach), reach=Math.floor(reachRaw+1e-9);
   const checks={};
   for(const [k,c] of activeChecks()){
     let need=0, got=0;
     c.items.forEach(it=>{ const key=it[0], n=needOf(it,p,T); need+=n; got+=Math.min(have(key),n); });
     checks[k]={need,have:got,ratio:need?got/need:1};
   }
-  return {p,T,water,food,foodTotal,waterReach,foodReach,reach,
+  return {p,T,water,food,foodTotal,kcal,kcalDay,waterReach,foodReach,reach,reachRaw,
     bottleneck: waterReach<=foodReach?'Wasser':'Nahrung', expired, soon, checks, medShort:medShort(T),
     waterNeed:wDay*T, petWaterNeed:petWater()*T, babyWaterNeed:babies()*BABY_WATER*T, foodNeed:eat*FOOD_DAY*T, eat};
 }
@@ -670,6 +686,8 @@ function render(){
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
 
+// Tage als Text: 0 Tage, aber etwas da → „knapp 1 Tag“ bzw. „unter 1 Tag“
+function daysText(n, raw){ if(n===0 && raw>0) return raw>=0.5?'knapp 1 Tag':'unter 1 Tag'; return `${n} ${n===1?'Tag':'Tage'}`; }
 function bar(r){ return `<div class="bar" role="presentation"><i class="s-${status(r)}" style="width:${Math.min(r,1)*100}%"></i></div>`; }
 
 /* ---------- Zielmarken ---------- */
@@ -682,15 +700,15 @@ function goalPanel(c){
   const celebrate = top>0 && (META.mile||0)<top;
   let todo='';
   if(next){
-    const wMiss=Math.max(0,(c.waterNeed/c.T)*next-c.water), fMiss=Math.max(0,(c.foodNeed/c.T)*next-c.foodTotal);
-    const parts=[]; if(wMiss>0.05) parts.push(`${fmt(Math.ceil(wMiss*2)/2)} l Wasser`); if(fMiss>0.05) parts.push(`${fmt(fMiss, fMiss<1?2:1)} kg Lebensmittel`);
+    const wMiss=Math.max(0,(c.waterNeed/c.T)*next-c.water), fMiss=Math.max(0,(c.kcalDay*next-c.kcal)/MIX_KCAL);
+    const parts=[]; if(wMiss>0.05) parts.push(`${fmt(Math.ceil(wMiss*2)/2)} l Wasser`); if(fMiss>0.05) parts.push(`ca. ${fmt(fMiss, fMiss<1?2:1)} kg gemischte Lebensmittel`);
     todo = parts.length ? `Dafür fehlen noch ${parts.join(' und ')}.` : '';
   }
   return `<section class="panel goal ${celebrate?'cele':''}">
     ${celebrate?`<div class="cheer" role="status">🎉 <b>Geschafft: Dein Vorrat reicht ${top} ${top===1?'Tag':'Tage'}!</b>${top>=10?' Damit erfüllst du die Empfehlung des Bundesamts.':''}</div>`:''}
     <div class="label">Deine Ziele</div>
     <div class="miles">${levels.map(x=>`<div class="mile ${c.reach>=x?'done':''}"><span class="mdot">${c.reach>=x?'✓':x}</span><span class="small">${x} Tage${x===3?'<br><span class="muted">Grundschutz</span>':x===10?'<br><span class="muted">empfohlen</span>':'<br><span class="muted">dein Ziel</span>'}</span></div>`).join('<span class="mline"></span>')}</div>
-    <p style="margin:0">${next?`Dein Vorrat reicht jetzt <b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b>. Nächstes Ziel: <b>${next} Tage</b>. ${todo}`:`<b>Alle Ziele erreicht.</b> Denk an die Verbrauchsliste, damit nichts abläuft.`}</p>
+    <p style="margin:0">${next?`Dein Vorrat reicht jetzt <b>${daysText(c.reach,c.reachRaw)}</b>. Nächstes Ziel: <b>${next} Tage</b>. ${todo}`:`<b>Alle Ziele erreicht.</b> Denk an die Verbrauchsliste, damit nichts abläuft.`}</p>
     ${celebrate?`<button class="secondary small" data-act="mileOk" data-v="${top}" style="align-self:flex-start">Super, weiter</button>`:''}
   </section>`;
 }
@@ -727,7 +745,7 @@ function viewHome(c){
       <span class="small num choice-fact">${nItems} Lebensmittel und Wasser · ${nParts} Ausrüstungsteile</span></span></button>
     <button class="choice" data-act="go" data-v="calc"><span class="choice-ico">${icon('calc')}</span>
       <span class="choice-txt"><span class="ct">Berechnung</span><span class="small muted">Wie lange reicht es? Was muss ich noch kaufen?</span>
-      <span class="small num choice-fact t-${status(c.reach/c.T)}">Reicht ${c.reach} von ${c.T} Tagen · ${c.p} ${c.p===1?'Person':'Personen'}</span></span></button>
+      <span class="small num choice-fact t-${status(c.reach/c.T)}">Reicht ${c.reach===0&&c.reachRaw>0?daysText(0,c.reachRaw):c.reach} von ${c.T} Tagen · ${c.p} ${c.p===1?'Person':'Personen'}</span></span></button>
     <button class="choice sos" data-act="go" data-v="wissen"><span class="choice-ico">${icon('sos')}</span>
       <span class="choice-txt"><span class="ct">Notfall-Wissen</span><span class="small muted">Was tun bei Stromausfall, Hochwasser, Brand und anderen Krisen</span>
       <span class="small choice-fact">Funktioniert auch ohne Internet</span></span></button>
@@ -809,7 +827,7 @@ function viewCalc(c){
     : `Für dein Ziel fehlen noch ${T-c.reach} Tage. <b>Am meisten fehlt: ${c.bottleneck}</b>.`;
   const tiles = [
     tile('wasser','Wasser', `${fmt(c.water)} von ${fmt(c.waterNeed)} l`, c.water/c.waterNeed, `reicht ${Math.floor(c.waterReach)} Tage`),
-    tile('nahrung','Nahrung', `${fmt(c.foodTotal)} von ${fmt(c.foodNeed)} kg`, c.foodTotal/c.foodNeed, `reicht ${Math.floor(c.foodReach)} Tage`),
+    tile('nahrung','Nahrung', `${fmt(c.foodTotal)} kg, ca. ${fmt(Math.round(c.kcal/1000)*1000,0)} kcal`, c.foodReach/T, `reicht ${daysText(Math.floor(c.foodReach+1e-9),c.foodReach)}`),
     ...activeChecks().map(([k,v])=>tile(k,v.n, `${c.checks[k].have} von ${c.checks[k].need} Teilen`, c.checks[k].ratio, c.checks[k].ratio>=1?'vollständig':'unvollständig')),
   ].join('');
   return `
@@ -832,9 +850,9 @@ function viewCalc(c){
     <div class="hero">
       <div class="ring"><svg viewBox="0 0 140 140"><circle cx="70" cy="70" r="${ringR}" fill="none" stroke="var(--track)" stroke-width="12"/>
         <circle cx="70" cy="70" r="${ringR}" fill="none" stroke="var(--${status(prog)==='ok'?'ok':status(prog)==='warn'?'warn':'bad'})" stroke-width="12" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-prog)}"/></svg>
-        <div class="center"><div><div class="big num">${c.reach}</div><div class="small muted">${c.reach===1?'Tag':'Tage'}</div></div></div></div>
+        <div class="center"><div><div class="big num">${c.reach===0&&c.reachRaw>0?'&lt;1':c.reach}</div><div class="small muted">${c.reach===1?'Tag':'Tage'}</div></div></div></div>
       <div><div class="label">Dein Vorrat reicht für</div><p class="verdict" style="margin:6px 0 0">${verdict}</p>
-        <p class="small muted" style="margin:6px 0 0">Gezählt werden Wasser und Nahrung. Der kleinere Wert bestimmt die Tage.</p></div>
+        <p class="small muted" style="margin:6px 0 0">Gezählt werden Wasser und Nahrung, Nahrung nach Kalorien (ca. 2.200 kcal pro Person und Tag). Der kleinere Wert bestimmt die Tage.</p></div>
     </div>
   </section>
   <div class="grid">${tiles}</div>` : viewBuy(c)}`;
@@ -914,8 +932,8 @@ function printInventory(){
   document.getElementById('printout').innerHTML=`
     <h1>Notvorrat – Bestandsliste</h1>
     <div class="meta">Stand ${d.toLocaleDateString('de-DE')} · ${c.p} ${c.p===1?'Person':'Personen'}${kids4()||kids1()||babies()?` (davon ${[kids4()?kids4()+' Kind'+(kids4()>1?'er':'')+' 4–9':'',kids1()?kids1()+' Kleinkind'+(kids1()>1?'er':''):'',babies()?babies()+' '+(babies()>1?'Babys':'Baby'):''].filter(Boolean).join(', ')})`:''}${petCount()?` · ${petCount()} ${petCount()===1?'Haustier':'Haustiere'}`:''} · Ziel ${c.T} Tage · Hamsterplan ${APP_VERSION}</div>
-    <div class="sum"><div>Reicht für<b>${c.reach} ${c.reach===1?'Tag':'Tage'}</b></div><div>Wasser<b>${fmt(c.water)} / ${fmt(c.waterNeed)} l</b></div>
-      <div>Nahrung<b>${fmt(c.foodTotal)} / ${fmt(c.foodNeed)} kg</b></div><div>Noch kaufen<b>${buyN} Posten</b></div></div>
+    <div class="sum"><div>Reicht für<b>${daysText(c.reach,c.reachRaw)}</b></div><div>Wasser<b>${fmt(c.water)} / ${fmt(c.waterNeed)} l</b></div>
+      <div>Nahrung<b>reicht ${daysText(Math.floor(c.foodReach+1e-9),c.foodReach)}</b></div><div>Noch kaufen<b>${buyN} Posten</b></div></div>
     ${c.expired.length||c.soon.length?`<p class="exp">Abgelaufen: ${c.expired.map(i=>esc(i.name)).join(', ')||'–'} · Läuft bald ab: ${c.soon.map(i=>esc(i.name)).join(', ')||'–'}</p>`:''}
     <section><h2>Wasser</h2>${table(water)}</section>
     <h2>Nahrung</h2>${food}
@@ -1009,7 +1027,7 @@ function itemRow(it){
   const st=mhdState(it.mhd);
   const pill = st==='expired'?`<span class="pill expired">abgelaufen ${mhdText(it.mhd)}</span>`: st==='soon'?`<span class="pill soon">bald ab: ${mhdText(it.mhd)}</span>`:`<span class="pill">haltbar bis ${mhdText(it.mhd)}</span>`;
   return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${esc(it.name)}</div>
-      <div class="meta"><span class="num">${sizeText(it)} je Stück</span>${factor(it)>1?`<span class="pill">${it.group==='milch'||it.group==='fleisch'?'Pulver':'getrocknet'}, zählt ×${fmt(factor(it))}</span>`:''}${pill}${it.demo?'<span class="pill demo">Beispiel</span>':''}</div></div>
+      <div class="meta"><span class="num">${sizeText(it)} je Stück${it.cat==='nahrung'?`, ca. ${fmt(Math.round(base(it)*kcalPerKg(it)/10)*10,0)} kcal`:''}</span>${factor(it)>1?`<span class="pill">${it.group==='milch'||it.group==='fleisch'?'Pulver':'getrocknet'}, zählt ×${fmt(factor(it))}</span>`:''}${pill}${it.demo?'<span class="pill demo">Beispiel</span>':''}</div></div>
     <div class="actions"><div class="stepper"><button data-act="count" data-id="${it.id}" data-d="-1" aria-label="Eins weniger">−</button><span class="num">${it.count}</span><button data-act="count" data-id="${it.id}" data-d="1" aria-label="Eins mehr">+</button></div>
       <button class="del" data-act="del" data-id="${it.id}" aria-label="${esc(it.name)} löschen">${icon('trash')}</button></div></div>`;
 }
@@ -1032,8 +1050,9 @@ function viewStock(c){
       <div class="list">${items.map(itemRow).join('')||'<p class="small muted" style="margin:0">Noch nichts eingetragen.</p>'}</div>
       <button class="secondary" data-act="add" data-cat="nahrung" data-group="${g.k}">Eintragen</button></section>`;
   }).join('');
-  return `${head}<section class="panel"><div class="spread"><span class="label">Gesamt</span><span class="num"><b>${fmt(c.foodTotal)}</b> von ${fmt(c.foodNeed)} kg</span></div>${bar(c.foodTotal/c.foodNeed)}
-    <p class="small muted" style="margin:0">Mengen nach der BBK-Beispielliste. Gemeint sind lange haltbare Lebensmittel, also Konserven, Gläser und Trockenware, kein Frischgemüse. Ein Mischgericht wie Ravioli trägst du bei seiner Hauptzutat ein.</p></section>${groups}`;
+  return `${head}<section class="panel"><div class="spread"><span class="label">Reicht für</span><span class="num"><b>${daysText(Math.floor(c.foodReach+1e-9),c.foodReach)}</b> von ${c.T}</span></div>${bar(c.foodReach/c.T)}
+    <p class="small muted" style="margin:0">Wie lange es reicht, rechnet die App nach Kalorien: ca. 2.200 kcal pro Person und Tag (BBK), Kinder weniger. Dein Vorrat hat ca. ${fmt(Math.round(c.kcal/100)*100,0)} kcal. Die Kalorien je Produkt sind Richtwerte.</p>
+    <p class="small muted" style="margin:0">Die Gruppen darunter zeigen, ob dein Vorrat ausgewogen ist. Mengen nach der BBK-Beispielliste. Gemeint sind lange haltbare Lebensmittel, also Konserven, Gläser und Trockenware, kein Frischgemüse. Ein Mischgericht wie Ravioli trägst du bei seiner Hauptzutat ein.</p></section>${groups}`;
 }
 
 function subRow(key,name){
@@ -1208,7 +1227,7 @@ function viewQuick(f){
   const years=[]; for(let y=NOW.getFullYear();y<=NOW.getFullYear()+10;y++) years.push(y);
   if(f.preset!=null){ const pr=PRESETS[f.preset];
     return `<h2 id="sh">${esc(pr[0])}</h2>
-      <p class="small muted" style="margin:0">${fmt(pr[2],2)} ${pr[3]} pro Stück${pr[4]?' · zählt umgerechnet, weil es zubereitet mehr ergibt':''}</p>
+      <p class="small muted" style="margin:0">${fmt(pr[2],2)} ${pr[3]} pro Stück${pr[4]?` · ca. ${fmt(Math.round(base({size:pr[2],unit:pr[3]})*pr[4]/10)*10,0)} kcal`:''}${pr[5]&&FOOD.find(g=>g.k===pr[1])?.form?' · zählt beim Gewicht umgerechnet, weil es zubereitet mehr ergibt':''}</p>
       <div class="spread"><span style="font-weight:700">Wie viele?</span><div class="stepper big"><button type="button" data-act="qcount" data-d="-1" aria-label="Eins weniger">−</button><span class="num">${f.count||1}</span><button type="button" data-act="qcount" data-d="1" aria-label="Eins mehr">+</button></div></div>
       <div class="field"><span style="font-weight:700">Haltbar bis <span class="muted" style="font-weight:400">(steht auf der Packung, kann leer bleiben)</span></span><div class="two">
         <select id="f-month" aria-label="Monat"><option value="">Monat</option>${MONTHS.map((m,i)=>`<option value="${i+1}" ${String(i+1)===String(f.m)?'selected':''}>${m}</option>`).join('')}</select>
@@ -1223,6 +1242,7 @@ function viewQuick(f){
     ${groups.map(([k,n])=>`<div><div class="label" style="margin:6px 0">${n}</div><div class="qgrid">${PRESETS.map((pr,i)=>pr[1]===k?`<button type="button" class="qbtn" data-act="preset" data-i="${i}">${esc(presetLabel(pr))}</button>`:'').join('')}</div></div>`).join('')}
     <div class="row"><button type="button" class="secondary" data-act="toForm">Etwas anderes eintragen</button><button type="button" class="linkbtn" data-act="closeSheet">Abbrechen</button></div>`;
 }
+function packDry(f,g){ return typeof f.dry==='boolean' ? f.dry : g.k==='getreide'; }
 function dryHint(g){ return `Zählt ${fmt(g.form.f)}-fach, weil es zubereitet mehr wiegt.${g.k==='gemuese'||g.k==='milch'||g.k==='fleisch'?' Braucht zusätzlich Wasser zum Zubereiten.':''}`; }
 function viewSheet(){
   const f=UI.sheet; if(f.mode==='med') return medForm(f);
@@ -1235,7 +1255,10 @@ function viewSheet(){
     <div class="field"><label for="f-name">Was ist es?</label><input id="f-name" maxlength="80" value="${esc(f.name||'')}" placeholder="${isW?'z. B. Mineralwasser 1,5 l':'z. B. Ravioli Dose'}" autocomplete="off"></div>
     ${isW?'':(()=>{ const g=FOOD.find(x=>x.k===f.group)||FOOD[0]; return `<div class="field"><label for="f-group">Art des Lebensmittels</label><select id="f-group">${FOOD.map(x=>`<option value="${x.k}" ${x.k===g.k?'selected':''}>${x.n}</option>`).join('')}</select>
       <span class="hint" id="f-ex">Lange haltbar, z. B. ${g.ex}. Mischgerichte zählst du bei der Hauptzutat.</span></div>
-      <label class="check" id="f-dry-wrap" ${g.form?'':'hidden'}><input type="checkbox" id="f-dry" ${f.dry?'checked':''}> <span><b id="f-dry-label">${g.form?g.form.label:''}</b><br><span class="hint" id="f-dry-hint">${g.form?dryHint(g):''}</span></span></label>`; })()}
+      <fieldset class="field pack" id="f-pack" ${g.k==='fett'?'hidden':''}><legend style="font-weight:700">Wie ist es haltbar gemacht?</legend>
+        <label class="check"><input type="radio" name="f-pack" id="f-pk-dry" value="dry" ${packDry(f,g)?'checked':''}> <span><b>Trocken oder als Pulver</b><br><span class="hint" id="f-pk-dry-ex">z. B. ${g.dryEx||''}</span><span class="hint" id="f-dry-hint" style="display:block">${g.form?dryHint(g):''}</span></span></label>
+        <label class="check"><input type="radio" name="f-pack" id="f-pk-wet" value="wet" ${packDry(f,g)?'':'checked'}> <span><b>Dose, Glas oder Tetrapack</b><br><span class="hint" id="f-pk-wet-ex">z. B. ${g.wetEx||''}</span></span></label>
+        <span class="hint">Davon hängen die Kalorien ab: 1 kg trockene Nudeln reicht viel länger als 1 kg Dosengemüse.</span></fieldset>`; })()}
     <div class="two"><div class="field"><label for="f-size">Menge pro Stück</label><input id="f-size" inputmode="decimal" value="${esc(f.size??(isW?'1,5':''))}" placeholder="${isW?'1,5':'400'}"></div>
       <div class="field"><label for="f-unit">Einheit</label><select id="f-unit">${units.map(u=>`<option ${u===(f.unit||(isW?'l':'g'))?'selected':''}>${u}</option>`).join('')}</select></div></div>
     <div class="field"><label for="f-count">Anzahl</label><input id="f-count" inputmode="numeric" value="${esc(f.count??(isW?'6':'1'))}"></div>
@@ -1295,7 +1318,7 @@ root.addEventListener('click', async e=>{
       const mhd = m&&y ? `${y}-${String(m).padStart(2,'0')}` : null, left = mhd ? mhdIdx(mhd)-CUR : null;
       if(left!==null && left<SHORT_MONTHS && !f.short){ f.short = left<0?'expired':'soon'; break; }
       const isW=pr[1]==='wasser';
-      S.items.push({id:uid(), cat:isW?'wasser':'nahrung', group:isW?null:pr[1], name:pr[0], size:pr[2], unit:pr[3], count:f.count||1, mhd, ...(pr[4]?{dry:true}:{})});
+      S.items.push({id:uid(), cat:isW?'wasser':'nahrung', group:isW?null:pr[1], name:pr[0], size:pr[2], unit:pr[3], count:f.count||1, mhd, ...(isW?{}:{kcal:pr[4], dry:pr[5]===true})});
       UI.msg=`${pr[0]} eingetragen.`; UI.sheet=null; save(); break; }
     case 'closeSheet': case 'closeBg': UI.sheet=null; break;
     case 'copyList': await copy(listText(calc()), 'Liste kopiert.', null); break;
@@ -1344,9 +1367,11 @@ root.addEventListener('change', e=>{
   if(t.id==='land'){ S.land=t.value||null; save(); const pos=window.scrollY; render(); window.scrollTo(0,pos); return; }
   if(t.id==='f-group'){ const g=FOOD.find(x=>x.k===t.value); if(!g) return;
     document.getElementById('f-ex').textContent=`Lange haltbar, z. B. ${g.ex}. Mischgerichte zählst du bei der Hauptzutat.`;
-    const w=document.getElementById('f-dry-wrap'); w.hidden=!g.form;
-    if(g.form){ document.getElementById('f-dry-label').textContent=g.form.label; document.getElementById('f-dry-hint').textContent=dryHint(g); }
-    else document.getElementById('f-dry').checked=false;
+    document.getElementById('f-pack').hidden = g.k==='fett';
+    document.getElementById('f-pk-dry-ex').textContent = g.dryEx?`z. B. ${g.dryEx}`:'';
+    document.getElementById('f-pk-wet-ex').textContent = g.wetEx?`z. B. ${g.wetEx}`:'';
+    document.getElementById('f-dry-hint').textContent = g.form?dryHint(g):'';
+    document.getElementById(g.k==='getreide'?'f-pk-dry':'f-pk-wet').checked = true;
     return; }
   if(t.id==='restore-file' && t.files && t.files[0]){ const f=t.files[0]; UI.impErr='';
     if(f.size>5e6){ UI.impErr='Die Datei ist zu groß für eine Hamsterplan-Sicherung.'; render(); return; }
@@ -1385,9 +1410,8 @@ root.addEventListener('submit', e=>{
     render(); return;
   }
   const name=str(g('f-name')||'',80), size=parseNum(g('f-size')), count=parseInt(g('f-count'),10), m=g('f-month'), y=g('f-year');
-  const dryEl=document.getElementById('f-dry');
-  const grp=g('f-group')||f.group, gObj=FOOD.find(x=>x.k===grp);
-  const dry=!!(dryEl&&dryEl.checked&&gObj&&gObj.form);
+  const grp=g('f-group')||f.group;
+  const dry = grp==='fett' ? undefined : !!document.getElementById('f-pk-dry')?.checked;
   // Hinweis kurz haltbar: neu prüfen, wenn sich das Datum geändert hat
   if(f.m!==m||f.y!==y) f.short=null;
   Object.assign(f,{name, size:g('f-size'), count:g('f-count'), unit:g('f-unit'), group:grp, dry, m, y}); f.err='';
