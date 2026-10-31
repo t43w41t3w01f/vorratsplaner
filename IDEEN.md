@@ -41,7 +41,6 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **„Ich fange bei null an“**: ein Tipp zeigt eine fertige Einkaufsliste für 3 Tage Grundschutz für den eigenen Haushalt (schneller Erfolg für Neue)
 - [ ] **Notfall-Infopunkt des Dorfs** (Leuchtturm) fest im Notfall-Wissen. *Adresse beim Wehrführer erfragen*
 - [ ] **Feedback-Knopf**: öffnet fertige Mail an info@hamsterplan.de mit App-Version. *Wartet auf die Weiterleitung bei INWX*
-- [ ] **Hamster an weiteren Stellen**: Glückwunsch, leere Listen, Teilen
 - [ ] **Empfehlung durch die Feuerwehr**: Facebook-Seite, Mitteilungsblatt, Veranstaltungen (keine App-Änderung)
 
 - [ ] **Push-Benachrichtigung ohne Server** (Hintergrund-Abruf in Chrome): nur als Versuch, Chrome entscheidet selbst, ob und wie oft das läuft
