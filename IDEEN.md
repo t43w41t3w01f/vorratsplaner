@@ -39,8 +39,10 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] Kanäle: PMR 1–16, Freenet 6 analoge Kanäle, CB mit Kanal 9 (Notruf-Tradition) und 19
 - [ ] So funkt man (Name, kurz, „kommen“, max. 3 Minuten), Notruf 112 geht vor, BOS-Funk tabu
 - [ ] Verweise aus den Karten „Telefon funktioniert nicht“ und „Informiert bleiben“
-- [ ] Checkliste: PMR-Funkgerät, Ersatzakkus fürs Funkgerät, CB-Funkgerät
-- [ ] Kanäle und Leistungsgrenzen vor dem Bau an den BNetzA-Vorgaben prüfen
+- [ ] Checkliste: PMR-Funkgerät, Ersatzakkus fürs Funkgerät; CB-Funkgerät als Haken, aber kein Muss (zählt nicht zur Vollständigkeit)
+- [ ] Kalendertermin „Funkrunde Hunsrück“ (Google Kalender oder Termindatei, sonntags 20 Uhr, wöchentlich)
+- [ ] Funkrunde und Kanäle im Ausdruck „Notfall-Wissen drucken“
+- [x] Vorgaben geprüft: PMR446 16 Kanäle 446,00625–446,19375 MHz, 0,5 W, nur Handgerät mit fester Antenne (Vfg. 91/2025, bis 2030); Freenet 6 analoge Kanäle 149,0250–149,1125 MHz, 1 W, nur Handgerät (Vfg. 45/2025, bis 2035); CB 80 Kanäle FM 4 W, AM 4 W und SSB 12 W PEP auf 1–40, Stationen erlaubt (Vfg. 21/2021, bis 2030)
 
 ## Priorität hoch
 
