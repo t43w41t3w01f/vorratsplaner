@@ -30,6 +30,18 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Sicherheitsprüfung in 5 Durchläufen** (Angreifer-Sicht): HTML-Einschleusung über Meldungen behoben, Eingaben und Einstellungen geprüft, CSP verschärft *(Version 1.21)*
 - [x] **Reichweite nach Kalorien** statt Gewicht, Richtwerte je Produkt, Auswahl trocken oder Dose/Glas *(Version 1.22)*
 
+## Geplant: Funk (eine Version, wartet auf Freigabe)
+
+- [ ] Startseite: 4. Knopf „Funk“ unter Notfall-Wissen
+- [ ] **Funkrunde Hunsrück**: jeden Sonntag 20 Uhr, PMR446 Kanal 5 (446,05625 MHz), kein Subcode (CTCSS aus); Anleitung zum Mitmachen
+- [ ] Warum Funk (Handy- und Festnetz fallen bei Stromausfall nach Stunden aus)
+- [ ] Vergleich PMR446 / Freenet / CB: Kosten, Reichweite, was erlaubt ist (Vfg. 91/2025, 45/2025, 21/2021), Kaufhilfe und Warnung vor unzulässigen Geräten
+- [ ] Kanäle: PMR 1–16, Freenet 6 analoge Kanäle, CB mit Kanal 9 (Notruf-Tradition) und 19
+- [ ] So funkt man (Name, kurz, „kommen“, max. 3 Minuten), Notruf 112 geht vor, BOS-Funk tabu
+- [ ] Verweise aus den Karten „Telefon funktioniert nicht“ und „Informiert bleiben“
+- [ ] Checkliste: PMR-Funkgerät, Ersatzakkus fürs Funkgerät, CB-Funkgerät
+- [ ] Kanäle und Leistungsgrenzen vor dem Bau an den BNetzA-Vorgaben prüfen
+
 ## Priorität hoch
 
 - [ ] **Praxistest mit 2–3 Senioren** aus dem Dorf vor der Verteilung
