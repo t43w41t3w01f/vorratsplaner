@@ -29,20 +29,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Haushaltsprofil Teil 3b: Babys unter 1 Jahr**: eigener Bereich, Hinweise zu Stillen und sicherem Wasser, 1 l Wasser pro Baby *(Version 1.20)*
 - [x] **Sicherheitsprüfung in 5 Durchläufen** (Angreifer-Sicht): HTML-Einschleusung über Meldungen behoben, Eingaben und Einstellungen geprüft, CSP verschärft *(Version 1.21)*
 - [x] **Reichweite nach Kalorien** statt Gewicht, Richtwerte je Produkt, Auswahl trocken oder Dose/Glas *(Version 1.22)*
-
-## Geplant: Funk (eine Version, wartet auf Freigabe)
-
-- [ ] Startseite: 4. Knopf „Funk“ unter Notfall-Wissen
-- [ ] **Funkrunde Hunsrück**: jeden Sonntag 20 Uhr, PMR446 Kanal 5 (446,05625 MHz), kein Subcode (CTCSS aus); Anleitung zum Mitmachen
-- [ ] Warum Funk (Handy- und Festnetz fallen bei Stromausfall nach Stunden aus)
-- [ ] Vergleich PMR446 / Freenet / CB: Kosten, Reichweite, was erlaubt ist (Vfg. 91/2025, 45/2025, 21/2021), Kaufhilfe und Warnung vor unzulässigen Geräten
-- [ ] Kanäle: PMR 1–16, Freenet 6 analoge Kanäle, CB mit Kanal 9 (Notruf-Tradition) und 19
-- [ ] So funkt man (Name, kurz, „kommen“, max. 3 Minuten), Notruf 112 geht vor, BOS-Funk tabu
-- [ ] Verweise aus den Karten „Telefon funktioniert nicht“ und „Informiert bleiben“
-- [ ] Checkliste: PMR-Funkgerät, Ersatzakkus fürs Funkgerät; CB-Funkgerät als Haken, aber kein Muss (zählt nicht zur Vollständigkeit)
-- [ ] Kalendertermin „Funkrunde Hunsrück“ (Google Kalender oder Termindatei, sonntags 20 Uhr, wöchentlich)
-- [ ] Funkrunde und Kanäle im Ausdruck „Notfall-Wissen drucken“
-- [x] Vorgaben geprüft: PMR446 16 Kanäle 446,00625–446,19375 MHz, 0,5 W, nur Handgerät mit fester Antenne (Vfg. 91/2025, bis 2030); Freenet 6 analoge Kanäle 149,0250–149,1125 MHz, 1 W, nur Handgerät (Vfg. 45/2025, bis 2035); CB 80 Kanäle FM 4 W, AM 4 W und SSB 12 W PEP auf 1–40, Stationen erlaubt (Vfg. 21/2021, bis 2030)
+- [x] **Funk**: eigener Bereich, Funkrunde Hunsrück (sonntags 20 Uhr, PMR Kanal 5) mit Kalendertermin, Vergleich PMR446/Freenet/CB, Kanäle, Kaufhilfe, Checkliste, Druck *(Version 1.23)*
 
 ## Priorität hoch
 
@@ -65,6 +52,8 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Teilen im Haushalt**: Sicherung per QR-Code auf ein zweites Handy übertragen
 
 ## Offen
+
+- [ ] **Funk-Regeln jährlich prüfen** (Bundesnetzagentur: PMR446 bis 2030, Freenet bis 2035, CB bis 2030); Preise und Reichweiten sind Richtwerte
 
 - [ ] **kcal-Richtwerte prüfen** (Schnellauswahl und Gruppenwerte trocken / Dose-Glas), bisher übliche Packungswerte
 

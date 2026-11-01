@@ -2,6 +2,14 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.23 – 1. November 2026
+Funk. Rücksprungpunkt: Zweig `stand-v1.22`.
+- **Bereich „Funk“** (4. Knopf auf der Startseite): Warum Funk, Funkrunde, Vergleich PMR446/Freenet/CB, Kaufhilfe, Kanaltabellen, „So funkt man“, „Im Notfall“, Quellenangabe (Vfg. 91/2025, 45/2025, 21/2021).
+- **Funkrunde Hunsrück**: sonntags 20 Uhr, PMR446 Kanal 5 (446,05625 MHz), kein Subcode. Kalendertermin wöchentlich (Google-Link mit RRULE BYDAY=SU oder .ics mit Erinnerung 10 Minuten vorher).
+- Checkliste Licht & Strom: `pmr` (1), `funkakku` (1), `cb` freiwillig (Menge 0, zählt nicht zur Vollständigkeit, Anzeige „freiwillig“).
+- Verweise auf Funk in den Karten „Stromausfall“, „Informiert bleiben“, „Telefon und Notruf funktionieren nicht“; Funk-Teil im Druck des Notfall-Wissens.
+- Behoben: In der Termindatei für den Vorratscheck wurden Semikolons nicht maskiert.
+
 ## 1.22 – 28. Oktober 2026
 Reichweite nach Kalorien. Rücksprungpunkt: Zweig `stand-v1.21`.
 - **Reichweite Nahrung nach Energie** statt Gewicht: Summe kcal / (2.200 kcal × Esser), Kinder 4–9 ×0,7, 1–3 ×0,5, Babys 0. Wasser unverändert.

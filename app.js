@@ -29,7 +29,7 @@ const CHECK = {
   hilfe:   {n:'Erste Hilfe', items:[['verband','DIN-Verbandskasten',1],['pflaster','Pflaster-Set',1],['desinf','Wund- und Hautdesinfektion',1],['thermo','Fieberthermometer',1],['pinzette','Splitterpinzette',1]]},
   medizin: {n:'Medikamente', items:[['schmerz','Schmerzmittel',1],['durchfall','Mittel gegen Durchfall',1],['erkaelt','Mittel gegen Erkältung',1],['salbe','Salbe für Stiche und Sonnenbrand',1]]},
   hygiene: {n:'Hygiene', items:[['seife','Seife',1,true],['zahnb','Zahnbürste',1,true],['paste','Zahnpasta',1],['klo','Toilettenpapier (Rollen)',4,true],['muell','Müllbeutel (Rolle)',1],['handdes','Handdesinfektion',1]]},
-  licht:   {n:'Licht & Strom', items:[['lampe','Taschenlampe',1],['batt','Ersatzbatterien (Pack)',2],['radio','Radio mit Kurbel oder Batterie',1],['kerzen','Kerzen',6],['feuer','Feuerzeug oder Streichhölzer',2],['powerbank','Powerbank',1]]},
+  licht:   {n:'Licht & Strom', items:[['lampe','Taschenlampe',1],['batt','Ersatzbatterien (Pack)',2],['radio','Radio mit Kurbel oder Batterie',1],['kerzen','Kerzen',6],['feuer','Feuerzeug oder Streichhölzer',2],['powerbank','Powerbank',1],['pmr','PMR446-Funkgerät',1],['funkakku','Ersatzakkus oder Batterien fürs Funkgerät',1],['cb','CB-Funkgerät (freiwillig)',0]]},
   waerme:  {n:'Wärme & Kochen', items:[['decke','Warme Decke oder Schlafsack',1,true],['kocher','Campingkocher',1],['kartusche','Gaskartuschen',3]]},
   // pp:'k' = pro Kleinkind, 5. Feld true = pro Tag. Mengen sind eigene Richtwerte
   // Haustiere: pp 'pf' = Trockenfutter kg (Summe aller Tiere pro Tag × Tage), 'pl' = Katzenstreu, 'pn' = pro Tier, 'pd' = pro Hund
@@ -102,7 +102,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
   if(pp==='b') return `${fmt(q,2)} pro Baby${perDay?' und Tag':''}`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.22';
+const APP_VERSION='1.23';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -127,6 +127,7 @@ const ICONS = {
   shelf:'<path d="M3 4h18M3 12h18M3 20h18M5 4v16M19 4v16"/><rect x="7" y="7" width="4" height="5"/><rect x="13" y="9" width="4" height="3"/><rect x="8" y="15" width="7" height="5"/>',
   print:'<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
   baby:'<circle cx="12" cy="8.5" r="4.5"/><path d="M10.3 8h.01M13.7 8h.01M10.8 10.3c.7.5 1.7.5 2.4 0"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/>',
+  funk:'<rect x="7" y="7" width="10" height="14" rx="2"/><path d="M10 7V2.5M10 11h4M10 14h4M10 17h4"/>',
   pflege:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 9.5v5M9.5 12h5"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
 };
@@ -178,7 +179,7 @@ const WISSEN = [
        'Nicht jeder Ort hat Sirenen. Deshalb immer einen zweiten Warnweg nutzen.'],],
    ['Sonstiges',['Zwei kurze Dauertöne mit Unterbrechung sind ein Feuerwehralarm und nur für die Einsatzkräfte gedacht.']]]},
  {id:'info', t:'Informiert bleiben ohne Strom und Internet', tags:'radio kurbelradio ukw autoradio',
-  gear:['radio','batt','powerbank'],
+  gear:['radio','batt','powerbank','pmr'],
   now:['Batterie-, Kurbel- oder Solarradio einschalten und einen regionalen UKW-Sender suchen.',
        'Zur Not geht das Autoradio. Den Motor dabei nur im Freien laufen lassen.',
        'Akkus von Handy und Powerbank schonen: Helligkeit runter, Energiesparmodus, nur kurz einschalten.',
@@ -195,7 +196,7 @@ const WISSEN = [
 
  {sec:'Ausfall der Versorgung'},
  {id:'strom', t:'Stromausfall', tags:'blackout licht kühlschrank heizung',
-  gear:['lampe','batt','radio','kerzen','feuer','powerbank','kocher'],
+  gear:['lampe','batt','radio','kerzen','feuer','powerbank','kocher','pmr'],
   now:['Ruhe bewahren. Prüfen, ob nur die eigene Wohnung betroffen ist (Sicherungskasten, Nachbarn).',
        'Taschenlampe statt Kerze nehmen. Kerzen nie unbeaufsichtigt brennen lassen.',
        'Radio einschalten, um zu erfahren, wie groß und lang der Ausfall ist.',
@@ -508,7 +509,7 @@ function googleCalUrl(freq){
 }
 function icsDownload(freq){
   const st=nextSaturday10(), en=new Date(st.getTime()+15*60000), t=calTexts(freq);
-  const esc2=x=>x.replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  const esc2=x=>x.replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Hamsterplan//DE','CALSCALE:GREGORIAN','BEGIN:VEVENT',
     `UID:vorratscheck-${Date.now()}@hamsterplan.de`, `DTSTAMP:${calStamp(new Date())}`, `DTSTART:${calStamp(st)}`, `DTEND:${calStamp(en)}`,
     `RRULE:${CAL_FREQ[freq].rule}`, `SUMMARY:${esc2(t.title)}`, `DESCRIPTION:${esc2(t.details)}`, `URL:${APP_URL}`,
@@ -664,6 +665,86 @@ function calc(){
     waterNeed:wDay*T, petWaterNeed:petWater()*T, babyWaterNeed:babies()*BABY_WATER*T, foodNeed:eat*FOOD_DAY*T, eat};
 }
 
+/* ---------- Funk (Vorgaben der Bundesnetzagentur: Vfg. 91/2025 PMR446, 45/2025 Freenet, 21/2021 CB; Stand November 2026) ---------- */
+const FUNKRUNDE = {name:'Funkrunde Hunsrück', tag:'Sonntag', zeit:'20 Uhr', kanal:5, mhz:'446,05625'};
+const PMR_CH = Array.from({length:16},(_,i)=>[i+1, (446.00625+i*0.0125).toFixed(5).replace('.',',')]);
+const FREENET_CH = [[1,'149,0250'],[2,'149,0375'],[3,'149,0500'],[4,'149,0875'],[5,'149,1000'],[6,'149,1125']];
+function nextSunday20(){ const d=new Date(); const add=(7-d.getDay())%7; d.setDate(d.getDate()+add); d.setHours(20,0,0,0); if(d<=new Date()) d.setDate(d.getDate()+7); return d; }
+function funkCalText(){ return {title:FUNKRUNDE.name, details:`Wöchentliche Funkrunde: PMR446 Kanal ${FUNKRUNDE.kanal} (${FUNKRUNDE.mhz} MHz), kein Subcode. Funkgerät einschalten, kurz zuhören, dann melden.\n${APP_URL}`}; }
+function funkGoogleUrl(){ const st=nextSunday20(), en=new Date(st.getTime()+30*60000), t=funkCalText();
+  return 'https://calendar.google.com/calendar/render?'+new URLSearchParams({action:'TEMPLATE', text:t.title, details:t.details, dates:`${calStamp(st)}/${calStamp(en)}`, ctz:'Europe/Berlin', recur:'RRULE:FREQ=WEEKLY;BYDAY=SU'}).toString(); }
+function funkIcs(){
+  const st=nextSunday20(), en=new Date(st.getTime()+30*60000), t=funkCalText();
+  const esc2=x=>x.replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Hamsterplan//DE','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    `UID:funkrunde-${Date.now()}@hamsterplan.de`, `DTSTAMP:${calStamp(new Date())}`, `DTSTART:${calStamp(st)}`, `DTEND:${calStamp(en)}`,
+    'RRULE:FREQ=WEEKLY;BYDAY=SU', `SUMMARY:${esc2(t.title)}`, `DESCRIPTION:${esc2(t.details)}`, `URL:${APP_URL}`,
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Funkrunde','TRIGGER:-PT10M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  try{ const url=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); const a=document.createElement('a'); a.href=url; a.download='funkrunde.ics';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); return true; }catch(e){ return false; }
+}
+const FUNK_TYPES = [
+  {n:'PMR446', sub:'Für den Einstieg, für alle', rows:[['Kosten','ca. 30–60 € für ein Paar'],['Anmeldung','keine, kostenlos'],['Erlaubt','nur Handfunkgerät mit fest eingebauter Antenne, 0,5 Watt'],['Reichweite','etwa 0,5 bis 3 km, je nach Gelände'],['Kanäle','16 (ältere Geräte: 8)']]},
+  {n:'Freenet', sub:'Etwas mehr Reichweite, nur in Deutschland', rows:[['Kosten','ca. 100–200 € pro Gerät'],['Anmeldung','keine, kostenlos'],['Erlaubt','nur Handfunkgerät, Antenne direkt am Gerät, 1 Watt'],['Reichweite','etwas mehr als PMR446'],['Kanäle','6 für Sprache (analog)']]},
+  {n:'CB-Funk', sub:'Für größere Entfernungen, braucht etwas Einarbeitung', rows:[['Kosten','ca. 80–200 €, dazu eine Antenne'],['Anmeldung','keine, kostenlos'],['Erlaubt','auch als Station zu Hause oder im Auto mit Außenantenne, bis 4 Watt (FM, AM), 12 Watt (SSB)'],['Reichweite','mit guter Außenantenne mehrere Kilometer'],['Kanäle','80 mit FM, davon 1–40 auch mit AM und SSB']]},
+];
+const FUNK_HOW = ['Erst zuhören, ob der Kanal frei ist.','Sendetaste drücken, eine Sekunde warten, dann sprechen. Das Gerät etwa eine Handbreit vor den Mund halten.',
+  'Kurz fassen. Länger als 3 Minuten am Stück ist nicht erlaubt.','Am Ende „Kommen“ sagen, dann ist der andere dran. „Ende“ heißt: Gespräch beendet.',
+  'Vornamen statt Nachnamen und Adressen nennen: Jeder kann mithören.','Ruhig und deutlich sprechen, Zahlen einzeln sagen („zwo, fünf“).'];
+const FUNK_BUY = ['Für die Funkrunde reicht ein PMR446-Funkgerät. Achte auf die Aufschrift „PMR446“ und das CE-Zeichen.','Die Antenne muss fest am Gerät sein.',
+  'Finger weg von billigen Geräten mit abschraubbarer Antenne oder viel Leistung (z. B. Baofeng UV-5R und ähnliche). Auf PMR- und Freenet-Kanälen sind sie in Deutschland verboten, es drohen Bußgelder.',
+  'Am besten Geräte, die auch mit normalen Batterien (AA) laufen: Batterien kann man lagern.','Ersatzbatterien oder eine Powerbank mit passendem Ladekabel dazulegen.'];
+const FUNK_SOS = ['Notruf 112 geht immer vor, solange Telefon oder Handy noch funktionieren.','Für PMR446 und Freenet gibt es keinen offiziellen Notrufkanal. Beim CB-Funk gilt Kanal 9 traditionell als Notrufkanal.',
+  'Geht gar nichts mehr: zum Feuerwehrhaus oder zur Notfall-Anlaufstelle der Gemeinde gehen.','Nie auf Funkfrequenzen von Feuerwehr, Rettungsdienst und Polizei senden (BOS-Funk). Das ist verboten und gefährdet Einsätze.'];
+const FUNK_SRC = 'Vorgaben der Bundesnetzagentur: Vfg. 91/2025 (PMR446), Vfg. 45/2025 (Freenet), Vfg. 21/2021 (CB-Funk). Stand November 2026. Preise und Reichweiten sind Richtwerte.';
+function funkRundeBlock(forPrint){
+  const steps=[`Funkgerät auf <b>Kanal ${FUNKRUNDE.kanal}</b> stellen, Subcode (CTCSS) auf 0 bzw. aus.`,`Um ${FUNKRUNDE.zeit} einschalten und erst kurz zuhören.`,
+    'Sendetaste drücken, kurz warten und sprechen: „Hier ist [Vorname] aus [Ort]. Funkrunde Hunsrück, wer hört mich? Kommen.“','Taste loslassen und auf Antwort warten.','Zum Schluss: „[Vorname] aus [Ort], Ende.“'];
+  if(forPrint) return `<section class="pw"><h3>${FUNKRUNDE.name}: jeden ${FUNKRUNDE.tag}, ${FUNKRUNDE.zeit}, PMR446 Kanal ${FUNKRUNDE.kanal} (${FUNKRUNDE.mhz} MHz), kein Subcode</h3><ol class="steps">${steps.map(x=>`<li>${x}</li>`).join('')}</ol></section>`;
+  return `<section class="panel funkrunde"><div class="label">Mitmachen</div><h2 style="margin:0">${FUNKRUNDE.name}</h2>
+    <div class="facts"><div class="fbig">Jeden ${FUNKRUNDE.tag}, ${FUNKRUNDE.zeit}</div><div class="fbig">PMR446 · Kanal ${FUNKRUNDE.kanal}</div><div class="small muted">${FUNKRUNDE.mhz} MHz · kein Subcode (CTCSS aus)</div></div>
+    <ol class="steps">${steps.map(x=>`<li>${x}</li>`).join('')}</ol>
+    <p class="small muted" style="margin:0">Die Funkrunde ist ein offenes Treffen zum Üben für den ganzen Hunsrück. Je mehr mitmachen, desto besser klappt es im Notfall. Wer weiter weg wohnt, hört vielleicht nicht jeden: Andere können Nachrichten weitergeben.</p>
+    <div class="row"><a class="primary small btnlink" href="${funkGoogleUrl()}" target="_blank" rel="noopener" data-act="funkGoogle">Termin in Google Kalender</a><button class="secondary small" data-act="funkIcs">Anderer Kalender</button></div></section>`;
+}
+function chTable(rows, hl){ return `<table class="ftab"><thead><tr><th>Kanal</th><th>Frequenz (MHz)</th></tr></thead><tbody>${rows.map(([k,f])=>`<tr${k===hl?' class="hl"':''}><td>${k}${k===hl?' · Funkrunde':''}</td><td class="n">${f}</td></tr>`).join('')}</tbody></table>`; }
+function viewFunk(){
+  const all={}; Object.values(CHECK).forEach(v=>v.items.forEach(it=>all[it[0]]=it));
+  const gear=['pmr','funkakku','cb'].map(k=>{ const ok=have(k)>0, opt=all[k][2]===0; return `<span class="gchip ${ok?'ok':opt?'opt':'no'}">${ok?'✓':opt?'○':'✗'} ${esc(all[k][1])}</span>`; }).join('');
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Funk</h1></div>
+  <p class="lead" style="margin:0">Wenn Handy, Telefon und Internet ausfallen, kannst du per Funk mit Nachbarn, Familie und Helfern sprechen.</p>
+  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
+  ${funkRundeBlock()}
+  <section class="panel"><h2 style="font-size:1.15rem">Warum Funk?</h2><ul class="plain">
+    <li>Bei Stromausfall halten Handynetz und Internet oft nur wenige Stunden. Festnetz über den Router fällt sofort aus.</li>
+    <li>Funkgeräte laufen mit Akku oder Batterien, ganz ohne Netz und ohne Vertrag.</li>
+    <li>Für Funkgeräte auf PMR446, Freenet und CB brauchst du keine Prüfung und keine Anmeldung.</li></ul></section>
+  <h2 class="wsec">Welches Funkgerät?</h2>
+  ${FUNK_TYPES.map(t=>`<section class="panel"><div><h2 style="font-size:1.15rem;margin:0">${t.n}</h2><div class="small muted">${t.sub}</div></div>
+    <table class="ftab"><tbody>${t.rows.map(([a,b])=>`<tr><th scope="row">${a}</th><td>${b}</td></tr>`).join('')}</tbody></table></section>`).join('')}
+  <section class="panel"><h2 style="font-size:1.15rem">Worauf beim Kauf achten?</h2><ul class="plain">${FUNK_BUY.map(x=>`<li>${x}</li>`).join('')}</ul>
+    <div class="gear"><span class="small muted">In deinem Vorrat:</span> ${gear}</div>
+    <button class="secondary small" data-act="go" data-v="licht" style="align-self:flex-start">Zur Checkliste Licht &amp; Strom</button></section>
+  <h2 class="wsec">Kanäle</h2>
+  <details class="wcard"><summary><span>PMR446: 16 Kanäle</span><span class="chev" aria-hidden="true">›</span></summary><div class="wbody">${chTable(PMR_CH, FUNKRUNDE.kanal)}<p class="small muted" style="margin:0">Ältere Geräte haben nur Kanal 1–8. Subcodes (CTCSS/DCS) filtern nur, was du hörst: Mit Subcode hörst du andere ohne Subcode nicht.</p></div></details>
+  <details class="wcard"><summary><span>Freenet: 6 Kanäle</span><span class="chev" aria-hidden="true">›</span></summary><div class="wbody">${chTable(FREENET_CH)}</div></details>
+  <details class="wcard"><summary><span>CB-Funk: wichtige Kanäle</span><span class="chev" aria-hidden="true">›</span></summary><div class="wbody"><table class="ftab"><tbody>
+    <tr><th scope="row">Kanal 9</th><td>27,065 MHz · traditionell Notrufkanal</td></tr><tr><th scope="row">Kanal 19</th><td>27,185 MHz · Fernfahrer und Anrufkanal</td></tr>
+    <tr><th scope="row">Kanal 1–40</th><td>FM, AM und SSB</td></tr><tr><th scope="row">Kanal 41–80</th><td>nur FM</td></tr></tbody></table></div></details>
+  <section class="panel"><h2 style="font-size:1.15rem">So funkt man</h2><ol class="steps">${FUNK_HOW.map(x=>`<li>${x}</li>`).join('')}</ol></section>
+  <section class="panel"><h2 style="font-size:1.15rem">Im Notfall</h2><ul class="plain">${FUNK_SOS.map(x=>`<li>${x}</li>`).join('')}</ul></section>
+  <div class="row">${CAN_PRINT?`<button class="primary" data-act="printWissen">${icon('print')} Mit Notfall-Wissen drucken</button>`:''}</div>
+  <p class="hint" style="margin:0">${FUNK_SRC}</p>`;
+}
+function printFunk(){
+  return `<h2>Funk</h2>${funkRundeBlock(true)}
+    <section class="pw"><h3>Kanäle</h3><p class="meta"><b>PMR446:</b> ${PMR_CH.map(([k,f])=>`${k}: ${f}`).join(' · ')}</p>
+    <p class="meta"><b>Freenet:</b> ${FREENET_CH.map(([k,f])=>`${k}: ${f}`).join(' · ')}</p>
+    <p class="meta"><b>CB-Funk:</b> Kanal 9 (27,065 MHz) traditionell Notrufkanal · Kanal 19 (27,185 MHz) Anrufkanal</p></section>
+    <section class="pw"><h3>So funkt man</h3><ol class="steps">${FUNK_HOW.map(x=>`<li>${x}</li>`).join('')}</ol></section>
+    <section class="pw"><h3>Im Notfall</h3><ul>${FUNK_SOS.map(x=>`<li>${x}</li>`).join('')}</ul></section>`;
+}
+
 /* ---------- Ansichten ---------- */
 const root=document.getElementById('app');
 function render(){
@@ -677,6 +758,7 @@ function render(){
   else if(UI.view==='settings') root.innerHTML=viewSettings();
   else if(UI.view==='rotation') root.innerHTML=viewRotation(c);
   else if(UI.view==='wissen') root.innerHTML=viewWissen();
+  else if(UI.view==='funk') root.innerHTML=viewFunk();
   else if(UI.view==='docs-orig') root.innerHTML=viewDocs('orig');
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
@@ -749,6 +831,9 @@ function viewHome(c){
     <button class="choice sos" data-act="go" data-v="wissen"><span class="choice-ico">${icon('sos')}</span>
       <span class="choice-txt"><span class="ct">Notfall-Wissen</span><span class="small muted">Was tun bei Stromausfall, Hochwasser, Brand und anderen Krisen</span>
       <span class="small choice-fact">Funktioniert auch ohne Internet</span></span></button>
+    <button class="choice" data-act="go" data-v="funk"><span class="choice-ico">${icon('funk')}</span>
+      <span class="choice-txt"><span class="ct">Funk</span><span class="small muted">Wenn Handy und Telefon ausfallen: Funkgeräte, Kanäle und die Funkrunde Hunsrück</span>
+      <span class="small choice-fact">Jeden ${FUNKRUNDE.tag}, ${FUNKRUNDE.zeit}, PMR Kanal ${FUNKRUNDE.kanal}</span></span></button>
   </div>
   ${backupStatus()}
   <a class="whatsnew" href="versionen.html" data-act="seenVersion">${META.seenVersion!==APP_VERSION?`<span class="newdot">Neu: Version ${APP_VERSION}</span> `:''}Was kann die App alles? Unter <b>„Was ist neu?“</b> stehen alle Funktionen und Änderungen der Versionen. ›</a>
@@ -875,7 +960,7 @@ function wissenCard(w, forPrint){
   if(forPrint) return `<section class="pw"><h3>${w.t}</h3>${steps}${more}</section>`;
   return `<details class="wcard" id="w-${w.id}" data-search="${esc((w.t+' '+(w.tags||'')+' '+w.now.join(' ')).toLowerCase().replace(/<[^>]+>/g,''))}">
     <summary><span>${w.t}</span><span class="chev" aria-hidden="true">›</span></summary>
-    <div class="wbody"><div class="label">Sofort tun</div>${steps}${w.id==='strom'?stromExtra():''}${gearChips(w.gear)}${more}</div></details>`;
+    <div class="wbody"><div class="label">Sofort tun</div>${steps}${w.id==='strom'?stromExtra():''}${gearChips(w.gear)}${w.id==='netz'||w.id==='info'||w.id==='strom'?`<button class="secondary small" data-act="go" data-v="funk" style="align-self:flex-start">${icon('funk')} Zum Bereich Funk</button>`:''}${more}</div></details>`;
 }
 function notrufBar(){
   const g=S.land?giftFor(S.land):null;
@@ -904,6 +989,7 @@ function printWissen(){
     <div class="sum" style="grid-template-columns:repeat(3,1fr)">${NUMMERN.slice(0,3).map(([n,name])=>`<div>${name}<b>${n}</b></div>`).join('')}</div>
     <p class="meta">${g?`<b>Giftnotruf ${g.ort}: ${g.tel}</b> · `:''}Telefonseelsorge: 0800 111 0 111 · Notfall-Infopunkt in meiner Nähe: ______________________________</p>
     ${WISSEN.map(w=>w.sec?`<h2>${w.sec}</h2>`:wissenCard(w,true)).join('')}
+    ${printFunk()}
     <p class="meta" style="margin-top:12pt">Eigene Zusammenfassung nach Empfehlungen von BBK, BfR, Verbraucherzentrale, Polizei und DWD. Ersetzt keinen Erste-Hilfe-Kurs.</p>`;
   document.body.classList.add('pinv');
   const done=()=>{ document.body.classList.remove('pinv'); window.removeEventListener('afterprint',done); };
@@ -1100,7 +1186,7 @@ function viewCheck(c){
     if(DERIVED[key]||key==='bargeld') return subRow(key,name);
     const need=needOf(it,c.p,c.T), have=S.checks[key]||0, nt=needText(it), na=!!(S.checkNa&&S.checkNa[key]);
     return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${name}</div>
-      <div class="meta">${na?'<span class="pill">entfällt</span>':`<span class="num">Soll: ${need}${nt?` (${nt})`:''}</span>${have>=need?'<span class="pill" style="border-color:var(--ok);color:var(--ok)">vorhanden</span>':''}`}</div></div>
+      <div class="meta">${na?'<span class="pill">entfällt</span>':it[2]===0?'<span class="pill">freiwillig, zählt nicht mit</span>':`<span class="num">Soll: ${need}${nt?` (${nt})`:''}</span>${have>=need?'<span class="pill" style="border-color:var(--ok);color:var(--ok)">vorhanden</span>':''}`}${it[2]===0&&have>0?'<span class="pill" style="border-color:var(--ok);color:var(--ok)">vorhanden</span>':''}</div></div>
       <div class="actions">${na?'':`<div class="stepper"><button data-act="check" data-k="${key}" data-d="-1" aria-label="${esc(name)}: eins weniger">−</button><span class="num">${have}</span><button data-act="check" data-k="${key}" data-d="1" aria-label="${esc(name)}: eins mehr">+</button></div>`}
       ${v.optional?`<button class="na" data-act="checkNa" data-k="${key}" aria-pressed="${na}">Entfällt</button>`:''}</div></div>`; }).join('');
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="${UI.back}" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">${v.n}</h1></div>
@@ -1328,6 +1414,8 @@ root.addEventListener('click', async e=>{
     case 'calFreq': if(Object.prototype.hasOwnProperty.call(CAL_FREQ,b.dataset.f)) META.calFreq=b.dataset.f; DB.put(META,'meta'); break;
     case 'calGoogle': META.cal='done'; DB.put(META,'meta'); UI.msg='Google Kalender geöffnet: dort „Speichern“ tippen.'; setTimeout(render,50); return;
     case 'calIcs': if(icsDownload(META.calFreq||'monthly')){ META.cal='done'; DB.put(META,'meta'); UI.msg='Termindatei „vorratscheck.ics“ geladen: öffnen und im Kalender speichern.'; } else UI.msg='Termindatei konnte nicht erstellt werden.'; break;
+    case 'funkGoogle': UI.msg='Google Kalender geöffnet: dort „Speichern“ tippen.'; setTimeout(render,50); return;
+    case 'funkIcs': UI.msg = funkIcs() ? 'Termindatei „funkrunde.ics“ geladen: öffnen und im Kalender speichern.' : 'Termindatei konnte nicht erstellt werden.'; break;
     case 'calLater': META.cal='later'; UI.calLaterShown=true; DB.put(META,'meta'); break;
     case 'calNever': META.cal='never'; DB.put(META,'meta'); break;
     case 'snooze': META.snoozeUntil=Date.now()+864e5; DB.put(META,'meta'); break;

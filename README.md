@@ -6,7 +6,7 @@
 
 👉 **App öffnen:** [hamsterplan.de](https://hamsterplan.de)
 
-Aktuelle Version: **1.22** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.23** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -49,6 +49,11 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 - „Sofort tun“ in Schritten plus Hintergründe, Abgleich mit der Ausrüstung im Vorrat.
 - **Notrufnummern** zum Antippen und **Giftnotruf je Bundesland**.
 - Suche, Drucken und PDF.
+
+### Funk
+- **Funkrunde Hunsrück:** jeden Sonntag um 20 Uhr auf PMR446 Kanal 5 (446,05625 MHz), kein Subcode, mit Kalendertermin.
+- **PMR446, Freenet und CB-Funk** im Vergleich, Kaufhilfe, Kanaltabellen, „So funkt man“ und „Im Notfall“, nach den Vorgaben der Bundesnetzagentur.
+- Funkgerät und Ersatzakkus in der Checkliste, CB-Funkgerät freiwillig.
 
 ### Haltbarkeit im Blick
 - Warnung auf der Startseite, wenn etwas abläuft. Abgelaufenes zählt nicht mehr zum Vorrat.
