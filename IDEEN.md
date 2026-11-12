@@ -30,6 +30,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Sicherheitsprüfung in 5 Durchläufen** (Angreifer-Sicht): HTML-Einschleusung über Meldungen behoben, Eingaben und Einstellungen geprüft, CSP verschärft *(Version 1.21)*
 - [x] **Reichweite nach Kalorien** statt Gewicht, Richtwerte je Produkt, Auswahl trocken oder Dose/Glas *(Version 1.22)*
 - [x] **Funk**: eigener Bereich, Funkrunde Hunsrück (sonntags 20 Uhr, PMR Kanal 5) mit Kalendertermin, Vergleich PMR446/Freenet/CB, Kanäle, Kaufhilfe, Checkliste, Druck *(Version 1.23)*
+- [x] **Impressum und Verantwortlicher im Datenschutz** (HunsrückPrep, Sascha Löhr, hunsrueckprep@gmail.com) *(Version 1.24)*
 
 ## Priorität hoch
 
@@ -41,7 +42,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 - [ ] **„Ich fange bei null an“**: ein Tipp zeigt eine fertige Einkaufsliste für 3 Tage Grundschutz für den eigenen Haushalt (schneller Erfolg für Neue)
 - [ ] **Notfall-Infopunkt des Dorfs** (Leuchtturm) fest im Notfall-Wissen. *Adresse beim Wehrführer erfragen*
-- [ ] **Feedback-Knopf**: öffnet fertige Mail an info@hamsterplan.de mit App-Version. *Wartet auf die Weiterleitung bei INWX*
+- [ ] **Feedback-Knopf**: öffnet fertige Mail an info@hamsterplan.de mit App-Version. *Möglich mit hunsrueckprep@gmail.com*
 - [ ] **Empfehlung durch die Feuerwehr**: Facebook-Seite, Mitteilungsblatt, Veranstaltungen (keine App-Änderung)
 
 - [ ] **Push-Benachrichtigung ohne Server** (Hintergrund-Abruf in Chrome): nur als Versuch, Chrome entscheidet selbst, ob und wie oft das läuft
@@ -67,7 +68,6 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 - [ ] **Maskottchen an weiteren Stellen**: z. B. Glückwunsch bei erreichten Zielen, Teilen-Bild, leere Listen. Ganzkörper-Hamster mit Vorratsglas (Entwurf B) als Figur möglich
 
-- [ ] **Impressum und Verantwortlicher im Datenschutz**, sobald die App öffentlich im Dorf verteilt wird. *Bewusst verschoben.*
 - [ ] **Haustier-Mengen prüfen** (Wasser und Futter pro Tier und Tag), bisher eigene Richtwerte
 - [ ] **Notfall-Infopunkte der eigenen Gemeinde** eintragbar machen (Adresse des nächsten Leuchtturms)
 - [ ] **Kleinkind-Mengen prüfen** (6 Windeln, 1 Gläschen pro Tag usw.), bisher eigene Richtwerte

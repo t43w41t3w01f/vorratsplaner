@@ -102,7 +102,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
   if(pp==='b') return `${fmt(q,2)} pro Baby${perDay?' und Tag':''}`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.23';
+const APP_VERSION='1.24';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -764,7 +764,7 @@ function render(){
   else if(UI.view==='cash') root.innerHTML=viewCash();
   else if(CHECK[UI.view] && c.checks[UI.view]) root.innerHTML=viewCheck(c);
   else { UI.view='home'; root.innerHTML=viewHome(c); }
-  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
+  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a> · <a href="impressum.html" style="color:inherit">Impressum</a><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
 

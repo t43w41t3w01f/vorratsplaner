@@ -2,6 +2,12 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.24 – 12. November 2026
+Impressum. Rücksprungpunkt: Zweig `stand-v1.23`.
+- **Neue Seite `impressum.html`** (§ 5 DDG, § 18 Abs. 2 MStV): HunsrückPrep, Sascha Löhr, c/o ZERODOX, Gulisastraße 93, 56072 Koblenz, hunsrueckprep@gmail.com. Offline im Cache (sw.js).
+- Links zum Impressum im Fuß der App, auf der Versions- und der Datenschutzseite.
+- Datenschutz: Abschnitt „Verantwortlich“ mit Anschrift und E-Mail (Art. 13 DSGVO), Stand November 2026.
+
 ## 1.23 – 1. November 2026
 Funk. Rücksprungpunkt: Zweig `stand-v1.22`.
 - **Bereich „Funk“** (4. Knopf auf der Startseite): Warum Funk, Funkrunde, Vergleich PMR446/Freenet/CB, Kaufhilfe, Kanaltabellen, „So funkt man“, „Im Notfall“, Quellenangabe (Vfg. 91/2025, 45/2025, 21/2021).

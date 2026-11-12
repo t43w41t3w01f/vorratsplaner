@@ -17,6 +17,6 @@ Sicherheit:
 
 Weitere Regeln:
 - Rein statisch, offline-fähig, keine externen Abrufe (keine Webfonts, keine APIs). Der Abruf von warnung.bund.de wurde getestet und blockiert (CORS), daher verworfen.
-- Kein Impressum: privates Projekt, keine Werbung.
+- Impressum in `impressum.html`. Ändert sich Anschrift oder Kontakt, auch den Abschnitt „Verantwortlich“ in `datenschutz.html` anpassen.
 - Texte auf Deutsch, für Laien verständlich.
 - Mengen nach BBK; eigene Richtwerte im Code und in der App als solche kennzeichnen.
