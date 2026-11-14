@@ -58,7 +58,7 @@ h2{font-size:1.45rem;text-transform:uppercase}
 .spread>span:first-child{min-width:0;overflow-wrap:anywhere}
 .stepper{flex:none;display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}
 .stepper button{width:48px;height:48px;border:0;background:transparent;font-size:1.3rem;font-weight:700}
-.stepper button:hover{background:var(--track)}
+@media (hover:hover){.stepper button:hover{background:var(--track)}}
 .stepper span{min-width:3.2ch;text-align:center;font-weight:700}
 input[type=range]{width:100%;accent-color:var(--rust);height:32px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
@@ -84,7 +84,7 @@ input[type=range]{width:100%;accent-color:var(--rust);height:32px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:380px){.grid{grid-template-columns:1fr}.hero{grid-template-columns:1fr;justify-items:center;text-align:center}}
 .tile{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:12px;min-width:0}
-.tile:hover{border-color:var(--muted)}
+@media (hover:hover){.tile:hover{border-color:var(--muted)}}
 .tile .head{display:flex;align-items:center;gap:8px}
 .tile .head svg{width:26px;height:26px;flex:none;color:var(--olive)}
 .tile .name{font-weight:700;line-height:1.15}
@@ -103,7 +103,7 @@ input[type=range]{width:100%;accent-color:var(--rust);height:32px}
 .pill.soon{border-color:var(--warn);color:var(--warn-t)}
 .pill.demo{border-style:dashed}
 .del{width:48px;height:48px;border-radius:10px;border:0;background:transparent;color:var(--muted)}
-.del:hover{color:var(--bad);background:var(--track)}
+@media (hover:hover){.del:hover{color:var(--bad);background:var(--track)}}
 .del svg{width:20px;height:20px}
 .primary{border:0;background:var(--btn);color:#fff;font-weight:700;border-radius:12px;padding:12px 18px;min-height:48px}
 .secondary{border:1.5px solid var(--line);background:var(--paper);font-weight:700;border-radius:12px;padding:11px 16px;min-height:48px}
@@ -128,7 +128,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.8r
 .lead{font-size:1.05rem;margin:0;max-width:60ch}
 .choices{display:flex;flex-direction:column;gap:12px}
 .choice{display:flex;gap:16px;align-items:center;text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:18px}
-.choice:hover{border-color:var(--olive)}
+@media (hover:hover){.choice:hover{border-color:var(--olive)}}
 .choice-ico{flex:none;display:grid;place-items:center;width:64px;height:64px;border-radius:16px;background:var(--olive);color:var(--olive-ink)}
 .choice-ico svg{width:34px;height:34px}
 .choice-txt{display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -249,7 +249,7 @@ footer .brand{display:block;margin-top:10px;font-family:var(--f-display);font-we
 .addbig svg,.big svg{width:22px;height:22px}
 .qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:8px}
 .qbtn{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:12px;min-height:56px;font-weight:700;text-align:left;line-height:1.25}
-.qbtn:hover,.qbtn:focus-visible{border-color:var(--olive)}
+.qbtn:focus-visible{border-color:var(--olive)}@media (hover:hover){.qbtn:hover{border-color:var(--olive)}}
 .stepper.big button{width:56px;height:56px;font-size:1.5rem}
 .stepper.big span{font-size:1.3rem;min-width:3ch}
 .obdots{display:flex;gap:6px;justify-content:center}
