@@ -32,6 +32,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Funk**: eigener Bereich, Funkrunde Hunsrück (sonntags 20 Uhr, PMR Kanal 5) mit Kalendertermin, Vergleich PMR446/Freenet/CB, Kanäle, Kaufhilfe, Checkliste, Druck *(Version 1.23)*
 - [x] **Impressum und Verantwortlicher im Datenschutz** (HunsrückPrep, Sascha Löhr, hunsrueckprep@gmail.com) *(Version 1.24)*
 - [x] **Anlassbezogene Gestaltung**: schaltet sich nach Datum selbst ein und aus, Termine und Inhalte in `app.js` (`seasonTheme`, `THEMES`) *(Version 1.25)*
+- [x] **„Ich fange bei null an“** (Einkaufszettel 3 Tage, „Gekauft“ trägt ein) und **Feedback per E-Mail** *(Version 1.26)*
 
 ## Priorität hoch
 
@@ -41,9 +42,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 
 ## Weitere Ideen
 
-- [ ] **„Ich fange bei null an“**: ein Tipp zeigt eine fertige Einkaufsliste für 3 Tage Grundschutz für den eigenen Haushalt (schneller Erfolg für Neue)
 - [ ] **Notfall-Infopunkt des Dorfs** (Leuchtturm) fest im Notfall-Wissen. *Adresse beim Wehrführer erfragen*
-- [ ] **Feedback-Knopf**: öffnet fertige Mail an info@hamsterplan.de mit App-Version. *Möglich mit hunsrueckprep@gmail.com*
 - [ ] **Empfehlung durch die Feuerwehr**: Facebook-Seite, Mitteilungsblatt, Veranstaltungen (keine App-Änderung)
 
 - [ ] **Push-Benachrichtigung ohne Server** (Hintergrund-Abruf in Chrome): nur als Versuch, Chrome entscheidet selbst, ob und wie oft das läuft
@@ -70,9 +69,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [ ] **Maskottchen an weiteren Stellen**: z. B. Glückwunsch bei erreichten Zielen, Teilen-Bild, leere Listen. Ganzkörper-Hamster mit Vorratsglas (Entwurf B) als Figur möglich
 
 - [ ] **Haustier-Mengen prüfen** (Wasser und Futter pro Tier und Tag), bisher eigene Richtwerte
-- [ ] **Notfall-Infopunkte der eigenen Gemeinde** eintragbar machen (Adresse des nächsten Leuchtturms)
 - [ ] **Kleinkind-Mengen prüfen** (6 Windeln, 1 Gläschen pro Tag usw.), bisher eigene Richtwerte
-- [ ] **Feedback per E-Mail**: Textfeld in der App öffnet die Mail-App mit fertigem Text und App-Version. *Wartet auf eine eigene E-Mail-Adresse.*
 - [ ] **Besucherzähler** (z. B. GoatCounter, ohne Cookies und IP-Speicherung, nur für Sascha sichtbar). *Entscheidung offen*, bräuchte einen externen Dienst und einen Datenschutz-Hinweis
 - [ ] **Umrechnungsfaktoren prüfen** (getrocknet ×2,5, Trockenobst ×3, Milchpulver ×8, Volleipulver ×4), bisher Richtwerte
 - [ ] **Konserven: Gesamt- oder Abtropfgewicht?** BBK-Angabe unklar, derzeit Gesamtgewicht

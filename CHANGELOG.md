@@ -2,6 +2,12 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.26 – 14. November 2026
+Einstieg und Kontakt. Rücksprungpunkt: Zweig `stand-v1.25`.
+- **„Ich fange bei null an“** (Ansicht `starter`): Einkaufszettel für 3 Tage nach Haushalt (Wasser in Kisten, je BBK-Gruppe ein Standardprodukt, Taschenlampe, Batterien, Radio, Verbandskasten, Toilettenpapier), „Gekauft ✓“ trägt Produkte ein, „Habe ich ✓“ hakt Ausrüstung ab, Liste kopieren. Karte auf der Startseite und Hinweis in „Noch kaufen“, solange der Vorrat keine 3 Tage reicht.
+- **Feedback per E-Mail**: Auswahl Lob/Fehler/Idee/Frage, Textfeld (max. 1.500 Zeichen), öffnet die Mail-App an hunsrueckprep@gmail.com mit App-Version. Die App sendet selbst nichts. Zugang: Startseite, Einstellungen, Fußzeile „Kontakt“.
+- Datenschutz: Abschnitt „Kontakt per E-Mail“.
+
 ## 1.25 – 14. November 2026
 Anlassbezogene Gestaltung. Rücksprungpunkt: Zweig `stand-v1.24`.
 - Zu bestimmten Anlässen ändert sich das Aussehen der App automatisch (Hamster, Gruß, Deko, passender Tipp). Das App-Symbol auf dem Handy bleibt unverändert.

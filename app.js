@@ -102,7 +102,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
   if(pp==='b') return `${fmt(q,2)} pro Baby${perDay?' und Tag':''}`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.25';
+const APP_VERSION='1.26';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -811,6 +811,66 @@ function winterCheck(){
     <div class="wlinks">${WINTER.map(([id,t])=>`<button class="secondary small" data-act="wopen" data-id="${id}">${t} ›</button>`).join('')}</div></section>`;
 }
 
+/* ---------- Feedback per E-Mail (die App selbst sendet nichts, öffnet nur die Mail-App) ---------- */
+const CONTACT = 'hunsrueckprep@gmail.com';
+const FB_TYPES = ['Lob','Fehler gefunden','Idee','Frage'];
+function feedbackForm(f){
+  return `<div class="overlay" data-act="closeBg"><form class="sheet" id="fbForm" role="dialog" aria-modal="true" aria-labelledby="sh">
+    <h2 id="sh">Feedback und Kontakt</h2>
+    <p class="small muted" style="margin:0">Deine Nachricht geht per E-Mail an Sascha, der den Hamsterplan entwickelt. Du siehst die Mail vor dem Senden.</p>
+    <fieldset class="field pack"><legend style="font-weight:700">Worum geht es?</legend>
+      <div class="fbtypes">${FB_TYPES.map((t,i)=>`<label class="check"><input type="radio" name="fb-type" value="${i}" ${(f.type??2)===i?'checked':''}> <span>${t}</span></label>`).join('')}</div></fieldset>
+    <div class="field"><label for="fb-text">Deine Nachricht</label><textarea id="fb-text" rows="6" maxlength="1500" placeholder="Was gefällt dir, was fehlt, was klappt nicht?">${esc(f.text||'')}</textarea>
+      <span class="hint">Bitte keine Gesundheitsdaten oder Adressen hineinschreiben, wenn es nicht nötig ist.</span></div>
+    ${f.err?`<div class="err" role="alert">${esc(f.err)}</div>`:''}
+    <div class="row"><button type="submit" class="primary">Mit E-Mail senden</button><button type="button" class="secondary" data-act="closeSheet">Abbrechen</button></div>
+    <p class="small muted" style="margin:0">Keine Mail-App? Schreib an <b>${CONTACT}</b> <button type="button" class="linkbtn small" data-act="copyMail">Adresse kopieren</button></p>
+  </form></div>`;
+}
+function feedbackLink(text){ return `<button class="linkbtn small fblink" data-act="feedback">${text}</button>`; }
+
+/* ---------- „Ich fange bei null an“: Grundschutz für 3 Tage ---------- */
+const STARTER_DAYS = 3;
+const STARTER_FOOD = {getreide:'Nudeln', gemuese:'Gemüse (Dose)', obst:'Obst (Dose)', milch:'H-Milch', fleisch:'Fleisch oder Wurst (Dose)', fett:'Rapsöl'};
+const STARTER_GEAR = ['lampe','batt','radio','verband','klo'];
+function starterData(c){
+  const T=STARTER_DAYS, rows=[];
+  const wNeed=((S.persons-babies())*WATER_DAY+babies()*BABY_WATER+petWater())*T, wMiss=Math.max(0,wNeed-c.water);
+  if(wMiss>0){ const pi=PRESETS.findIndex(x=>x[0]==='Kiste Wasser (6 × 1,5 l)'); rows.push({kind:'buy', pi, n:Math.ceil(wMiss/9), txt:`Wasser: ${fmt(wNeed)} l für ${T} Tage, es fehlen ${fmt(wMiss)} l`}); }
+  const eat=eatUnits();
+  FOOD.forEach(g=>{ const need=g.d*eat*T, miss=need-(c.food[g.k]||0); if(miss<=0.0001) return;
+    const pi=PRESETS.findIndex(x=>x[0]===STARTER_FOOD[g.k]); const pr=PRESETS[pi]; const size=base({size:pr[2],unit:pr[3]});
+    rows.push({kind:'buy', pi, n:Math.max(1,Math.ceil(miss/size-0.15)), txt:g.n}); });
+  const all={}; Object.values(CHECK).forEach(v=>v.items.forEach(it=>all[it[0]]=it));
+  STARTER_GEAR.forEach(k=>{ const it=all[k]; if(!it) return; const need=Math.max(1,needOf(it,S.persons,T)); if(have(k)<need) rows.push({kind:'gear', k, n:need, txt:it[1]}); });
+  const meds=(S.meds||[]).filter(m=>{ const d=medDays(m); return d!==null && d<T; });
+  return {rows, meds};
+}
+function viewStarter(c){
+  const {rows,meds}=starterData(c), T=STARTER_DAYS;
+  const line=r=>{ if(r.kind==='buy'){ const pr=PRESETS[r.pi];
+      return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${r.n} × ${esc(pr[0])}</div><div class="meta"><span>${esc(r.txt)}</span></div></div>
+        <div class="actions"><button class="secondary small" data-act="starterBuy" data-i="${r.pi}" data-n="${r.n}">Gekauft ✓</button></div></div>`; }
+    return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${r.n} × ${esc(r.txt)}</div><div class="meta"><span>Ausrüstung</span></div></div>
+      <div class="actions"><button class="secondary small" data-act="starterHave" data-k="${r.k}" data-n="${r.n}">Habe ich ✓</button></div></div>`; };
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Ich fange bei null an</h1></div>
+  <p class="lead" style="margin:0">Das Wichtigste für die ersten <b>${T} Tage</b> für deinen Haushalt (${esc(householdText())}). Damit bist du für einen längeren Stromausfall gut aufgestellt.</p>
+  ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
+  ${rows.length?`<section class="panel"><h2 style="font-size:1.15rem">Einkaufszettel</h2><div class="list">${rows.map(line).join('')}</div>
+    <p class="hint" style="margin:0">Nach dem Einkauf „Gekauft“ tippen: Die App trägt es in deinen Vorrat ein. Das Haltbarkeitsdatum kannst du später unter „Mein Vorrat“ ergänzen.</p></section>`
+   :`<div class="band ok"><div><b>Geschafft!</b> Dein Grundschutz für ${T} Tage steht. Nächstes Ziel: 10 Tage, wie vom BBK empfohlen.</div></div>`}
+  ${meds.length?`<div class="band warn"><div class="small"><b>Eigene Medikamente:</b> ${meds.map(m=>esc(m.name)).join(', ')} reicht keine ${T} Tage. Rechtzeitig Rezept holen.</div></div>`:''}
+  <section class="panel"><h2 style="font-size:1.15rem">Außerdem sinnvoll</h2><ul class="plain">
+    <li>Etwas Bargeld in kleinen Scheinen, falls Kartenzahlung ausfällt.</li><li>Handy und Powerbank voll laden.</li><li>Wichtige Telefonnummern auf Papier notieren.</li></ul></section>
+  <div class="row">${rows.length?`<button class="secondary" data-act="copyStarter">Liste kopieren</button>`:''}<button class="primary" data-act="go" data-v="calc">Weiter zur ganzen Berechnung</button></div>`;
+}
+function starterText(c){ const {rows}=starterData(c); return `Hamsterplan – das Wichtigste für ${STARTER_DAYS} Tage\n`+rows.map(r=>r.kind==='buy'?`☐ ${r.n} × ${PRESETS[r.pi][0]}`:`☐ ${r.n} × ${r.txt}`).join('\n'); }
+function starterCard(c){
+  if(S.demo || c.reachRaw>=STARTER_DAYS) return '';
+  return `<button class="choice starter" data-act="go" data-v="starter"><span class="choice-ico">${icon('plus')}</span>
+    <span class="choice-txt"><span class="ct">Ich fange bei null an</span><span class="small muted">Was brauche ich für die ersten ${STARTER_DAYS} Tage? Ein fertiger Einkaufszettel für deinen Haushalt.</span></span></button>`;
+}
+
 /* ---------- Ansichten ---------- */
 const root=document.getElementById('app');
 function render(){
@@ -826,12 +886,13 @@ function render(){
   else if(UI.view==='rotation') root.innerHTML=viewRotation(c);
   else if(UI.view==='wissen') root.innerHTML=viewWissen();
   else if(UI.view==='funk') root.innerHTML=viewFunk();
+  else if(UI.view==='starter') root.innerHTML=viewStarter(c);
   else if(UI.view==='docs-orig') root.innerHTML=viewDocs('orig');
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
   else if(CHECK[UI.view] && c.checks[UI.view]) root.innerHTML=viewCheck(c);
   else { UI.view='home'; root.innerHTML=viewHome(c); }
-  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a> · <a href="impressum.html" style="color:inherit">Impressum</a><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
+  root.insertAdjacentHTML('beforeend', `<footer>Richtwerte nach Empfehlung des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag. Keine Garantie für die Versorgung im Notfall.<br><a href="versionen.html" style="color:inherit">Version ${APP_VERSION} – Was ist neu?</a> · <a href="datenschutz.html" style="color:inherit">Datenschutz</a> · <a href="impressum.html" style="color:inherit">Impressum</a> · <button class="linkbtn" data-act="feedback" style="color:inherit;font-weight:400">Kontakt</button><span class="brand">Entwickelt von Sascha L. · © 2026</span></footer>`);
   if(UI.sheet) root.insertAdjacentHTML('beforeend', viewSheet());
 }
 
@@ -889,6 +950,7 @@ function viewHome(c){
   ${UI.view==='home'&&UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
   ${goalPanel(c)||'<p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>'}
   <div class="choices">
+    ${starterCard(c)}
     <button class="choice" data-act="go" data-v="vorrat"><span class="choice-ico">${icon('shelf')}</span>
       <span class="choice-txt"><span class="ct">Mein Vorrat</span><span class="small muted">Artikel eintragen, Mengen und Haltbarkeit ändern</span>
       <span class="small num choice-fact">${nItems} Lebensmittel und Wasser · ${nParts} Ausrüstungsteile</span></span></button>
@@ -905,6 +967,7 @@ function viewHome(c){
   ${seasonTheme()&&!S.demo?THEMES[seasonTheme()].tip():''}
   ${backupStatus()}
   <a class="whatsnew" href="versionen.html" data-act="seenVersion">${META.seenVersion!==APP_VERSION?`<span class="newdot">Neu: Version ${APP_VERSION}</span> `:''}Was kann die App alles? Unter <b>„Was ist neu?“</b> stehen alle Funktionen und Änderungen der Versionen. ›</a>
+  <p class="small muted" style="margin:0">Fragen, Ideen oder einen Fehler gefunden? ${feedbackLink('Schreib mir ›')}</p>
   ${S.demo?'':shareBox()}`;
 }
 
@@ -1157,9 +1220,10 @@ function buyLines(c){
 }
 function viewBuy(c){
   const L=buyLines(c);
+  const starterHint = c.reachRaw<STARTER_DAYS && !S.demo ? `<button class="secondary small" data-act="go" data-v="starter" style="align-self:flex-start">Erst mal nur das Nötigste für ${STARTER_DAYS} Tage ›</button>` : '';
   const sec=(title,rows)=>`<div class="shop"><h2 style="font-size:1.15rem;margin-bottom:4px">${title}</h2>${rows.length?rows.map(r=>`<div class="line"><span>${esc(r[0])}${r[2]?`<br><span class="small muted">${esc(r[2])}</span>`:''}</span><span class="num">${r[1]}</span></div>`).join(''):`<div class="done">Vollständig</div>`}</div>`;
   const empty=!L.water.length&&!L.food.length&&!L.checks.length;
-  return `<section class="panel print-area">
+  return `${starterHint}<section class="panel print-area">
     <div class="spread"><div><h2 class="print-only">Einkaufsliste Notvorrat</h2><div class="label">Einkaufsliste für ${c.T} Tage, ${c.p} ${c.p===1?'Person':'Personen'}</div></div></div>
     ${empty?'':`<div class="row no-print">${CAN_PRINT?`<button class="primary small" data-act="print">Drucken oder als PDF speichern</button>`:''}<button class="secondary small" data-act="copyList">Liste kopieren</button></div>
     ${CAN_PRINT?'':`<p class="hint no-print" style="margin:0">Drucken und PDF gibt es in der installierten App. In dieser Vorschau kannst du die Liste kopieren.</p>`}`}
@@ -1343,6 +1407,8 @@ function medForm(f){
 function viewSettings(){
   return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück">${icon('back')}</button><h1 style="flex:1">Einstellungen</h1></div>
   ${shareBox()}
+  <section class="panel"><h2>Feedback und Kontakt</h2><p class="small muted" style="margin:0">Lob, Fehler, Ideen oder Fragen: Deine Nachricht geht per E-Mail direkt an den Entwickler.</p>
+    <button class="secondary" data-act="feedback" style="align-self:flex-start">Nachricht schreiben</button></section>
   <section class="panel"><h2>Anzeige</h2>
     <label class="check"><input type="checkbox" id="big-font" ${META.big?'checked':''}> <span><b>Große Schrift</b><br><span class="hint">Alles wird größer und leichter lesbar.</span></span></label>
   </section>
@@ -1400,6 +1466,7 @@ function packDry(f,g){ return typeof f.dry==='boolean' ? f.dry : g.k==='getreide
 function dryHint(g){ return `Zählt ${fmt(g.form.f)}-fach, weil es zubereitet mehr wiegt.${g.k==='gemuese'||g.k==='milch'||g.k==='fleisch'?' Braucht zusätzlich Wasser zum Zubereiten.':''}`; }
 function viewSheet(){
   const f=UI.sheet; if(f.mode==='med') return medForm(f);
+  if(f.mode==='feedback') return feedbackForm(f);
   const isW=f.cat==='wasser';
   const years=[]; for(let y=NOW.getFullYear()-1;y<=NOW.getFullYear()+10;y++) years.push(y);
   const units=isW?['l','ml']:['g','kg','ml','l'];
@@ -1457,6 +1524,14 @@ root.addEventListener('click', async e=>{
     case 'del': S.items=S.items.filter(i=>i.id!==b.dataset.id); save(); break;
     case 'doc': { S.docs=S.docs||{}; const k=b.dataset.k, v=b.dataset.val==='na'?'na':1; if(S.docs[k]===v) delete S.docs[k]; else S.docs[k]=v; save(); break; }
     case 'wopen': { const id=b.dataset.id; UI.view='wissen'; render(); const el=document.getElementById('w-'+id); if(el){ el.open=true; el.scrollIntoView({block:'start'}); } return; }
+    case 'feedback': UI.sheet={mode:'feedback', type:2, text:''}; render(); setTimeout(()=>document.getElementById('fb-text')?.focus(),30); return;
+    case 'copyMail': await copy(CONTACT, 'E-Mail-Adresse kopiert.', null); if(UI.sheet) UI.sheet.err=''; break;
+    case 'copyStarter': await copy(starterText(calc()), 'Liste kopiert.', null); break;
+    case 'starterBuy': { const i=+b.dataset.i, n=Math.max(1,Math.min(99,+b.dataset.n||1)), pr=PRESETS[i]; if(!pr) break; const isW=pr[1]==='wasser';
+      const it=cleanItem({id:uid(), cat:isW?'wasser':'nahrung', group:isW?null:pr[1], name:pr[0], size:pr[2], unit:pr[3], count:n, ...(isW?{}:{kcal:pr[4], dry:pr[5]===true})});
+      if(it){ S.items.push(it); UI.msg=`${n} × ${pr[0]} eingetragen.`; save(); } break; }
+    case 'starterHave': { const k=b.dataset.k, n=Math.max(1,Math.min(99,+b.dataset.n||1)); const known=Object.values(CHECK).some(v=>v.items.some(it=>it[0]===k));
+      if(known){ S.checks[k]=Math.max(S.checks[k]||0,n); UI.msg='Abgehakt.'; save(); } break; }
     case 'checkNa': { S.checkNa=S.checkNa||{}; const k=b.dataset.k; if(S.checkNa[k]) delete S.checkNa[k]; else S.checkNa[k]=true; save(); break; }
     case 'careOk': META.careSeen=true; DB.put(META,'meta'); break;
     case 'medAdd': UI.sheet={mode:'med', per:'day', dose:'1', stock:'', cold:false, who:''}; render(); setTimeout(()=>document.getElementById('m-name')?.focus(),30); return;
@@ -1551,6 +1626,15 @@ root.addEventListener('input', e=>{
 root.addEventListener('submit', e=>{
   e.preventDefault();
   const f=UI.sheet; const g=id=>document.getElementById(id)?.value;
+  if(e.target.id==='fbForm'){
+    const type=+(document.querySelector('input[name="fb-type"]:checked')?.value||2), text=(document.getElementById('fb-text')?.value||'').trim().slice(0,1500);
+    Object.assign(f,{type,text}); f.err='';
+    if(text.length<3){ f.err='Bitte schreib ein paar Worte.'; render(); return; }
+    const subject=`Hamsterplan: ${FB_TYPES[type]||'Feedback'}`, body=`${text}\n\n—\nHamsterplan Version ${APP_VERSION}`;
+    const url=`mailto:${CONTACT}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    UI.sheet=null; UI.msg='Deine Mail-App öffnet sich. Dort nur noch auf Senden tippen.'; render();
+    window.location.href=url; return;
+  }
   if(e.target.id==='medForm'){
     const name=str(g('m-name')||'',60), per=g('m-per'), doseRaw=(g('m-dose')||'').trim(), stockRaw=(g('m-stock')||'').trim();
     const dose=doseRaw?parseNum(doseRaw):(per==='need'?1:NaN), stock=stockRaw?parseNum(stockRaw):NaN, cold=!!document.getElementById('m-cold')?.checked;

@@ -1,5 +1,5 @@
 // Offline-Cache. Bei jeder Änderung an den Dateien VERSION erhöhen.
-const VERSION = 'hamsterplan-v29';
+const VERSION = 'hamsterplan-v30';
 const FILES = ['./', 'index.html', 'app.js', 'datenschutz.html', 'impressum.html', 'versionen.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/hamster-xmas-192.png', 'icons/schnee.svg', 'icons/hamster-party-192.png', 'icons/lichterkette-a.svg', 'icons/lichterkette-b.svg',
   'icons/hamster-karneval-192.png', 'icons/hamster-ostern-192.png', 'icons/hamster-uhr-192.png', 'icons/hamster-sommer-192.png', 'icons/hamster-warntag-192.png', 'icons/hamster-halloween-192.png',
