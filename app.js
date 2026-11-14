@@ -711,7 +711,7 @@ function chTable(rows, hl){ return `<table class="ftab"><thead><tr><th>Kanal</th
 function viewFunk(){
   const all={}; Object.values(CHECK).forEach(v=>v.items.forEach(it=>all[it[0]]=it));
   const gear=['pmr','funkakku','cb'].map(k=>{ const ok=have(k)>0, opt=all[k][2]===0; return `<span class="gchip ${ok?'ok':opt?'opt':'no'}">${ok?'✓':opt?'○':'✗'} ${esc(all[k][1])}</span>`; }).join('');
-  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Funk</h1></div>
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="hubN" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Funk</h1></div>
   <p class="lead" style="margin:0">Wenn Handy, Telefon und Internet ausfallen, kannst du per Funk mit Nachbarn, Familie und Helfern sprechen.</p>
   ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
   ${funkRundeBlock()}
@@ -853,7 +853,7 @@ function viewStarter(c){
         <div class="actions"><button class="secondary small" data-act="starterBuy" data-i="${r.pi}" data-n="${r.n}">Gekauft ✓</button></div></div>`; }
     return `<div class="item"><div style="min-width:0"><div style="font-weight:700">${r.n} × ${esc(r.txt)}</div><div class="meta"><span>Ausrüstung</span></div></div>
       <div class="actions"><button class="secondary small" data-act="starterHave" data-k="${r.k}" data-n="${r.n}">Habe ich ✓</button></div></div>`; };
-  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Ich fange bei null an</h1></div>
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="hubV" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Ich fange bei null an</h1></div>
   <p class="lead" style="margin:0">Das Wichtigste für die ersten <b>${T} Tage</b> für deinen Haushalt (${esc(householdText())}). Damit bist du für einen längeren Stromausfall gut aufgestellt.</p>
   ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
   ${rows.length?`<section class="panel"><h2 style="font-size:1.15rem">Einkaufszettel</h2><div class="list">${rows.map(line).join('')}</div>
@@ -869,6 +869,37 @@ function starterCard(c){
   if(S.demo || c.reachRaw>=STARTER_DAYS) return '';
   return `<button class="choice starter" data-act="go" data-v="starter"><span class="choice-ico">${icon('plus')}</span>
     <span class="choice-txt"><span class="ct">Ich fange bei null an</span><span class="small muted">Was brauche ich für die ersten ${STARTER_DAYS} Tage? Ein fertiger Einkaufszettel für deinen Haushalt.</span></span></button>`;
+}
+
+/* ---------- Menüs: Mein Vorrat und Im Notfall ---------- */
+function viewHubV(c){
+  const nItems=S.items.length, nParts=Object.values(S.checks).reduce((a,b)=>a+b,0)+Object.values(S.docs||{}).filter(v=>v===1).length;
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Mein Vorrat</h1></div>
+  <div class="choices">
+    ${starterCard(c)}
+    <button class="choice" data-act="go" data-v="vorrat"><span class="choice-ico">${icon('shelf')}</span>
+      <span class="choice-txt"><span class="ct">Vorrat eintragen</span><span class="small muted">Artikel eintragen, Mengen und Haltbarkeit ändern</span>
+      <span class="small num choice-fact">${nItems} Lebensmittel und Wasser · ${nParts} Ausrüstungsteile</span></span></button>
+    <button class="choice" data-act="go" data-v="calc"><span class="choice-ico">${icon('calc')}</span>
+      <span class="choice-txt"><span class="ct">Berechnung</span><span class="small muted">Wie lange reicht es? Was muss ich noch kaufen?</span>
+      <span class="small num choice-fact t-${status(c.reach/c.T)}">Reicht ${c.reach===0&&c.reachRaw>0?daysText(0,c.reachRaw):c.reach} von ${c.T} Tagen · ${c.p} ${c.p===1?'Person':'Personen'}</span></span></button>
+    <button class="choice" data-act="go" data-v="rotation"><span class="choice-ico">${icon('rotate')}</span>
+      <span class="choice-txt"><span class="ct">Verbrauchsliste</span><span class="small muted">Was bald abläuft: verbrauchen und ersetzen</span>
+      <span class="small num choice-fact">${c.soon.length+c.expired.length} ${c.soon.length+c.expired.length===1?'Artikel':'Artikel'} in den nächsten 2 Monaten</span></span></button>
+  </div>`;
+}
+function viewHubN(){
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Im Notfall</h1></div>
+  <div class="choices">
+    <button class="choice sos" data-act="go" data-v="wissen"><span class="choice-ico">${icon('sos')}</span>
+      <span class="choice-txt"><span class="ct">Notfall-Wissen</span><span class="small muted">Was tun bei Stromausfall, Hochwasser, Brand und anderen Krisen</span>
+      <span class="small choice-fact">23 Anleitungen, auch ohne Internet</span></span></button>
+    <button class="choice" data-act="go" data-v="funk"><span class="choice-ico">${icon('funk')}</span>
+      <span class="choice-txt"><span class="ct">Funk</span><span class="small muted">Wenn Handy und Telefon ausfallen: Funkgeräte, Kanäle und die Funkrunde Hunsrück</span>
+      <span class="small choice-fact">Jeden ${FUNKRUNDE.tag}, ${FUNKRUNDE.zeit}, PMR Kanal ${FUNKRUNDE.kanal}</span></span></button>
+  </div>
+  <section class="panel"><h2 style="font-size:1.15rem">Notruf</h2><div class="row">
+    <a class="primary btnlink" href="tel:112">112 Feuerwehr, Rettung</a><a class="secondary btnlink" href="tel:110">110 Polizei</a></div></section>`;
 }
 
 /* ---------- Ansichten ---------- */
@@ -887,6 +918,8 @@ function render(){
   else if(UI.view==='wissen') root.innerHTML=viewWissen();
   else if(UI.view==='funk') root.innerHTML=viewFunk();
   else if(UI.view==='starter') root.innerHTML=viewStarter(c);
+  else if(UI.view==='hubV') root.innerHTML=viewHubV(c);
+  else if(UI.view==='hubN') root.innerHTML=viewHubN();
   else if(UI.view==='docs-orig') root.innerHTML=viewDocs('orig');
   else if(UI.view==='docs-copy') root.innerHTML=viewDocs('copy');
   else if(UI.view==='cash') root.innerHTML=viewCash();
@@ -951,18 +984,12 @@ function viewHome(c){
   ${goalPanel(c)||'<p class="lead">Plane deinen Notvorrat nach den Empfehlungen des Bundesamts für Bevölkerungsschutz.</p>'}
   <div class="choices">
     ${starterCard(c)}
-    <button class="choice" data-act="go" data-v="vorrat"><span class="choice-ico">${icon('shelf')}</span>
-      <span class="choice-txt"><span class="ct">Mein Vorrat</span><span class="small muted">Artikel eintragen, Mengen und Haltbarkeit ändern</span>
-      <span class="small num choice-fact">${nItems} Lebensmittel und Wasser · ${nParts} Ausrüstungsteile</span></span></button>
-    <button class="choice" data-act="go" data-v="calc"><span class="choice-ico">${icon('calc')}</span>
-      <span class="choice-txt"><span class="ct">Berechnung</span><span class="small muted">Wie lange reicht es? Was muss ich noch kaufen?</span>
-      <span class="small num choice-fact t-${status(c.reach/c.T)}">Reicht ${c.reach===0&&c.reachRaw>0?daysText(0,c.reachRaw):c.reach} von ${c.T} Tagen · ${c.p} ${c.p===1?'Person':'Personen'}</span></span></button>
-    <button class="choice sos" data-act="go" data-v="wissen"><span class="choice-ico">${icon('sos')}</span>
-      <span class="choice-txt"><span class="ct">Notfall-Wissen</span><span class="small muted">Was tun bei Stromausfall, Hochwasser, Brand und anderen Krisen</span>
+    <button class="choice" data-act="go" data-v="hubV"><span class="choice-ico">${icon('shelf')}</span>
+      <span class="choice-txt"><span class="ct">Mein Vorrat</span><span class="small muted">Eintragen, berechnen, einkaufen</span>
+      <span class="small num choice-fact t-${status(c.reach/c.T)}">Reicht ${c.reach===0&&c.reachRaw>0?daysText(0,c.reachRaw):c.reach} von ${c.T} Tagen · ${nItems} Artikel</span></span></button>
+    <button class="choice sos" data-act="go" data-v="hubN"><span class="choice-ico">${icon('sos')}</span>
+      <span class="choice-txt"><span class="ct">Im Notfall</span><span class="small muted">Anleitungen für Krisen, Notrufe und Funk</span>
       <span class="small choice-fact">Funktioniert auch ohne Internet</span></span></button>
-    <button class="choice" data-act="go" data-v="funk"><span class="choice-ico">${icon('funk')}</span>
-      <span class="choice-txt"><span class="ct">Funk</span><span class="small muted">Wenn Handy und Telefon ausfallen: Funkgeräte, Kanäle und die Funkrunde Hunsrück</span>
-      <span class="small choice-fact">Jeden ${FUNKRUNDE.tag}, ${FUNKRUNDE.zeit}, PMR Kanal ${FUNKRUNDE.kanal}</span></span></button>
   </div>
   ${seasonTheme()&&!S.demo?THEMES[seasonTheme()].tip():''}
   ${backupStatus()}
@@ -975,7 +1002,7 @@ function viewVorrat(c){
   const nW=S.items.filter(i=>i.cat==='wasser').length, nF=S.items.filter(i=>i.cat==='nahrung').length;
   const warn=cat=>{ const n=S.items.filter(i=>i.cat===cat&&mhdState(i.mhd)!=='ok'&&mhdState(i.mhd)!=='none').length; return n?`<span class="small t-warn" style="font-weight:700">${n} ${n===1?'läuft':'laufen'} bald ab</span>`:`<span class="small muted">Haltbarkeit in Ordnung</span>`; };
   const t=(k,name,val,extra)=>`<button class="tile" data-act="go" data-v="${k}"><div class="head">${icon(k)}<span class="name">${name}</span></div><span class="val num">${val}</span>${extra}</button>`;
-  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Mein Vorrat</h1></div>
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="hubV" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Mein Vorrat</h1></div>
   <button class="primary big addbig" data-act="add">${icon('plus')} Lebensmittel oder Wasser eintragen</button>
   ${UI.msg?`<div class="small t-ok" role="status" style="font-weight:700">${esc(UI.msg)}</div>`:''}
   ${expiryBand(c)}
@@ -1047,7 +1074,7 @@ function viewCalc(c){
     ...activeChecks().map(([k,v])=>tile(k,v.n, `${c.checks[k].have} von ${c.checks[k].need} Teilen`, c.checks[k].ratio, c.checks[k].ratio>=1?'vollständig':'unvollständig')),
   ].join('');
   return `
-  <div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Berechnung</h1></div>
+  <div class="topbar"><button class="iconbtn" data-act="go" data-v="hubV" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Berechnung</h1></div>
   ${expiryBand(c)}
   <section class="panel" aria-label="Haushalt und Ziel">
     <div class="spread"><div style="min-width:0"><div class="label">Dein Haushalt</div><div style="font-weight:700">${householdText()}</div></div>
@@ -1104,7 +1131,7 @@ function notrufBar(){
 function viewWissen(){
   let body='';
   WISSEN.forEach(w=>{ body += w.sec ? `<h2 class="wsec">${w.sec}</h2>` : wissenCard(w); });
-  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="home" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Notfall-Wissen</h1></div>
+  return `<div class="topbar"><button class="iconbtn" data-act="go" data-v="hubN" aria-label="Zurück zur Startseite">${icon('back')}</button><h1 style="flex:1">Notfall-Wissen</h1></div>
   <p class="small muted" style="margin:0">Kurze Anleitungen für Krisen in Deutschland, gespeichert auf deinem Gerät und auch ohne Internet lesbar. Im Ernstfall gelten immer zuerst die Anweisungen von Behörden, Feuerwehr und Polizei.</p>
   ${notrufBar()}
   <div class="field"><label for="wsearch" class="label">Suchen</label><input id="wsearch" type="search" placeholder="z. B. Strom, Wasser, Sirene, Brand" autocomplete="off"></div>
@@ -1504,7 +1531,7 @@ root.addEventListener('click', async e=>{
     case 'print': window.print(); return;
     case 'printInv': printInventory(); return;
     case 'printWissen': printWissen(); return;
-    case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&UI.view==='home')) UI.back=UI.view; UI.rotEdit=null; UI.pending=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
+    case 'go': if(UI.view==='vorrat'||UI.view==='calc'||(b.dataset.v==='rotation'&&(UI.view==='home'||UI.view==='hubV'))) UI.back=UI.view; UI.rotEdit=null; UI.pending=null; UI.view=b.dataset.v; UI.confirmReset=false; UI.impErr=''; window.scrollTo(0,0); break;
     case 'tab': UI.tab=b.dataset.v; break;
     case 'days': setDays(+b.dataset.d); break;
     case 'pet': { S.pets=S.pets||{}; const k=b.dataset.k; S.pets[k]=Math.max(0,Math.min(20,petN(k)+ +b.dataset.d)); save(); break; }

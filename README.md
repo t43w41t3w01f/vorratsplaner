@@ -13,6 +13,7 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 ## Funktionen
 
 ### Einfach für alle
+- **Aufgeräumte Startseite:** zwei große Knöpfe, „Mein Vorrat“ und „Im Notfall“, mit Untermenüs.
 - **Ich fange bei null an:** fertiger Einkaufszettel für die ersten 3 Tage, „Gekauft“ trägt es direkt ein.
 - **Feedback und Kontakt** per E-Mail direkt aus der App.
 - **Einstieg in 3 Schritten:** Haushalt, Haustiere, Bundesland – danach geht es mit dem eigenen Vorrat los.

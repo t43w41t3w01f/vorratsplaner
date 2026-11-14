@@ -7,6 +7,7 @@ Einstieg und Kontakt. Rücksprungpunkt: Zweig `stand-v1.25`.
 - **„Ich fange bei null an“** (Ansicht `starter`): Einkaufszettel für 3 Tage nach Haushalt (Wasser in Kisten, je BBK-Gruppe ein Standardprodukt, Taschenlampe, Batterien, Radio, Verbandskasten, Toilettenpapier), „Gekauft ✓“ trägt Produkte ein, „Habe ich ✓“ hakt Ausrüstung ab, Liste kopieren. Karte auf der Startseite und Hinweis in „Noch kaufen“, solange der Vorrat keine 3 Tage reicht.
 - **Feedback per E-Mail**: Auswahl Lob/Fehler/Idee/Frage, Textfeld (max. 1.500 Zeichen), öffnet die Mail-App an hunsrueckprep@gmail.com mit App-Version. Die App sendet selbst nichts. Zugang: Startseite, Einstellungen, Fußzeile „Kontakt“.
 - Datenschutz: Abschnitt „Kontakt per E-Mail“.
+- **Startseite mit zwei Knöpfen**: Menü „Mein Vorrat“ (`hubV`: Vorrat eintragen, Berechnung, Verbrauchsliste, „Ich fange bei null an“ solange unter 3 Tagen) und „Im Notfall“ (`hubN`: Notfall-Wissen, Funk, Notruf 112/110). Zurück führt ins jeweilige Menü. „Ich fange bei null an“ zusätzlich auf der Startseite, solange der Vorrat keine 3 Tage reicht.
 
 ## 1.25 – 14. November 2026
 Anlassbezogene Gestaltung. Rücksprungpunkt: Zweig `stand-v1.24`.
