@@ -31,6 +31,7 @@ Ideen-Sammlung zum Abhaken. Erledigte Punkte bekommen ein `[x]` und die Version,
 - [x] **Reichweite nach Kalorien** statt Gewicht, Richtwerte je Produkt, Auswahl trocken oder Dose/Glas *(Version 1.22)*
 - [x] **Funk**: eigener Bereich, Funkrunde Hunsrück (sonntags 20 Uhr, PMR Kanal 5) mit Kalendertermin, Vergleich PMR446/Freenet/CB, Kanäle, Kaufhilfe, Checkliste, Druck *(Version 1.23)*
 - [x] **Impressum und Verantwortlicher im Datenschutz** (HunsrückPrep, Sascha Löhr, hunsrueckprep@gmail.com) *(Version 1.24)*
+- [x] **Anlassbezogene Gestaltung**: schaltet sich nach Datum selbst ein und aus, Termine und Inhalte in `app.js` (`seasonTheme`, `THEMES`) *(Version 1.25)*
 
 ## Priorität hoch
 

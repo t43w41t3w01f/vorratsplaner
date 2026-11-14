@@ -1,7 +1,9 @@
 // Offline-Cache. Bei jeder Änderung an den Dateien VERSION erhöhen.
-const VERSION = 'hamsterplan-v28';
+const VERSION = 'hamsterplan-v29';
 const FILES = ['./', 'index.html', 'app.js', 'datenschutz.html', 'impressum.html', 'versionen.html', 'manifest.webmanifest',
-  'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
+  'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/hamster-xmas-192.png', 'icons/schnee.svg', 'icons/hamster-party-192.png', 'icons/lichterkette-a.svg', 'icons/lichterkette-b.svg',
+  'icons/hamster-karneval-192.png', 'icons/hamster-ostern-192.png', 'icons/hamster-uhr-192.png', 'icons/hamster-sommer-192.png', 'icons/hamster-warntag-192.png', 'icons/hamster-halloween-192.png',
+  'icons/deko-konfetti.svg', 'icons/deko-eier.svg', 'icons/deko-grusel.svg'];
 const NET_TIMEOUT = 3000; // bei schlechtem Netz nach 3 s auf die gespeicherte Version zurückgreifen
 
 self.addEventListener('install', e => {

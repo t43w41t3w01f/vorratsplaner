@@ -19,4 +19,5 @@ Weitere Regeln:
 - Rein statisch, offline-fähig, keine externen Abrufe (keine Webfonts, keine APIs). Der Abruf von warnung.bund.de wurde getestet und blockiert (CORS), daher verworfen.
 - Impressum in `impressum.html`. Ändert sich Anschrift oder Kontakt, auch den Abschnitt „Verantwortlich“ in `datenschutz.html` anpassen.
 - Texte auf Deutsch, für Laien verständlich.
+- Anlassbezogene Gestaltung: Termine und Vorrang in `seasonTheme()`, Inhalte in `THEMES` (`app.js`), Bilder `icons/hamster-<anlass>-192.png`, Deko `icons/deko-*.svg`. In den Versionshinweisen nicht im Detail aufzählen.
 - Mengen nach BBK; eigene Richtwerte im Code und in der App als solche kennzeichnen.

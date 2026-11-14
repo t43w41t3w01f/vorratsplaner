@@ -6,7 +6,7 @@
 
 👉 **App öffnen:** [hamsterplan.de](https://hamsterplan.de)
 
-Aktuelle Version: **1.24** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
+Aktuelle Version: **1.25** · [Alle Änderungen](CHANGELOG.md) · [Ideen und Planung](IDEEN.md)
 
 Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick, wie viele Tage dein Notvorrat reicht und was dir noch fehlt. Grundlage sind die Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK): 10 Tage, 2 Liter Getränke und ca. 2.200 kcal pro Person und Tag.
 
@@ -20,6 +20,7 @@ Der Hamsterplan (bis Version 1.17 „Vorratsplaner“) zeigt dir auf einen Blick
 - **Zielmarken:** 3 Tage, 10 Tage, eigenes Ziel – mit Angabe, was bis zum nächsten Ziel fehlt.
 - **App weiterempfehlen** per WhatsApp oder Link.
 - **Hamster-Maskottchen** als App-Symbol und auf der Startseite.
+- **Der Hamster feiert mit:** Zu besonderen Anlässen ändert sich das Aussehen der App automatisch.
 - **Schutz vor Datenverlust:** Sicherungsstatus auf der Startseite, erste Erinnerung nach 5 Einträgen, „An mich selbst schicken“, Sicherung einspielen direkt im Einstieg.
 
 ### Berechnung

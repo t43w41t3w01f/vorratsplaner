@@ -102,7 +102,7 @@ function needText(item){ const [,, q, pp, perDay]=item;
   if(!pp && perDay) return `${fmt(q,2)} pro Tag, eigener Richtwert`;
   if(pp==='b') return `${fmt(q,2)} pro Baby${perDay?' und Tag':''}`;
   return pp==='k' ? `${fmt(q,2)} pro Kleinkind${perDay?' und Tag':''}` : pp ? `${q} pro Person` : ''; }
-const APP_VERSION='1.24';
+const APP_VERSION='1.25';
 const BACKUP_DAYS = 7, BACKUP_CHANGES = 10; // Erinnerung nach 7 Tagen oder 10 Änderungen
 const CASH_PER_PERSON = 100; // Orientierung: NL/AT-Behörden ca. 70–100 € pro Person für 72 Stunden; BBK nennt keinen Betrag
 const ICONS = {
@@ -745,11 +745,78 @@ function printFunk(){
     <section class="pw"><h3>Im Notfall</h3><ul>${FUNK_SOS.map(x=>`<li>${x}</li>`).join('')}</ul></section>`;
 }
 
+/* ---------- Jahreszeiten-Ausgaben: schalten sich nach Datum selbst ein und aus (App-Symbol bleibt unverändert) ----------
+   Reihenfolge = Vorrang bei Überschneidung. Termine: Ostern beweglich (Gauß), Karneval Weiberdonnerstag–Veilchendienstag und 11.11.,
+   Zeitumstellung letzter Sonntag im März/Oktober (Do–Di), Warntag 2. Donnerstag im September (Vortag und Tag). */
+function easterSunday(y){ const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+  h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return new Date(y,mo-1,da); }
+const dayDiff = (a,b) => Math.round((Date.UTC(a.getFullYear(),a.getMonth(),a.getDate())-Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()))/864e5);
+function lastSunday(y,m){ const d=new Date(y,m+1,0); d.setDate(d.getDate()-d.getDay()); return d; }
+function secondThursday(y,m){ const d=new Date(y,m,1); d.setDate(1+((4-d.getDay()+7)%7)+7); return d; }
+function seasonTheme(){
+  const d=new Date(), y=d.getFullYear(), m=d.getMonth(), t=d.getDate(), easter=easterSunday(y);
+  if((m===11 && t===31) || (m===0 && t===1)) return 'newyear';
+  if(m===11 && t<=26) return 'xmas';
+  if(m===9 && t>=29) return 'halloween';
+  const wt=dayDiff(d,secondThursday(y,8)); if(wt===0 || wt===-1) return 'warntag';
+  const ed=dayDiff(d,easter);
+  if((ed>=-52 && ed<=-47) || (m===10 && t===11)) return 'karneval';
+  if(ed>=-3 && ed<=1) return 'ostern';
+  for(const mm of [2,9]){ const z=dayDiff(d,lastSunday(y,mm)); if(z>=-3 && z<=2) return 'uhr'; }
+  if(m===6 || m===7) return 'sommer';
+  return null;
+}
+const isXmas = () => seasonTheme()==='xmas';
+function uhrText(){ const d=new Date(), y=d.getFullYear(); for(const mm of [2,9]){ const z=dayDiff(d,lastSunday(y,mm)); if(z>=-3 && z<=2){ const w=mm===2?'vorgestellt':'zurückgestellt';
+  return z<0 ? `Am Sonntag wird die Uhr ${w} ⏰` : z===0 ? `Heute Nacht wurde die Uhr ${w} ⏰` : `Die Uhr wurde am Sonntag ${w} ⏰`; } } return ''; }
+function warntagText(){ const d=new Date(); return dayDiff(d,secondThursday(d.getFullYear(),8))===0 ? 'Heute um 11 Uhr: Probewarnung 🚨' : 'Morgen um 11 Uhr: Probewarnung 🚨'; }
+const tipBox = (title, text, links) => `<section class="panel wintercheck"><div><h2 style="font-size:1.15rem;margin:0">${title}</h2>
+    <p class="small muted" style="margin:4px 0 0">${text}</p></div>
+    <div class="wlinks">${links.map(([act,v,t])=>`<button class="secondary small" data-act="${act}" ${act==='wopen'?`data-id="${v}"`:`data-v="${v}"`}>${t} ›</button>`).join('')}</div></section>`;
+const THEMES = {
+  xmas:{greet:()=>'Frohe Weihnachten aus dem Hunsrück 🎄', tip:()=>winterCheck()},
+  newyear:{img:'party', greet:()=>new Date().getMonth()===11 ? 'Guten Rutsch ins neue Jahr! 🎆' : `Frohes neues Jahr ${new Date().getFullYear()}! 🥂`,
+    tip:()=>tipBox('Sicher ins neue Jahr','Nur geprüftes Feuerwerk mit CE-Zeichen, nie aus der Hand zünden, Blindgänger liegen lassen. Haustiere drinnen lassen, Fenster schließen. Bei Verletzung oder Brand: 112.',[['wopen','brand','Brand in der Wohnung'],['wopen','notruf','Notruf richtig absetzen']])},
+  karneval:{greet:()=>'Alaaf und Helau! 🎭',
+    tip:()=>tipBox('Feiern mit Plan','Beim Zoch ist das Handynetz oft überlastet. Macht vorher einen festen Treffpunkt aus, ladet das Handy voll und nehmt eine Powerbank mit. Der Notruf 112 geht auch, wenn sonst nichts geht.',[['wopen','netz','Telefon funktioniert nicht'],['wopen','notruf','Notruf richtig absetzen']])},
+  ostern:{greet:()=>'Frohe Ostern! 🐣',
+    tip:()=>tipBox('Frühjahrs-Check','Ostern ist ein guter Zeitpunkt zum Durchsehen: Was läuft bald ab? Jetzt verbrauchen und neu kaufen. Wasser und Batterien prüfen, danach eine Sicherung machen.',[['go','rotation','Was läuft bald ab?'],['go','settings','Sicherung machen']])},
+  uhr:{greet:()=>uhrText(),
+    tip:()=>tipBox('Uhr umstellen, Vorrat prüfen','Zweimal im Jahr gleich mitprüfen: Rauchmelder testen, Batterien von Taschenlampe und Radio checken, Haltbarkeit durchsehen, Sicherung machen.',[['go','rotation','Was läuft bald ab?'],['go','licht','Licht &amp; Strom'],['go','settings','Sicherung machen']])},
+  sommer:{greet:()=>'Schönen Sommer! Trink genug. ☀️',
+    tip:()=>tipBox('Hitze-Check','Viel trinken, auch ohne Durst. Ältere Nachbarn und Angehörige im Blick behalten. Wasservorrat kühl und dunkel lagern. Bei Trockenheit: kein Feuer und keine Zigaretten im Wald.',[['wopen','hitze','Hitze'],['wopen','waldbrand','Waldbrand'],['go','wasser','Mein Wasser']])},
+  warntag:{greet:()=>warntagText(),
+    tip:()=>tipBox('Bundesweiter Warntag','Um 11 Uhr heulen die Sirenen (1 Minute auf- und abschwellend), Warn-Apps und Handys melden sich mit einer Probewarnung. Gegen 11:45 Uhr kommt die Entwarnung. Du musst nichts tun. Prüf nur, ob dein Handy die Warnung bekommt.',[['wopen','warnung','Warnungen erkennen']])},
+  halloween:{greet:()=>'Schaurig schönes Halloween! 🎃',
+    tip:()=>tipBox('Sicher durch die dunkle Jahreszeit','Kinder beim Süßes-oder-Saures mit Reflektoren und Taschenlampe losschicken. Kerzen in Kürbissen nie unbeaufsichtigt brennen lassen. Taschenlampen und Batterien für die langen Abende prüfen.',[['wopen','brand','Brand in der Wohnung'],['go','licht','Licht &amp; Strom']])},
+};
+const hamsterImg = () => { const th=seasonTheme(); return th ? `icons/hamster-${THEMES[th].img||th}-192.png` : 'icons/icon-192.png'; };
+function seasonGreeting(){ const th=seasonTheme(); return th ? THEMES[th].greet() : ''; }
+// Leise fallende Schneeflocken hinter dem Inhalt; bei „Bewegung reduzieren“ per CSS ausgeblendet
+function snowLayer(on){
+  let el=document.getElementById('snow');
+  if(!on){ if(el) el.remove(); return; }
+  if(el) return;
+  el=document.createElement('div'); el.id='snow'; el.setAttribute('aria-hidden','true');
+  let seed=7; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
+  for(let i=0;i<22;i++){ const f=document.createElement('i'); const size=3+rnd()*4;
+    f.style.cssText=`left:${(rnd()*100).toFixed(1)}%;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;animation-duration:${(22+rnd()*18).toFixed(1)}s,${(5+rnd()*4).toFixed(1)}s;animation-delay:-${(rnd()*40).toFixed(1)}s,-${(rnd()*6).toFixed(1)}s;opacity:${(0.55+rnd()*0.35).toFixed(2)}`;
+    el.appendChild(f); }
+  document.body.prepend(el);
+}
+const WINTER = [['heizung','Heizung fällt aus'],['kaelte','Kälte, Schnee und Glatteis'],['strom','Stromausfall'],['co','Kohlenmonoxid beim Heizen']];
+function winterCheck(){
+  return `<section class="panel wintercheck"><div><h2 style="font-size:1.15rem;margin:0">Winter-Check</h2>
+    <p class="small muted" style="margin:4px 0 0">Kalte Tage, Schnee, Stromausfall bei Frost: Das solltest du jetzt wissen.</p></div>
+    <div class="wlinks">${WINTER.map(([id,t])=>`<button class="secondary small" data-act="wopen" data-id="${id}">${t} ›</button>`).join('')}</div></section>`;
+}
+
 /* ---------- Ansichten ---------- */
 const root=document.getElementById('app');
 function render(){
   const c=calc();
   document.documentElement.classList.toggle('big', !!META.big);
+  const th=seasonTheme(); Object.keys(THEMES).forEach(k=>document.documentElement.classList.toggle(k, th===k)); snowLayer(th==='xmas');
   if(UI.view==='start'){ root.innerHTML=viewStart(); return; }
   if(UI.view==='home') root.innerHTML=viewHome(c);
   else if(UI.view==='vorrat') root.innerHTML=viewVorrat(c);
@@ -814,7 +881,7 @@ function shareBox(){
 
 function viewHome(c){
   const nItems=S.items.length, nParts=Object.values(S.checks).reduce((a,b)=>a+b,0)+Object.values(S.docs||{}).filter(v=>v===1).length;
-  return `<div class="topbar"><div class="appbrand"><img src="icons/icon-192.png" alt="" width="52" height="52"><div><h1>Hamsterplan</h1><div class="tagline">Vorrat wie ein Hamster: Stück für Stück.</div></div></div><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
+  return `<div class="topbar"><div class="appbrand"><img src="${hamsterImg()}" alt="" width="52" height="52"><div><h1>Hamsterplan</h1><div class="tagline">${seasonGreeting()||'Vorrat wie ein Hamster: Stück für Stück.'}</div></div></div><button class="iconbtn" data-act="go" data-v="settings" aria-label="Einstellungen">${icon('gear')}</button></div>
   ${S.demo?`<div class="band info"><div style="display:flex;flex-direction:column;gap:8px"><div><b>Das ist ein Beispiel.</b> <span class="small">So sieht ein halb gefüllter Vorrat für 2 Personen aus. Das sind nicht deine Sachen.</span></div><button class="primary big" data-act="startOwn" style="align-self:flex-start">Meinen eigenen Vorrat anlegen</button></div></div>`:''}
   ${expiryBand(c)}
   ${S.care&&!META.careSeen&&!S.demo?careBand():''}
@@ -835,6 +902,7 @@ function viewHome(c){
       <span class="choice-txt"><span class="ct">Funk</span><span class="small muted">Wenn Handy und Telefon ausfallen: Funkgeräte, Kanäle und die Funkrunde Hunsrück</span>
       <span class="small choice-fact">Jeden ${FUNKRUNDE.tag}, ${FUNKRUNDE.zeit}, PMR Kanal ${FUNKRUNDE.kanal}</span></span></button>
   </div>
+  ${seasonTheme()&&!S.demo?THEMES[seasonTheme()].tip():''}
   ${backupStatus()}
   <a class="whatsnew" href="versionen.html" data-act="seenVersion">${META.seenVersion!==APP_VERSION?`<span class="newdot">Neu: Version ${APP_VERSION}</span> `:''}Was kann die App alles? Unter <b>„Was ist neu?“</b> stehen alle Funktionen und Änderungen der Versionen. ›</a>
   ${S.demo?'':shareBox()}`;
@@ -888,7 +956,7 @@ function viewStart(){
   const st=UI.ob||1;
   const dots=`<div class="obdots" aria-label="Schritt ${st} von 3">${[1,2,3].map(i=>`<span class="${i<=st?'on':''}"></span>`).join('')}</div>`;
   let body='';
-  if(st===1) body=`<img src="icons/icon-192.png" alt="" width="96" height="96" style="border-radius:20px"><h1>Willkommen beim Hamsterplan</h1>
+  if(st===1) body=`<img src="${hamsterImg()}" alt="" width="96" height="96" style="border-radius:20px"><h1>Willkommen beim Hamsterplan</h1>
     <p class="lead" style="margin:0">Vorrat wie ein Hamster: Stück für Stück, nicht im Panikkauf. Der Hamsterplan hilft dir, für Notfälle wie einen langen Stromausfall vorzusorgen. Drei kurze Fragen, dann geht es los.</p>
     <details class="panel restorebox" ${UI.pending||UI.impErr?'open':''}><summary><b>Du hattest die App schon?</b> Hier deine Sicherung einspielen</summary>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px"><p class="small muted" style="margin:0">Wähle die Sicherungsdatei, z. B. aus WhatsApp, deinen Mails oder dem Ordner „Downloads“.</p>${restoreUI()}</div></details>
@@ -1388,6 +1456,7 @@ root.addEventListener('click', async e=>{
     case 'count': { const it=S.items.find(i=>i.id===b.dataset.id); if(it){ it.count=Math.max(0,it.count+ +b.dataset.d); } save(); break; }
     case 'del': S.items=S.items.filter(i=>i.id!==b.dataset.id); save(); break;
     case 'doc': { S.docs=S.docs||{}; const k=b.dataset.k, v=b.dataset.val==='na'?'na':1; if(S.docs[k]===v) delete S.docs[k]; else S.docs[k]=v; save(); break; }
+    case 'wopen': { const id=b.dataset.id; UI.view='wissen'; render(); const el=document.getElementById('w-'+id); if(el){ el.open=true; el.scrollIntoView({block:'start'}); } return; }
     case 'checkNa': { S.checkNa=S.checkNa||{}; const k=b.dataset.k; if(S.checkNa[k]) delete S.checkNa[k]; else S.checkNa[k]=true; save(); break; }
     case 'careOk': META.careSeen=true; DB.put(META,'meta'); break;
     case 'medAdd': UI.sheet={mode:'med', per:'day', dose:'1', stock:'', cold:false, who:''}; render(); setTimeout(()=>document.getElementById('m-name')?.focus(),30); return;

@@ -2,6 +2,10 @@
 
 Alle Änderungen am Hamsterplan (bis Version 1.17 „Vorratsplaner“), neueste zuerst. Dieselben Einträge stehen in der App unter „Was ist neu?“.
 
+## 1.25 – 14. November 2026
+Anlassbezogene Gestaltung. Rücksprungpunkt: Zweig `stand-v1.24`.
+- Zu bestimmten Anlässen ändert sich das Aussehen der App automatisch (Hamster, Gruß, Deko, passender Tipp). Das App-Symbol auf dem Handy bleibt unverändert.
+
 ## 1.24 – 12. November 2026
 Impressum. Rücksprungpunkt: Zweig `stand-v1.23`.
 - **Neue Seite `impressum.html`** (§ 5 DDG, § 18 Abs. 2 MStV): HunsrückPrep, Sascha Löhr, c/o ZERODOX, Gulisastraße 93, 56072 Koblenz, hunsrueckprep@gmail.com. Offline im Cache (sw.js).
